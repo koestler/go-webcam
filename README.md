@@ -48,7 +48,7 @@ MqttClients:                                               # mandatory, a list o
     Broker: "tcp://mqtt.exampel.com:1883"                  # mandatory, the address / port of the server
     User: Bob                                              # optional, if given used for login
     Password: Jeir2Jie4zee                                 # optional, if given used for login
-    ClientId: "config-tester"                              # optional, default go-mqtt-to-influx, client-id sent to the server
+    ClientId: "config-tester"                              # optional, default go-webcam, client-id sent to the server
     Qos: 2                                                 # optional, default 0, QOS-level used for subscriptions
     AvailabilityTopic: test/%Prefix%tele/%clientId%/LWT    # optional, if given, a message with Online/Offline will be published on connect/disconnect
                                                            # supported placeholders:

@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -27,6 +28,7 @@ func ReadConfigFile(exe, source string) (config Config, err []error) {
 func ReadConfig(yamlStr []byte) (config Config, err []error) {
 	var configRead configRead
 
+	yamlStr = []byte(os.ExpandEnv(string(yamlStr)))
 	e := yaml.Unmarshal(yamlStr, &configRead)
 	if e != nil {
 		return config, []error{fmt.Errorf("cannot parse yaml: %s", err)}
@@ -53,16 +55,13 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	ret.MqttClients, e = c.MqttClients.TransformAndValidate()
 	err = append(err, e...)
 
-	ret.InfluxClients, e = c.InfluxClients.TransformAndValidate()
+	ret.Cameras, e = c.Cameras.TransformAndValidate()
 	err = append(err, e...)
 
-	ret.Converters, e = c.Converters.TransformAndValidate(ret.MqttClients, ret.InfluxClients)
+	ret.Views, e = c.Views.TransformAndValidate(ret.Cameras)
 	err = append(err, e...)
 
 	ret.HttpServer, e = c.HttpServer.TransformAndValidate()
-	err = append(err, e...)
-
-	ret.Statistics, e = c.Statistics.TransformAndValidate()
 	err = append(err, e...)
 
 	if c.Version == nil {
@@ -92,7 +91,7 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err []error) {
 	ret.enabled = false
 	ret.bind = "[::1]"
-	ret.port = 8042
+	ret.port = 8043
 
 	if c == nil {
 		return
@@ -115,51 +114,6 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 	return
 }
 
-func (c *statisticsConfigRead) TransformAndValidate() (ret StatisticsConfig, err []error) {
-	// default values
-	ret.enabled = false
-	ret.historyResolution = time.Second
-	ret.historyMaxAge = 10 * time.Minute
-
-	if c == nil {
-		return
-	}
-
-	if c.Enabled != nil && *c.Enabled {
-		ret.enabled = true
-	}
-
-	if len(c.HistoryResolution) < 1 {
-		// use default 1s
-	} else if historyResolution, e := time.ParseDuration(c.HistoryResolution); e != nil {
-		err = append(err, fmt.Errorf("Statistics->HistoryResolution='%s' parse error: %s",
-			c.HistoryResolution, e,
-		))
-	} else if historyResolution <= 0 {
-		err = append(err, fmt.Errorf("Statistics->HistoryResolution='%s' must be >0",
-			c.HistoryResolution,
-		))
-	} else {
-		ret.historyResolution = historyResolution
-	}
-
-	if len(c.HistoryMaxAge) < 1 {
-		// use default 10min
-	} else if historyMaxAge, e := time.ParseDuration(c.HistoryMaxAge); e != nil {
-		err = append(err, fmt.Errorf("Statistics->HistoryMaxAge='%s' parse error: %s",
-			c.HistoryMaxAge, e,
-		))
-	} else if historyMaxAge <= 0 {
-		err = append(err, fmt.Errorf("Statistics->HistoryMaxAge='%s' must be >0",
-			c.HistoryMaxAge,
-		))
-	} else {
-		ret.historyMaxAge = historyMaxAge
-	}
-
-	return
-}
-
 func (c mqttClientConfigReadMap) getOrderedKeys() (ret []string) {
 	ret = make([]string, len(c))
 	i := 0
@@ -172,10 +126,6 @@ func (c mqttClientConfigReadMap) getOrderedKeys() (ret []string) {
 }
 
 func (c mqttClientConfigReadMap) TransformAndValidate() (ret []*MqttClientConfig, err []error) {
-	if len(c) < 1 {
-		return ret, []error{fmt.Errorf("MqttClients section must no be empty")}
-	}
-
 	ret = make([]*MqttClientConfig, len(c))
 	j := 0
 	for _, name := range c.getOrderedKeys() {
@@ -205,7 +155,7 @@ func (c mqttClientConfigRead) TransformAndValidate(name string) (ret MqttClientC
 		err = append(err, fmt.Errorf("MqttClientConfig->%s->Broker must not be empty", name))
 	}
 	if len(ret.clientId) < 1 {
-		ret.clientId = "go-mqtt-to-influx"
+		ret.clientId = "go-webcam"
 	}
 	if c.Qos == nil {
 		ret.qos = 0
@@ -229,7 +179,7 @@ func (c mqttClientConfigRead) TransformAndValidate(name string) (ret MqttClientC
 	return
 }
 
-func (c influxClientConfigReadMap) getOrderedKeys() (ret []string) {
+func (c cameraConfigReadMap) getOrderedKeys() (ret []string) {
 	ret = make([]string, len(c))
 	i := 0
 	for k := range c {
@@ -240,12 +190,12 @@ func (c influxClientConfigReadMap) getOrderedKeys() (ret []string) {
 	return
 }
 
-func (c influxClientConfigReadMap) TransformAndValidate() (ret []*InfluxClientConfig, err []error) {
+func (c cameraConfigReadMap) TransformAndValidate() (ret []*CameraConfig, err []error) {
 	if len(c) < 1 {
-		return ret, []error{fmt.Errorf("InfluxClients section must no be empty")}
+		return ret, []error{fmt.Errorf("Cameras section must no be empty")}
 	}
 
-	ret = make([]*InfluxClientConfig, len(c))
+	ret = make([]*CameraConfig, len(c))
 	j := 0
 	for _, name := range c.getOrderedKeys() {
 		r, e := c[name].TransformAndValidate(name)
@@ -256,65 +206,41 @@ func (c influxClientConfigReadMap) TransformAndValidate() (ret []*InfluxClientCo
 	return
 }
 
-func (c influxClientConfigRead) TransformAndValidate(name string) (ret InfluxClientConfig, err []error) {
-	ret = InfluxClientConfig{
+func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, err []error) {
+	ret = CameraConfig{
 		name:     name,
 		address:  c.Address,
 		user:     c.User,
 		password: c.Password,
-		database: c.Database,
 	}
 
 	if !nameMatcher.MatchString(ret.name) {
-		err = append(err, fmt.Errorf("InfluxClientConfig->Name='%s' does not match %s", ret.name, NameRegexp))
+		err = append(err, fmt.Errorf("CameraConfig->Name='%s' does not match %s", ret.name, NameRegexp))
 	}
 
 	if len(ret.address) < 1 {
-		err = append(err, fmt.Errorf("InfluxClientConfig->%s->Address must not be empty", name))
+		err = append(err, fmt.Errorf("CameraConfig->%s->Address must not be empty", name))
 	}
 
-	if len(ret.database) < 1 {
-		ret.database = "go-mqtt-to-influx"
-	}
-
-	if len(c.WriteInterval) < 1 {
+	if len(c.RefreshInterval) < 1 {
 		// use default 0
-		ret.writeInterval = 200 * time.Millisecond
-	} else if writeInterval, e := time.ParseDuration(c.WriteInterval); e != nil {
-		err = append(err, fmt.Errorf("InfluxClientConfig->%s->WriteInterval='%s' parse error: %s",
-			name, c.WriteInterval, e,
+		ret.refreshInterval = 200 * time.Millisecond
+	} else if refreshInterval, e := time.ParseDuration(c.RefreshInterval); e != nil {
+		err = append(err, fmt.Errorf("CameraConfig->%s->RefreshInterval='%s' parse error: %s",
+			name, c.RefreshInterval, e,
 		))
-	} else if writeInterval < 0 {
-		err = append(err, fmt.Errorf("InfluxClientConfig->%s->WriteInterval='%s' must be positive",
-			name, c.WriteInterval,
-		))
-	} else {
-		ret.writeInterval = writeInterval
-	}
-
-	if len(c.TimePrecision) < 1 {
-		// use default 1s
-		ret.timePrecision = time.Second
-	} else if timePrecision, e := time.ParseDuration(c.TimePrecision); e != nil {
-		err = append(err, fmt.Errorf("InfluxClientConfig->%s->TimePrecision='%s' parse error: %s",
-			name, c.TimePrecision, e,
-		))
-	} else if timePrecision < 0 {
-		err = append(err, fmt.Errorf("InfluxClientConfig->%s->TimePrecision='%s' must be positive",
-			name, c.TimePrecision,
+	} else if refreshInterval < 0 {
+		err = append(err, fmt.Errorf("CameraConfig->%s->RefreshInterval='%s' must be positive",
+			name, c.RefreshInterval,
 		))
 	} else {
-		ret.timePrecision = timePrecision
-	}
-
-	if c.LogLineProtocol != nil && *c.LogLineProtocol {
-		ret.logLineProtocol = true
+		ret.refreshInterval = refreshInterval
 	}
 
 	return
 }
 
-func (c converterConfigReadMap) getOrderedKeys() (ret []string) {
+func (c viewConfigReadMap) getOrderedKeys() (ret []string) {
 	ret = make([]string, len(c))
 	i := 0
 	for k := range c {
@@ -325,18 +251,15 @@ func (c converterConfigReadMap) getOrderedKeys() (ret []string) {
 	return
 }
 
-func (c converterConfigReadMap) TransformAndValidate(
-	mqttClients []*MqttClientConfig,
-	influxClients []*InfluxClientConfig,
-) (ret []*ConverterConfig, err []error) {
+func (c viewConfigReadMap) TransformAndValidate(	cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
 	if len(c) < 1 {
-		return ret, []error{fmt.Errorf("Converters section must no be empty.")}
+		return ret, []error{fmt.Errorf("Views section must no be empty.")}
 	}
 
-	ret = make([]*ConverterConfig, len(c))
+	ret = make([]*ViewConfig, len(c))
 	j := 0
 	for _, name := range c.getOrderedKeys() {
-		r, e := c[name].TransformAndValidate(name, mqttClients, influxClients)
+		r, e := c[name].TransformAndValidate(name, cameras)
 		ret[j] = &r
 		err = append(err, e...)
 		j++
@@ -344,73 +267,49 @@ func (c converterConfigReadMap) TransformAndValidate(
 	return
 }
 
-var implementationsAndDefaultMeasurement = map[string]string{
-	"go-ve-sensor":   "floatValue",
-	"lwt":            "boolValue",
-	"tasmota-state":  "boolValue",
-	"tasmota-sensor": "floatValue",
-}
-
-func (c converterConfigRead) TransformAndValidate(
+func (c viewConfigRead) TransformAndValidate(
 	name string,
-	mqttClients []*MqttClientConfig,
-	influxClients []*InfluxClientConfig,
-) (ret ConverterConfig, err []error) {
-	ret = ConverterConfig{
+	cameras []*CameraConfig,
+) (ret ViewConfig, err []error) {
+	ret = ViewConfig{
 		name:              name,
-		implementation:    c.Implementation,
-		targetMeasurement: c.TargetMeasurement,
-		mqttTopics:        c.MqttTopics,
-		mqttClients:       c.MqttClients,
-		influxClients:     c.InfluxClients,
+		route: c.Route,
+		cameras: c.Cameras,
 	}
 
 	if !nameMatcher.MatchString(ret.name) {
-		err = append(err, fmt.Errorf("Converters->Name='%s' does not match %s", ret.name, NameRegexp))
+		err = append(err, fmt.Errorf("Views->Name='%s' does not match %s", ret.name, NameRegexp))
 	}
 
-	if def, ok := implementationsAndDefaultMeasurement[ret.implementation]; !ok {
-		err = append(err, fmt.Errorf("Converters->%s->Implementation='%s' is unkown", name, ret.implementation))
-	} else if len(ret.targetMeasurement) < 1 {
-		ret.targetMeasurement = def
-	}
-
-	// validate that all listed mqttClients exist
-	for _, clientName := range ret.mqttClients {
+	// validate that all listed cameras exist
+	for _, cameraName := range ret.cameras {
 		found := false
-		for _, client := range mqttClients {
-			if clientName == client.name {
+		for _, client := range cameras {
+			if cameraName == client.name {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			err = append(err, fmt.Errorf("Converters->%s->MqttClient='%s' is not defined", name, clientName))
+			err = append(err, fmt.Errorf("Views->%s->Cameras='%s' is not defined", name, cameraName))
 		}
 	}
 
-	// validate that all listed influxClients exist
-	for _, clientName := range ret.influxClients {
-		found := false
-		for _, client := range influxClients {
-			if clientName == client.name {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			err = append(err, fmt.Errorf("Converters->%s->InfluxClient='%s' is not defined", name, clientName))
-		}
+	if c.ResolutionMaxWidth == nil {
+		ret.resolutionMaxWidth = 3840
+	} else if *c.ResolutionMaxWidth > 0 {
+		ret.resolutionMaxWidth = *c.ResolutionMaxWidth 
+	} else {
+		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxWidth=%d but must be a positive integer", name, *c.ResolutionMaxWidth))
 	}
 
-	if len(ret.mqttTopics) < 1 {
-		err = append(err, fmt.Errorf("Converters->%s->MqttTopics must not be empty", name))
-	}
-
-	if c.LogHandleOnce != nil && *c.LogHandleOnce {
-		ret.logHandleOnce = true
+	if c.ResolutionMaxHeight == nil {
+		ret.resolutionMaxHeight = 3840
+	} else if *c.ResolutionMaxHeight > 0 {
+		ret.resolutionMaxHeight = *c.ResolutionMaxHeight
+	} else {
+		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxHeight=%d but must be a positive integer", name, *c.ResolutionMaxHeight))
 	}
 
 	return

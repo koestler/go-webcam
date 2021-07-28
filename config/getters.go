@@ -38,64 +38,44 @@ func (c MqttClientConfig) LogMessages() bool {
 	return c.logMessages
 }
 
-func (c InfluxClientConfig) Name() string {
+func (c CameraConfig) Name() string {
 	return c.name
 }
 
-func (c InfluxClientConfig) Address() string {
+func (c CameraConfig) Addresss() string {
 	return c.address
 }
 
-func (c InfluxClientConfig) User() string {
+func (c CameraConfig) User() string {
 	return c.user
 }
 
-func (c InfluxClientConfig) Password() string {
+func (c CameraConfig) Password() string {
 	return c.password
 }
 
-func (c InfluxClientConfig) Database() string {
-	return c.database
+func (c CameraConfig) RefreshInterval() time.Duration {
+	return c.refreshInterval
 }
 
-func (c InfluxClientConfig) WriteInterval() time.Duration {
-	return c.writeInterval
-}
-
-func (c InfluxClientConfig) TimePrecision() time.Duration {
-	return c.timePrecision
-}
-
-func (c InfluxClientConfig) LogLineProtocol() bool {
-	return c.logLineProtocol
-}
-
-func (c ConverterConfig) Name() string {
+func (c ViewConfig) Name() string {
 	return c.name
 }
 
-func (c ConverterConfig) Implementation() string {
-	return c.implementation
+func (c ViewConfig) Route() string {
+	return c.route
 }
 
-func (c ConverterConfig) TargetMeasurement() string {
-	return c.targetMeasurement
+func (c ViewConfig) Cameras() []string {
+	return c.cameras
 }
 
-func (c ConverterConfig) MqttTopics() []string {
-	return c.mqttTopics
+func (c ViewConfig) ResolutionMaxWidth() int {
+	return c.resolutionMaxWidth
 }
 
-func (c ConverterConfig) MqttClients() []string {
-	return c.mqttClients
-}
-
-func (c ConverterConfig) InfluxClients() []string {
-	return c.influxClients
-}
-
-func (c ConverterConfig) LogHandleOnce() bool {
-	return c.logHandleOnce
+func (c ViewConfig) ResolutionMaxHeight() int {
+	return c.resolutionMaxHeight
 }
 
 func (c HttpServerConfig) Enabled() bool {
@@ -112,16 +92,4 @@ func (c HttpServerConfig) Port() int {
 
 func (c HttpServerConfig) LogRequests() bool {
 	return c.logRequests
-}
-
-func (c StatisticsConfig) Enabled() bool {
-	return c.enabled
-}
-
-func (c StatisticsConfig) HistoryResolution() time.Duration {
-	return c.historyResolution
-}
-
-func (c StatisticsConfig) HistoryMaxAge() time.Duration {
-	return c.historyMaxAge
 }

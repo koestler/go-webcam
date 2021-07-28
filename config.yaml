@@ -1,0 +1,42 @@
+Version: 0                                                 # mandatory, version is always 0 (reserved for later use)
+LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
+LogWorkerStart: True                                       # optional, default False, write log for starting / stoping of workers
+LogMqttDebug: True                                         # optional, default False, enable debug output of the mqtt module
+
+HttpServer:                                                # optional, default Disabled, start the http server
+  Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
+  Port: 8043                                               # optional, default 8043
+  LogRequests: True                                        # optional, default False, log all requests to stdout
+
+Cameras:
+  0-cam-east:
+    Address: 192.168.8.63
+    User: ubnt
+    Password: gDtDFhjUfcYQthKQX7zN
+    RefreshInterval: 0s
+
+  1-cam-north:
+    Address: 192.168.8.64
+    User: ubnt
+    Password: gDtDFhjUfcYQthKQX7zN
+    RefreshInterval: 500ms
+
+Views:                                                     # mandatory, a list of Views that shall be available
+  public:
+    Route: /
+    Cameras:
+      - 0-cam-east
+    ResolutionMaxWidth: 1024
+    ResolutionMaxHeight: 768
+  private:
+    Route: /all/
+    Cameras:
+      - 0-cam-east
+      - 1-cam-north
+    Htaccess:
+      - "user:password"
+
+#MqttClients:                                               # mandatory, a list of MQTT servers to connect to
+#  1-local-mosquitto:                                       # optional, a second MQTT erver
+#    Broker: "tcp://172.17.0.2:1883"                         # optional, the second MQTT servers broker...
+

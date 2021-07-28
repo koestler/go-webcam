@@ -10,32 +10,25 @@ func (c Config) MarshalYAML() (interface{}, error) {
 			}
 			return mqttClients
 		}(),
-		InfluxClients: func() influxClientConfigReadMap {
-			influxClients := make(influxClientConfigReadMap, len(c.InfluxClients))
-			for _, c := range c.InfluxClients {
-				influxClients[c.Name()] = c.convertToRead()
+		Cameras: func() cameraConfigReadMap {
+			cameras := make(cameraConfigReadMap, len(c.Cameras))
+			for _, c := range c.Cameras {
+				cameras[c.Name()] = c.convertToRead()
 			}
-			return influxClients
+			return cameras
 		}(),
-		Converters: func() converterConfigReadMap {
-			converters := make(converterConfigReadMap, len(c.Converters))
-			for _, c := range c.Converters {
-				converters[c.Name()] = c.convertToRead()
+		Views: func() viewConfigReadMap {
+			views := make(viewConfigReadMap, len(c.Views))
+			for _, c := range c.Views {
+				views[c.Name()] = c.convertToRead()
 			}
-			return converters
+			return views
 		}(),
 		HttpServer: func() *httpServerConfigRead {
 			if !c.HttpServer.Enabled() {
 				return nil
 			}
 			r := c.HttpServer.convertToRead()
-			return &r
-		}(),
-		Statistics: func() *statisticsConfigRead {
-			if !c.Statistics.Enabled() {
-				return nil
-			}
-			r := c.Statistics.convertToRead()
 			return &r
 		}(),
 		LogConfig:      &c.LogConfig,
@@ -57,25 +50,21 @@ func (c MqttClientConfig) convertToRead() mqttClientConfigRead {
 	}
 }
 
-func (c InfluxClientConfig) convertToRead() influxClientConfigRead {
-	return influxClientConfigRead{
+func (c CameraConfig) convertToRead() cameraConfigRead {
+	return cameraConfigRead{
 		Address:         c.address,
 		User:            c.user,
 		Password:        c.password,
-		Database:        c.database,
-		WriteInterval:   c.writeInterval.String(),
-		TimePrecision:   c.timePrecision.String(),
-		LogLineProtocol: &c.logLineProtocol,
+		RefreshInterval: c.refreshInterval.String(),
 	}
 }
 
-func (c ConverterConfig) convertToRead() converterConfigRead {
-	return converterConfigRead{
-		Implementation:    c.implementation,
-		TargetMeasurement: c.targetMeasurement,
-		MqttTopics:        c.mqttTopics,
-		MqttClients:       c.mqttClients,
-		LogHandleOnce:     &c.logHandleOnce,
+func (c ViewConfig) convertToRead() viewConfigRead {
+	return viewConfigRead{
+		Route:               c.route,
+		Cameras:             c.cameras,
+		ResolutionMaxWidth:  &c.resolutionMaxWidth,
+		ResolutionMaxHeight: &c.resolutionMaxHeight,
 	}
 }
 
@@ -84,13 +73,5 @@ func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 		Bind:        c.bind,
 		Port:        &c.port,
 		LogRequests: &c.logRequests,
-	}
-}
-
-func (c StatisticsConfig) convertToRead() statisticsConfigRead {
-	return statisticsConfigRead{
-		Enabled:           &c.enabled,
-		HistoryResolution: c.HistoryResolution().String(),
-		HistoryMaxAge:     c.HistoryMaxAge().String(),
 	}
 }

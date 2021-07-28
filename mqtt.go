@@ -4,7 +4,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/koestler/go-webcam/config"
 	"github.com/koestler/go-webcam/mqttClient"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 )
@@ -34,10 +33,6 @@ func runMqttClient(
 			mqttClientInstances[mqttClientConfig.Name()] = client
 			log.Printf("mqttClient[%s]: started", mqttClientConfig.Name())
 		}
-	}
-
-	if len(mqttClientInstances) < 1 {
-		initiateShutdown <- errors.New("no mqttClient was started")
 	}
 
 	return mqttClientInstances
