@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type HttpRoute struct {
@@ -75,7 +76,7 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 			routes = append(routes, HttpRoute{
 				view.Name(),
 				"GET",
-				view.Route() + "/" + camera + ".jpg",
+				strings.TrimRight(view.Route(), "/") + "/" + camera + ".jpg",
 				func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
 					return handleCameraImage(camera, w, r)
 				},
