@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/disintegration/imaging"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"net/http"
@@ -25,6 +28,11 @@ type Config interface {
 	User() string
 	Password() string
 	RefreshInterval() time.Duration
+}
+
+type Dimension interface {
+	Width() int
+	Height() int
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -96,7 +104,7 @@ func (c *Client) login() (err error) {
 	return nil
 }
 
-func (c *Client) GetRawImage() (image []byte, err error) {
+func (c *Client) GetRawImageReader() (imgReader io.ReadCloser, err error) {
 	// login
 	err = c.login()
 	if err != nil {
@@ -118,8 +126,47 @@ func (c *Client) GetRawImage() (image []byte, err error) {
 		return nil, fmt.Errorf("got code %v from camera when fetching a snapshot", res.StatusCode)
 	}
 
-	defer res.Body.Close()
-	image, err = io.ReadAll(res.Body)
+	log.Printf("cameraClient[%s]: image fetched", c.Name())
 
-	return
+	return res.Body, nil
+}
+
+func (c *Client) GetRawImage() (img []byte, err error) {
+	imgReader, err := c.GetRawImageReader()
+	if err != nil {
+		return nil, err
+	}
+	defer imgReader.Close()
+	return io.ReadAll(imgReader)
+}
+
+func (c *Client) GetImage(dim Dimension) (img image.Image, err error) {
+	imgReader, err := c.GetRawImageReader()
+	if err != nil {
+		return nil, err
+	}
+	defer imgReader.Close()
+
+	img, err = jpeg.Decode(imgReader)
+	if err != nil {
+		return nil, err
+	}
+	return imageResize(img, dim.Width(), dim.Height()), nil
+}
+
+func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupImg image.Image) {
+	inputWidth := inpImg.Bounds().Max.X - inpImg.Bounds().Min.X
+	inputHeight := inpImg.Bounds().Max.Y - inpImg.Bounds().Min.Y
+
+	var width, height int
+
+	if requestedWidth * inputHeight / inputWidth < requestedHeight {
+		width = requestedWidth
+		height = 0
+	} else {
+		width = 0
+		height = requestedHeight
+	}
+
+	return imaging.Resize(inpImg, width, height, imaging.Box)
 }

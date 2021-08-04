@@ -13,13 +13,13 @@ Cameras:
     Address: 192.168.8.63
     User: ubnt
     Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 0s
+    RefreshInterval: 2s
 
   1-cam-north:
     Address: 192.168.8.64
     User: ubnt
     Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 500ms
+    RefreshInterval: 5000ms
 
 Views: # mandatory, a list of Views that shall be available
   public:

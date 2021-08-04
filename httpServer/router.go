@@ -73,12 +73,18 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 		})
 		for _, c := range view.Cameras() {
 			camera := c
+
+			cameraClient := env.CameraClientPoolInstance.GetClient(camera)
+			if cameraClient == nil {
+				continue
+			}
+
 			routes = append(routes, HttpRoute{
 				"fetch image",
 				"GET",
 				strings.TrimRight(view.Route(), "/") + "/" + camera + ".jpg",
 				func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
-					return handleCameraImage(camera, env, w, r)
+					return handleCameraImage(cameraClient, view, w, r)
 				},
 			})
 		}
