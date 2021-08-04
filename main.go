@@ -88,8 +88,12 @@ func main() {
 			defer pprof.StopCPUProfile()
 		}
 
+		// start camera clients
+		cameraClientPoolInstance := runCameraClient(cfg, initiateShutdown)
+		defer cameraClientPoolInstance.Shutdown()
+
 		// start http server
-		httpServerInstance := runHttpServer(cfg)
+		httpServerInstance := runHttpServer(cfg, cameraClientPoolInstance)
 		defer httpServerInstance.Shutdown()
 
 		// start mqtt clients

@@ -36,7 +36,7 @@ type CameraConfig struct {
 type ViewConfig struct {
 	name                string   // defined automatically by map key
 	route               string   // mandatory: must end with a '/'
-	cameras             []string // mandatory: a list of camera naems
+	cameras             []string // mandatory: a list of cameraClient naems
 	resolutionMaxWidth  int      // optional: defaults to 3840
 	resolutionMaxHeight int      // optional: defaults  2160
 }

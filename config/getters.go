@@ -42,7 +42,7 @@ func (c CameraConfig) Name() string {
 	return c.name
 }
 
-func (c CameraConfig) Addresss() string {
+func (c CameraConfig) Address() string {
 	return c.address
 }
 

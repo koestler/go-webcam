@@ -52,7 +52,7 @@ func newRouter(logger io.Writer, env *Environment) *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 
-		log.Printf("Route for: %v %v : %v", route.Method, route.Pattern, route.Name)
+		log.Printf("httpServer: setup route for: %v %v : %v", route.Method, route.Pattern, route.Name)
 	}
 
 	return router
@@ -64,7 +64,7 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 	for _, v := range env.Views {
 		view := v
 		routes = append(routes, HttpRoute{
-			view.Name(),
+			"index page",
 			"GET",
 			view.Route(),
 			func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
@@ -74,11 +74,11 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 		for _, c := range view.Cameras() {
 			camera := c
 			routes = append(routes, HttpRoute{
-				view.Name(),
+				"fetch image",
 				"GET",
 				strings.TrimRight(view.Route(), "/") + "/" + camera + ".jpg",
 				func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
-					return handleCameraImage(camera, w, r)
+					return handleCameraImage(camera, env, w, r)
 				},
 			})
 		}
