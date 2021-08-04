@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
+	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -16,10 +16,8 @@ import (
 type Client struct {
 	config     Config
 	httpClient *http.Client
-	lastAuth time.Time
+	lastAuth   time.Time
 }
-
-
 
 type Config interface {
 	Name() string
@@ -82,13 +80,13 @@ func (c *Client) login() (err error) {
 		return
 	}
 
-	resp, err := c.httpClient.Post(loginUrl.String(), "application/json", bytes.NewBuffer(bodyJson))
+	res, err := c.httpClient.Post(loginUrl.String(), "application/json", bytes.NewBuffer(bodyJson))
 	if err != nil {
 		return
 	}
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("got code %v from camera", resp.StatusCode)
+	if res.StatusCode != 200 {
+		return fmt.Errorf("got code %d from camera during login", res.StatusCode)
 	}
 
 	// set auth time to now
@@ -99,10 +97,29 @@ func (c *Client) login() (err error) {
 }
 
 func (c *Client) GetRawImage() (image []byte, err error) {
+	// login
 	err = c.login()
 	if err != nil {
 		return
 	}
 
-	return nil, errors.New("image not available for camera " + c.Name())
+	// create address
+	imageUrl, err := url.Parse("http://" + path.Join(c.Config().Address(), "snap.jpeg"))
+	if err != nil {
+		return
+	}
+
+	res, err := c.httpClient.Get(imageUrl.String())
+	if err != nil {
+		return
+	}
+
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("got code %v from camera when fetching a snapshot", res.StatusCode)
+	}
+
+	defer res.Body.Close()
+	image, err = io.ReadAll(res.Body)
+
+	return
 }
