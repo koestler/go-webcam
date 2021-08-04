@@ -107,6 +107,7 @@ func (handler Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case Error:
 			// We can retrieve the status here and write out a specific
 			// HTTP status code.
+			log.Printf("httpServer: error: %v", err)
 			http.Error(w, http.StatusText(e.Status()), e.Status())
 			return
 		default:
