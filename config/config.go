@@ -251,7 +251,7 @@ func (c viewConfigReadMap) getOrderedKeys() (ret []string) {
 	return
 }
 
-func (c viewConfigReadMap) TransformAndValidate(	cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
+func (c viewConfigReadMap) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
 	if len(c) < 1 {
 		return ret, []error{fmt.Errorf("Views section must no be empty.")}
 	}
@@ -272,8 +272,8 @@ func (c viewConfigRead) TransformAndValidate(
 	cameras []*CameraConfig,
 ) (ret ViewConfig, err []error) {
 	ret = ViewConfig{
-		name:              name,
-		route: c.Route,
+		name:    name,
+		route:   "/" + strings.Trim(c.Route, "/"),
 		cameras: c.Cameras,
 	}
 
@@ -299,7 +299,7 @@ func (c viewConfigRead) TransformAndValidate(
 	if c.ResolutionMaxWidth == nil {
 		ret.resolutionMaxWidth = 3840
 	} else if *c.ResolutionMaxWidth > 0 {
-		ret.resolutionMaxWidth = *c.ResolutionMaxWidth 
+		ret.resolutionMaxWidth = *c.ResolutionMaxWidth
 	} else {
 		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxWidth=%d but must be a positive integer", name, *c.ResolutionMaxWidth))
 	}

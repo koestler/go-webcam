@@ -9,8 +9,8 @@ import (
 )
 
 type MqttClient struct {
-	config     Config
-	client     mqtt.Client
+	config Config
+	client mqtt.Client
 }
 
 type Config interface {
@@ -68,8 +68,8 @@ func Run(config Config) (*MqttClient, error) {
 	log.Printf("mqttClient[%s]: connected to broker='%s'", config.Name(), config.Broker())
 
 	return &MqttClient{
-		config:     config,
-		client:     client,
+		config: config,
+		client: client,
 	}, nil
 }
 

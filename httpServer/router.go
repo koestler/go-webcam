@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lestrrat-go/apache-logformat"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -15,12 +16,12 @@ type HttpRoute struct {
 	HandlerFunc HandlerHandleFunc
 }
 
-var httpRoutes = []HttpRoute{
+var staticHttpRoutes = []HttpRoute{
 	{
-		"ApiIndex",
+		"views",
 		"GET",
-		"/api{Path:.*}",
-		HandleApiNotFound,
+		"/api/v0/views",
+		HandleViewsIndex,
 	}, {
 		"expvar",
 		"GET",
@@ -35,6 +36,8 @@ var httpRoutes = []HttpRoute{
 func newRouter(logger io.Writer, env *Environment) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
+	httpRoutes := append(staticHttpRoutes, getDynamicHttpRoutes(env)...)
+
 	// setup normal http routes
 	for _, route := range httpRoutes {
 		var handler http.Handler
@@ -48,7 +51,38 @@ func newRouter(logger io.Writer, env *Environment) *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 
+		log.Printf("Route for: %v %v : %v", route.Method, route.Pattern, route.Name)
 	}
 
 	return router
+}
+
+func getDynamicHttpRoutes(env *Environment) []HttpRoute {
+	routes := make([]HttpRoute, 0)
+
+	for _, v := range env.Views {
+		view := v
+		routes = append(routes, HttpRoute{
+			view.Name(),
+			"GET",
+			view.Route(),
+			func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
+				return handleViewIndex(view, w, r)
+			},
+		})
+		for _, c := range view.Cameras() {
+			camera := c
+			routes = append(routes, HttpRoute{
+				view.Name(),
+				"GET",
+				view.Route() + "/" + camera + ".jpg",
+				func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
+					return handleCameraImage(camera, w, r)
+				},
+			})
+		}
+
+	}
+
+	return routes
 }

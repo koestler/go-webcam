@@ -2,6 +2,7 @@ package httpServer
 
 import (
 	"context"
+	"github.com/koestler/go-webcam/config"
 	"io"
 	"log"
 	"net/http"
@@ -59,6 +60,7 @@ func (s *HttpServer) Shutdown() {
 
 // Our application wide data containers
 type Environment struct {
+	Views []*config.ViewConfig
 }
 
 // Error represents a handler error. It provides methods for a HTTP status

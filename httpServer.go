@@ -18,6 +18,7 @@ func runHttpServer(cfg *config.Config) *httpServer.HttpServer {
 	return httpServer.Run(
 		&cfg.HttpServer,
 		&httpServer.Environment{
+			Views: cfg.Views,
 		},
 	)
 }

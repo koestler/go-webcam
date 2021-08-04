@@ -1,18 +1,19 @@
 # go-webcams
 
-This daemon conntets to multiple network cameras and serves all their
-images as one central server. It can authenticate at the cameras to fetch images
-and serve the images in aggregated views to different users.
+This daemon conntets to multiple network cameras and serves all their images as one central server. It can authenticate
+at the cameras to fetch images and serve the images in aggregated views to different users.
 
-The tool can also connect to an MQTT server to publish the health state of each webcam
-and the url where the image can be fetched.
+The tool can also connect to an MQTT server to publish the health state of each webcam and the url where the image can
+be fetched.
 
 The tool consists of the following components:
+
 * **httpServer**: *serves* the images as well as a simple frontend to the clients
 * **cameraClient**: connects to a camera and *receives* images
 * **mqttClient**: connects to a MQTT Server and *send* messages
 
 ## Basic Usage
+
 ```
 Usage:
   go-webcam [-c <path to yaml config file>]
@@ -28,8 +29,9 @@ Help Options:
 ```
 
 ## Config
-The Configuration is stored in one yaml file. There are mandatory fields and there are optional fields which
-have a default value. 
+
+The Configuration is stored in one yaml file. There are mandatory fields and there are optional fields which have a
+default value.
 
 ### Complete, explained example
 
@@ -92,4 +94,5 @@ Views:                                                     # mandatory, a list o
 ```  
 
 # License
+
 MIT License

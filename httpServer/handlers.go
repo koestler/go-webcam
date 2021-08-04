@@ -1,7 +1,7 @@
 package httpServer
 
 import (
-	"errors"
+	"encoding/json"
 	"net/http"
 )
 
@@ -10,8 +10,15 @@ func writeJsonHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 }
 
-func HandleApiNotFound(env *Environment, w http.ResponseWriter, r *http.Request) Error {
-	err := errors.New("api method not found")
-	return StatusError{404, err}
+func writeJsonResponse(w http.ResponseWriter, data interface{}) Error {
+	writeJsonHeaders(w)
+	b, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return StatusError{500, err}
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		return StatusError{500, err}
+	}
+	return nil
 }
-
