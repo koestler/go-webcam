@@ -1,17 +1,25 @@
 package cameraClient
 
 import (
+	"bufio"
+	"bytes"
 	"github.com/disintegration/imaging"
-	"image"
+	"image/jpeg"
 )
 
-func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupImg image.Image) {
-	if inpImg == nil {
-		return nil
+func imageResize(inpImg []byte, requestedWidth, requestedHeight int) (oupImg []byte, err error) {
+	if len(inpImg) == 0 {
+		return inpImg, nil
 	}
 
-	inputWidth := inpImg.Bounds().Max.X - inpImg.Bounds().Min.X
-	inputHeight := inpImg.Bounds().Max.Y - inpImg.Bounds().Min.Y
+	decodedImg, err := jpeg.Decode(bytes.NewReader(inpImg))
+	if err != nil {
+		return
+	}
+
+	bounds := decodedImg.Bounds()
+	inputWidth := bounds.Max.X - bounds.Min.X
+	inputHeight := bounds.Max.Y - bounds.Min.Y
 
 	var width, height int
 
@@ -24,10 +32,20 @@ func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupIm
 	}
 
 	if inputWidth == width || inputHeight == height {
-		return inpImg
+		return inpImg, nil
 	}
 
-	return imaging.Resize(inpImg, width, height, imaging.Box)
+	resizedImp := imaging.Resize(decodedImg, width, height, imaging.Box)
+
+	var b bytes.Buffer
+	w := bufio.NewWriter(&b)
+
+	err = jpeg.Encode(w, resizedImp, &jpeg.Options{Quality: 90})
+	if err != nil {
+		return
+	}
+
+	return b.Bytes(), nil
 }
 
 func min(x, y int) int {

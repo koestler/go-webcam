@@ -1,25 +1,24 @@
 package cameraClient
 
 import (
-	"image"
 	"time"
 )
 
 type CameraPicture interface {
-	Img() image.Image
+	Img() []byte
 	Fetched() time.Time
 	Uuid() string
 	Err() error
 }
 
 type cameraPicture struct {
-	img     image.Image
+	img     []byte
 	fetched time.Time
 	uuid    string
 	err     error
 }
 
-func (cp cameraPicture) Img() image.Image {
+func (cp cameraPicture) Img() []byte {
 	return cp.img
 }
 

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
-	"image/jpeg"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -72,11 +70,7 @@ func handleCameraImage(
 		int(math.Floor(cameraClient.Config().RefreshInterval().Seconds()))),
 	)
 
-	// todo: put image quality setting into view config
-	err := jpeg.Encode(w, cameraImage.Img(), &jpeg.Options{Quality: 90})
-	if err != nil {
-		log.Printf("handleCameraImage failed: %v", err)
-	}
+	w.Write(cameraImage.Img())
 
 	return nil
 }

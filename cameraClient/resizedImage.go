@@ -29,11 +29,17 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 	if cp, ok := c.resizeCache[cacheKey]; ok && cp.Uuid() == rawImg.Uuid() {
 		request.response <- cp
 	} else {
+		var img []byte
+		err := rawImg.Err()
+		if err == nil {
+			img, err = imageResize(rawImg.Img(), dim.Width(), dim.Height())
+		}
+
 		resizedImage := &cameraPicture{
-			img:     imageResize(rawImg.Img(), dim.Width(), dim.Height()),
+			img:     img,
 			fetched: rawImg.Fetched(),
 			uuid:    rawImg.Uuid(),
-			err:     rawImg.Err(),
+			err:     err,
 		}
 		log.Printf("cameraClient[%s]: image resized", c.Name())
 
