@@ -59,7 +59,7 @@ func handleCameraImage(
 	// fetch image
 	dim := getDimensions(view, r)
 
-	image, err := cameraClient.GetImage(dim)
+	image, err := cameraClient.GetResizedImage(dim)
 	if err != nil {
 		return StatusError{500, err}
 	}
