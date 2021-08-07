@@ -161,12 +161,19 @@ func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupIm
 	var width, height int
 
 	if requestedWidth * inputHeight / inputWidth < requestedHeight {
-		width = requestedWidth
+		width = min(inputWidth, requestedWidth)
 		height = 0
 	} else {
 		width = 0
-		height = requestedHeight
+		height = min(inputHeight, requestedHeight)
 	}
 
 	return imaging.Resize(inpImg, width, height, imaging.Box)
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
