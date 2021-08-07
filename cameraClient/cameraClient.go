@@ -17,7 +17,7 @@ type Client struct {
 	lastAuth   time.Time
 
 	// interfacing
-	readRequestChannel chan readRequest
+	rawImageReadRequestChannel chan rawImageReadRequest
 
 	// image cache
 	lastFetched time.Time
@@ -31,12 +31,6 @@ type CameraPicture interface {
 	GetUuid() uuid.UUID
 }
 
-type readResponse struct {
-	img  image.Image
-	uuid uuid.UUID
-	err  error
-}
-
 type Config interface {
 	Name() string
 	Address() string
@@ -48,18 +42,6 @@ type Config interface {
 type Dimension interface {
 	Width() int
 	Height() int
-}
-
-func (rr readResponse) GetImg() image.Image {
-	return rr.img
-}
-
-func (rr readResponse) GetUuid() uuid.UUID {
-	return rr.uuid
-}
-
-type readRequest struct {
-	response chan readResponse
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -76,7 +58,7 @@ func RunClient(config Config) (*Client, error) {
 			// -> us a relatively short timeout
 			Timeout: 10 * time.Second,
 		},
-		readRequestChannel: make(chan readRequest, 32),
+		rawImageReadRequestChannel: make(chan rawImageReadRequest, 32),
 	}
 
 	go client.mainRoutine()
@@ -95,8 +77,8 @@ func (c *Client) Config() Config {
 }
 
 func (c *Client) GetRawImage() (cameraPicture CameraPicture, err error) {
-	response := make(chan readResponse)
-	c.readRequestChannel <- readRequest{
+	response := make(chan rawImageReadResponse)
+	c.rawImageReadRequestChannel <- rawImageReadRequest{
 		response: response,
 	}
 	r := <-response
@@ -106,20 +88,8 @@ func (c *Client) GetRawImage() (cameraPicture CameraPicture, err error) {
 func (c *Client) mainRoutine() {
 	for {
 		select {
-		case readRequest := <-c.readRequestChannel:
-			// fetch new image every RefreshInterval
-			if time.Now().After(c.lastFetched.Add(c.Config().RefreshInterval())) {
-				c.lastUuid = uuid.New()
-				c.lastFetched = time.Now()
-				c.lastImg, c.lastErr = c.ubntGetRawImage()
-			}
-
-			// return current image / uuid / error
-			readRequest.response <- readResponse{
-				img:  c.lastImg,
-				uuid: c.lastUuid,
-				err:  c.lastErr,
-			}
+		case readRequest := <-c.rawImageReadRequestChannel:
+			c.handleRawImageReadRequest(readRequest)
 		}
 	}
 }
