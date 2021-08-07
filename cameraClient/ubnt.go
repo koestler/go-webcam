@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"net/url"
@@ -78,4 +80,18 @@ func (c *Client) ubntGetRawImageReader() (imgReader io.ReadCloser, err error) {
 	log.Printf("cameraClient[%s]: image fetched", c.Name())
 
 	return res.Body, nil
+}
+
+func (c *Client) ubntGetRawImage() (img image.Image, err error) {
+	imgReader, err := c.ubntGetRawImageReader()
+	if err != nil {
+		return nil, err
+	}
+	defer imgReader.Close()
+
+	decodedImg, err := jpeg.Decode(imgReader)
+	if err != nil {
+		return nil, err
+	}
+	return decodedImg, err
 }

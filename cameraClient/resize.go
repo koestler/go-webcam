@@ -3,21 +3,14 @@ package cameraClient
 import (
 	"github.com/disintegration/imaging"
 	"image"
-	"image/jpeg"
 )
 
 func (c *Client) GetResizedImage(dim Dimension) (img image.Image, err error) {
-	imgReader, err := c.ubntGetRawImageReader()
+	rawImg, err := c.GetRawImage()
 	if err != nil {
 		return nil, err
 	}
-	defer imgReader.Close()
-
-	img, err = jpeg.Decode(imgReader)
-	if err != nil {
-		return nil, err
-	}
-	return imageResize(img, dim.Width(), dim.Height()), nil
+	return imageResize(rawImg, dim.Width(), dim.Height()), nil
 }
 
 func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupImg image.Image) {
@@ -32,6 +25,10 @@ func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupIm
 	} else {
 		width = 0
 		height = min(inputHeight, requestedHeight)
+	}
+
+	if inputWidth == width || inputHeight == height {
+		return inpImg
 	}
 
 	return imaging.Resize(inpImg, width, height, imaging.Box)

@@ -1,6 +1,7 @@
 package cameraClient
 
 import (
+	"image"
 	"net/http"
 	"net/http/cookiejar"
 	"time"
@@ -52,3 +53,6 @@ func (c *Client) Config() Config {
 	return c.config
 }
 
+func (c *Client) GetRawImage() (img image.Image, err error) {
+	return c.ubntGetRawImage()
+}
