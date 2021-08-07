@@ -6,11 +6,11 @@ import (
 )
 
 func (c *Client) GetResizedImage(dim Dimension) (img image.Image, err error) {
-	rawImg, err := c.GetRawImage()
+	cameraImage, err := c.GetRawImage()
 	if err != nil {
 		return nil, err
 	}
-	return imageResize(rawImg, dim.Width(), dim.Height()), nil
+	return imageResize(cameraImage.GetImg(), dim.Width(), dim.Height()), nil
 }
 
 func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupImg image.Image) {
@@ -19,7 +19,7 @@ func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupIm
 
 	var width, height int
 
-	if requestedWidth * inputHeight / inputWidth < requestedHeight {
+	if requestedWidth*inputHeight/inputWidth < requestedHeight {
 		width = min(inputWidth, requestedWidth)
 		height = 0
 	} else {
@@ -40,4 +40,3 @@ func min(x, y int) int {
 	}
 	return y
 }
-
