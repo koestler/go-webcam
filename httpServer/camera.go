@@ -59,9 +59,9 @@ func handleCameraImage(
 	// fetch image
 	dim := getDimensions(view, r)
 
-	image, err := cameraClient.GetResizedImage(dim)
-	if err != nil {
-		return StatusError{500, err}
+	cameraImage := cameraClient.GetResizedImage(dim)
+	if cameraImage.Err() != nil {
+		return StatusError{500, cameraImage.Err()}
 	}
 
 	// set headers
@@ -73,7 +73,7 @@ func handleCameraImage(
 	)
 
 	// todo: put image quality setting into view config
-	err = jpeg.Encode(w, image, &jpeg.Options{Quality: 90})
+	err := jpeg.Encode(w, cameraImage.Img(), &jpeg.Options{Quality: 90})
 	if err != nil {
 		log.Printf("handleCameraImage failed: %v", err)
 	}

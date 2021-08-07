@@ -5,15 +5,11 @@ import (
 	"image"
 )
 
-func (c *Client) GetResizedImage(dim Dimension) (img image.Image, err error) {
-	cameraImage, err := c.GetRawImage()
-	if err != nil {
-		return nil, err
-	}
-	return imageResize(cameraImage.GetImg(), dim.Width(), dim.Height()), nil
-}
-
 func imageResize(inpImg image.Image, requestedWidth, requestedHeight int) (oupImg image.Image) {
+	if inpImg == nil {
+		return nil
+	}
+
 	inputWidth := inpImg.Bounds().Max.X - inpImg.Bounds().Min.X
 	inputHeight := inpImg.Bounds().Max.Y - inpImg.Bounds().Min.Y
 

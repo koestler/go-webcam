@@ -1,35 +1,10 @@
 package cameraClient
 
 import (
-	"github.com/google/uuid"
-	"image"
 	"net/http"
 	"net/http/cookiejar"
 	"time"
 )
-
-type Client struct {
-	// configuration
-	config Config
-
-	// fetching
-	httpClient *http.Client
-	lastAuth   time.Time
-
-	// interfacing
-	rawImageReadRequestChannel chan rawImageReadRequest
-
-	// image cache
-	lastFetched time.Time
-	lastUuid    uuid.UUID
-	lastImg     image.Image
-	lastErr     error
-}
-
-type CameraPicture interface {
-	GetImg() image.Image
-	GetUuid() uuid.UUID
-}
 
 type Config interface {
 	Name() string
@@ -42,6 +17,25 @@ type Config interface {
 type Dimension interface {
 	Width() int
 	Height() int
+}
+
+type Client struct {
+	// configuration
+	config Config
+
+	// fetching
+	httpClient *http.Client
+	lastAuth   time.Time
+
+	// interfacing
+	rawImageReadRequestChannel     chan rawImageReadRequest
+	resizedImageReadRequestChannel chan resizedImageReadRequest
+
+	// raw image
+	raw cameraPicture
+
+	// resized image cache
+	resizeCache map[string]*cameraPicture
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -58,10 +52,13 @@ func RunClient(config Config) (*Client, error) {
 			// -> us a relatively short timeout
 			Timeout: 10 * time.Second,
 		},
-		rawImageReadRequestChannel: make(chan rawImageReadRequest, 32),
+		rawImageReadRequestChannel:     make(chan rawImageReadRequest, 16),
+		resizedImageReadRequestChannel: make(chan resizedImageReadRequest, 16),
+		resizeCache:                    make(map[string]*cameraPicture),
 	}
 
-	go client.mainRoutine()
+	go client.rawImageRoutine()
+	go client.resizedImageRoutine()
 
 	return client, nil
 }
@@ -76,20 +73,19 @@ func (c *Client) Config() Config {
 	return c.config
 }
 
-func (c *Client) GetRawImage() (cameraPicture CameraPicture, err error) {
-	response := make(chan rawImageReadResponse)
+func (c *Client) GetRawImage() CameraPicture {
+	response := make(chan *cameraPicture)
 	c.rawImageReadRequestChannel <- rawImageReadRequest{
 		response: response,
 	}
-	r := <-response
-	return r, r.err
+	return <-response
 }
 
-func (c *Client) mainRoutine() {
-	for {
-		select {
-		case readRequest := <-c.rawImageReadRequestChannel:
-			c.handleRawImageReadRequest(readRequest)
-		}
+func (c *Client) GetResizedImage(dim Dimension) CameraPicture {
+	response := make(chan *cameraPicture)
+	c.resizedImageReadRequestChannel <- resizedImageReadRequest{
+		dim:      dim,
+		response: response,
 	}
+	return <-response
 }
