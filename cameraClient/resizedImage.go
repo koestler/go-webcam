@@ -38,10 +38,11 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 		resizedImage := &cameraPicture{
 			img:     img,
 			fetched: rawImg.Fetched(),
+			expires: rawImg.Expires(),
 			uuid:    rawImg.Uuid(),
 			err:     err,
 		}
-		log.Printf("cameraClient[%s]: image resized", c.Name())
+		log.Printf("cameraClient[%s]: image resized, cacheKey=%s", c.Name(), cacheKey)
 
 		request.response <- resizedImage
 		c.resizeCache[cacheKey] = resizedImage

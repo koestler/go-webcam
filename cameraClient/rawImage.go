@@ -18,12 +18,15 @@ func (c *Client) rawImageRoutine() {
 
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
-	if time.Now().After(c.raw.fetched.Add(c.Config().RefreshInterval())) {
+	if time.Now().After(c.raw.expires) {
 		rawImg, err := c.ubntGetRawImage()
+
+		now := time.Now()
 
 		c.raw = cameraPicture{
 			img:     rawImg,
-			fetched: time.Now(),
+			fetched: now,
+			expires: now.Add(c.Config().RefreshInterval()),
 			uuid:    uuid.New().String(),
 			err:     err,
 		}
