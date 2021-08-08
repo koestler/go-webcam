@@ -62,8 +62,8 @@ func (c ViewConfig) Name() string {
 	return c.name
 }
 
-func (c ViewConfig) Route() string {
-	return c.route
+func (c ViewConfig) Title() string {
+	return c.title
 }
 
 func (c ViewConfig) Cameras() []string {

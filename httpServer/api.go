@@ -3,8 +3,8 @@ package httpServer
 import "net/http"
 
 type view struct {
-	Route       string
 	Name        string
+	Title       string
 	Cameras     []string
 	HasHtaccess bool
 }
@@ -14,8 +14,8 @@ func HandleViewsIndex(env *Environment, w http.ResponseWriter, r *http.Request) 
 
 	for _, v := range env.Views {
 		views = append(views, view{
-			Route:       v.Route(),
 			Name:        v.Name(),
+			Title:       v.Title(),
 			Cameras:     v.Cameras(),
 			HasHtaccess: false,
 		})

@@ -273,7 +273,7 @@ func (c viewConfigRead) TransformAndValidate(
 ) (ret ViewConfig, err []error) {
 	ret = ViewConfig{
 		name:    name,
-		route:   "/" + strings.Trim(c.Route, "/"),
+		title:   c.Title,
 		cameras: c.Cameras,
 	}
 

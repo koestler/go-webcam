@@ -12,7 +12,7 @@ func handleViewIndex(view *config.ViewConfig, w http.ResponseWriter, r *http.Req
 	fmt.Fprintln(w, "<ul>")
 
 	for _, camera := range view.Cameras() {
-		fmt.Fprintf(w, "<li>%s</li>", camera)
+		fmt.Fprintf(w, "<li><img src=\"/api/v0/images/%s/%s.jpg?width=400\" /></li>", view.Name(), camera)
 	}
 
 	fmt.Fprintln(w, "</ul>")

@@ -35,7 +35,7 @@ type CameraConfig struct {
 
 type ViewConfig struct {
 	name                string        // defined automatically by map key
-	route               string        // mandatory: must end with a '/'
+	title               string        // mandatory: a nice title for the view
 	cameras             []string      // mandatory: a list of cameraClient naems
 	resolutionMaxWidth  int           // optional: defaults to 3840
 	resolutionMaxHeight int           // optional: defaults  2160
@@ -84,7 +84,7 @@ type cameraConfigRead struct {
 type cameraConfigReadMap map[string]cameraConfigRead
 
 type viewConfigRead struct {
-	Route               string   `yaml:"Route"`
+	Title               string   `yaml:"Title"`
 	Cameras             []string `yaml:"Cameras"`
 	ResolutionMaxWidth  *int     `yaml:"ResolutionMaxWidth"`
 	ResolutionMaxHeight *int     `yaml:"ResolutionMaxHeight"`

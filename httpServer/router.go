@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type HttpRoute struct {
@@ -66,7 +65,7 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 		routes = append(routes, HttpRoute{
 			"index page",
 			"GET",
-			view.Route(),
+			"/" + view.Name(),
 			func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
 				return handleViewIndex(view, w, r)
 			},
@@ -82,7 +81,7 @@ func getDynamicHttpRoutes(env *Environment) []HttpRoute {
 			routes = append(routes, HttpRoute{
 				"fetch image",
 				"GET",
-				strings.TrimRight(view.Route(), "/") + "/" + camera + ".jpg",
+				"/api/v0/images/" + view.Name() + "/" + camera + ".jpg",
 				func(env *Environment, w http.ResponseWriter, r *http.Request) Error {
 					return handleCameraImage(cameraClient, view, w, r)
 				},

@@ -61,7 +61,7 @@ func (c CameraConfig) convertToRead() cameraConfigRead {
 
 func (c ViewConfig) convertToRead() viewConfigRead {
 	return viewConfigRead{
-		Route:               c.route,
+		Title:               c.title,
 		Cameras:             c.cameras,
 		ResolutionMaxWidth:  &c.resolutionMaxWidth,
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
