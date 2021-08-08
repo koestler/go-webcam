@@ -11,8 +11,8 @@ import (
 
 type resizedImageReadRequest struct {
 	refreshInterval time.Duration
-	dim      Dimension
-	response chan *cameraPicture
+	dim             Dimension
+	response        chan *cameraPicture
 }
 
 func (c *Client) resizedImageRoutine() {
