@@ -19,7 +19,7 @@ Cameras:
     Address: 192.168.8.64
     User: ubnt
     Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 5000ms
+    RefreshInterval: 100ms
 
 Views: # mandatory, a list of Views that shall be available
   public:
@@ -28,6 +28,7 @@ Views: # mandatory, a list of Views that shall be available
       - 0-cam-east
     ResolutionMaxWidth: 1024
     ResolutionMaxHeight: 768
+    RefreshInterval: 5s
   private:
     Route: /private/
     Cameras:
@@ -35,6 +36,7 @@ Views: # mandatory, a list of Views that shall be available
       - 1-cam-north
     Htaccess:
       - "user:password"
+    RefreshInterval: 500ms
 
 #MqttClients:                                               # mandatory, a list of MQTT servers to connect to
 #  1-local-mosquitto:                                       # optional, a second MQTT erver

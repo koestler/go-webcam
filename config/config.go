@@ -312,5 +312,20 @@ func (c viewConfigRead) TransformAndValidate(
 		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxHeight=%d but must be a positive integer", name, *c.ResolutionMaxHeight))
 	}
 
+	if len(c.RefreshInterval) < 1 {
+		// use default 0
+		ret.refreshInterval = time.Minute
+	} else if refreshInterval, e := time.ParseDuration(c.RefreshInterval); e != nil {
+		err = append(err, fmt.Errorf("viewConfig->%s->RefreshInterval='%s' parse error: %s",
+			name, c.RefreshInterval, e,
+		))
+	} else if refreshInterval < 0 {
+		err = append(err, fmt.Errorf("viewConfig->%s->RefreshInterval='%s' must be positive",
+			name, c.RefreshInterval,
+		))
+	} else {
+		ret.refreshInterval = refreshInterval
+	}
+
 	return
 }

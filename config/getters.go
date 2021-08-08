@@ -78,6 +78,10 @@ func (c ViewConfig) ResolutionMaxHeight() int {
 	return c.resolutionMaxHeight
 }
 
+func (c ViewConfig) RefreshInterval() time.Duration {
+	return c.refreshInterval
+}
+
 func (c HttpServerConfig) Enabled() bool {
 	return c.enabled
 }

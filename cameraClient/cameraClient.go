@@ -24,7 +24,7 @@ type Client struct {
 	config Config
 
 	// fetching
-	httpClient *http.Client
+	httpClient    *http.Client
 	authenticated bool
 
 	// interfacing

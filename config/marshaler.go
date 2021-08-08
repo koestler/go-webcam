@@ -65,6 +65,7 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 		Cameras:             c.cameras,
 		ResolutionMaxWidth:  &c.resolutionMaxWidth,
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
+		RefreshInterval:     c.refreshInterval.String(),
 	}
 }
 

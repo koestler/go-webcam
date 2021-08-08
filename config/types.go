@@ -34,11 +34,12 @@ type CameraConfig struct {
 }
 
 type ViewConfig struct {
-	name                string   // defined automatically by map key
-	route               string   // mandatory: must end with a '/'
-	cameras             []string // mandatory: a list of cameraClient naems
-	resolutionMaxWidth  int      // optional: defaults to 3840
-	resolutionMaxHeight int      // optional: defaults  2160
+	name                string        // defined automatically by map key
+	route               string        // mandatory: must end with a '/'
+	cameras             []string      // mandatory: a list of cameraClient naems
+	resolutionMaxWidth  int           // optional: defaults to 3840
+	resolutionMaxHeight int           // optional: defaults  2160
+	refreshInterval     time.Duration // optional: default 1m
 }
 
 type HttpServerConfig struct {
@@ -87,6 +88,7 @@ type viewConfigRead struct {
 	Cameras             []string `yaml:"Cameras"`
 	ResolutionMaxWidth  *int     `yaml:"ResolutionMaxWidth"`
 	ResolutionMaxHeight *int     `yaml:"ResolutionMaxHeight"`
+	RefreshInterval     string   `yaml:"RefreshInterval"`
 }
 
 type viewConfigReadMap map[string]viewConfigRead
