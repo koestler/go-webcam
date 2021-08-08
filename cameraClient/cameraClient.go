@@ -25,7 +25,7 @@ type Client struct {
 
 	// fetching
 	httpClient *http.Client
-	lastAuth   time.Time
+	authenticated bool
 
 	// interfacing
 	rawImageReadRequestChannel     chan rawImageReadRequest

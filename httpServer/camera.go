@@ -59,7 +59,7 @@ func handleCameraImage(
 
 	cameraImage := cameraClient.GetResizedImage(dim)
 	if cameraImage.Err() != nil {
-		return StatusError{500, cameraImage.Err()}
+		return StatusError{http.StatusServiceUnavailable, cameraImage.Err()}
 	}
 
 	// set headers

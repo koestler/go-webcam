@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"net/url"
 	"path"
-	"time"
 )
 
-func (c *Client) ubntLogin() (err error) {
-	if time.Now().Before(c.lastAuth.Add(12 * time.Hour)) {
-		// nothing todo, ubntLogin was done recently
+func (c *Client) ubntLogin(force bool) (err error) {
+	if force {
+		c.authenticated = false
+	}
+
+	if c.authenticated {
 		return
 	}
 
@@ -46,8 +49,8 @@ func (c *Client) ubntLogin() (err error) {
 		return fmt.Errorf("got code %d from camera during ubntLogin", res.StatusCode)
 	}
 
-	// set auth time to now
-	c.lastAuth = time.Now()
+	// we are authenticated
+	c.authenticated = true
 	log.Printf("cameraClient[%s]: ubntLogin successful", c.Name())
 
 	return nil
@@ -55,7 +58,7 @@ func (c *Client) ubntLogin() (err error) {
 
 func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	// ubntLogin
-	err = c.ubntLogin()
+	err = c.ubntLogin(false)
 	if err != nil {
 		return
 	}
@@ -66,17 +69,35 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 		return
 	}
 
+	// first attempt
 	res, err := c.httpClient.Get(imageUrl.String())
 	if err != nil {
 		return
 	}
 
-	if res.StatusCode != 200 {
+	// second attempt; try to relogin if unauthorized is returned
+	if res.StatusCode == http.StatusUnauthorized {
+		// unauthorized -> reloggin
+		err = c.ubntLogin(true)
+		if err != nil {
+			return
+		}
+
+		res, err = c.httpClient.Get(imageUrl.String())
+		if err != nil {
+			return
+		}
+
+	}
+
+	// handle errors
+	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("got code %v from camera when fetching a snapshot", res.StatusCode)
 	}
 
 	log.Printf("cameraClient[%s]: image fetched", c.Name())
 
+	// read and return body
 	defer res.Body.Close()
 	img, err = io.ReadAll(res.Body)
 	if err != nil {
