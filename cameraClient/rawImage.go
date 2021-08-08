@@ -2,6 +2,7 @@ package cameraClient
 
 import (
 	"github.com/google/uuid"
+	"log"
 	"time"
 )
 
@@ -18,8 +19,10 @@ func (c *Client) rawImageRoutine() {
 
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
-	if time.Now().After(c.raw.expires) {
+	if c.raw.Expired() {
 		rawImg, err := c.ubntGetRawImage()
+
+		log.Printf("cameraClient[%s]: raw image cache MISS, fetched", c.Name())
 
 		now := time.Now()
 
@@ -30,8 +33,8 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 			uuid:    uuid.New().String(),
 			err:     err,
 		}
-
-		c.purgeResizeCache()
+	} else {
+		log.Printf("cameraClient[%s]: raw image cache HIT", c.Name())
 	}
 
 	request.response <- &c.raw

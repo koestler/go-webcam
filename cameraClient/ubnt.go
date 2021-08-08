@@ -95,8 +95,6 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 		return nil, fmt.Errorf("got code %v from camera when fetching a snapshot", res.StatusCode)
 	}
 
-	log.Printf("cameraClient[%s]: image fetched", c.Name())
-
 	// read and return body
 	defer res.Body.Close()
 	img, err = io.ReadAll(res.Body)

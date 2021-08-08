@@ -1,10 +1,8 @@
 package httpServer
 
 import (
-	"fmt"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
-	"math"
 	"net/http"
 	"strconv"
 )
@@ -22,18 +20,18 @@ func (c Dimension) Height() int {
 	return c.height
 }
 
-func getDimensions (view *config.ViewConfig, r *http.Request) (dim Dimension) {
+func getDimensions(view *config.ViewConfig, r *http.Request) (dim Dimension) {
 	dim.width = view.ResolutionMaxWidth()
 	dim.height = view.ResolutionMaxHeight()
 
 	if list, ok := r.URL.Query()["width"]; ok {
-		if width, err := strconv.Atoi(list[0]) ; err == nil {
+		if width, err := strconv.Atoi(list[0]); err == nil {
 			dim.width = min(dim.width, width)
 		}
 	}
 
 	if list, ok := r.URL.Query()["height"]; ok {
-		if height, err := strconv.Atoi(list[0]) ; err == nil {
+		if height, err := strconv.Atoi(list[0]); err == nil {
 			dim.height = min(dim.height, height)
 		}
 	}
@@ -55,9 +53,9 @@ func handleCameraImage(
 	r *http.Request,
 ) Error {
 	// fetch image
-	dim := getDimensions(view, r)
+	cameraImage := cameraClient.GetDelayedImage(view.RefreshInterval(), getDimensions(view, r))
 
-	cameraImage := cameraClient.GetResizedImage(dim)
+	// handle camera fetching errors
 	if cameraImage.Err() != nil {
 		return StatusError{http.StatusServiceUnavailable, cameraImage.Err()}
 	}
@@ -65,10 +63,6 @@ func handleCameraImage(
 	// set headers
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Cache-Control", fmt.Sprintf(
-		"public, max-age=%d",
-		int(math.Floor(cameraClient.Config().RefreshInterval().Seconds()))),
-	)
 
 	w.Write(cameraImage.Img())
 

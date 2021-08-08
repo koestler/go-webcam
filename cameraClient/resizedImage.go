@@ -6,7 +6,6 @@ import (
 	"github.com/disintegration/imaging"
 	"image/jpeg"
 	"log"
-	"strconv"
 )
 
 type resizedImageReadRequest struct {
@@ -21,18 +20,18 @@ func (c *Client) resizedImageRoutine() {
 	}
 }
 
-func (c *Client) purgeResizeCache() {
-	c.resizeCache = make(map[string]*cameraPicture)
-}
-
 func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) {
 	dim := request.dim
-	cacheKey := strconv.Itoa(dim.Width()) + "x" + strconv.Itoa(dim.Height())
+	cacheKey := dimensionCacheKey(dim)
 
-	rawImg := c.GetRawImage()
-	if cp, ok := c.resizeCache[cacheKey]; ok && cp.Uuid() == rawImg.Uuid() {
+	c.resizeCache.purgeExpired()
+
+	if cp, ok := c.resizeCache[cacheKey]; ok {
+		log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s", c.Name(), cacheKey)
 		request.response <- cp
 	} else {
+		rawImg := c.GetRawImage()
+
 		var img []byte
 		err := rawImg.Err()
 		if err == nil {
@@ -46,7 +45,7 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 			uuid:    rawImg.Uuid(),
 			err:     err,
 		}
-		log.Printf("cameraClient[%s]: image resized, cacheKey=%s", c.Name(), cacheKey)
+		log.Printf("cameraClient[%s]: resize image cache MISS, computed, cacheKey=%s", c.Name(), cacheKey)
 
 		request.response <- resizedImage
 		c.resizeCache[cacheKey] = resizedImage
@@ -70,11 +69,11 @@ func imageResize(inpImg []byte, requestedWidth, requestedHeight int) (oupImg []b
 	var width, height int
 
 	if requestedWidth*inputHeight/inputWidth < requestedHeight {
-		width = min(inputWidth, requestedWidth)
+		width = minInt(inputWidth, requestedWidth)
 		height = 0
 	} else {
 		width = 0
-		height = min(inputHeight, requestedHeight)
+		height = minInt(inputHeight, requestedHeight)
 	}
 
 	if inputWidth == width || inputHeight == height {
@@ -94,7 +93,7 @@ func imageResize(inpImg []byte, requestedWidth, requestedHeight int) (oupImg []b
 	return b.Bytes(), nil
 }
 
-func min(x, y int) int {
+func minInt(x, y int) int {
 	if x < y {
 		return x
 	}
