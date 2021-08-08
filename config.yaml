@@ -36,7 +36,7 @@ Views: # mandatory, a list of Views that shall be available
       - 1-cam-north
     Htaccess:
       - "user:password"
-    RefreshInterval: 500ms
+    RefreshInterval: 20s
 
 #MqttClients:                                               # mandatory, a list of MQTT servers to connect to
 #  1-local-mosquitto:                                       # optional, a second MQTT erver

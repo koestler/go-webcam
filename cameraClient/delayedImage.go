@@ -7,7 +7,6 @@ import (
 
 type delayedImageReadRequest struct {
 	refreshInterval time.Duration
-	dim             Dimension
 	response        chan *cameraPicture
 }
 
@@ -20,9 +19,8 @@ func (c *Client) delayedImageRoutine() {
 
 func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) {
 	refreshInterval := request.refreshInterval
-	dim := request.dim
 
-	cacheKey := dimensionCacheKey(dim) + "-" + refreshInterval.String()
+	cacheKey := refreshInterval.String()
 
 	c.delayedCache.purgeExpired()
 
@@ -30,14 +28,14 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 		log.Printf("cameraClient[%s]: delayed image cache HIT, cacheKey=%s", c.Name(), cacheKey)
 		request.response <- cp
 	} else {
-		resizedImg := c.GetResizedImage(dim)
+		rawImg := c.GetRawImage()
 
 		delayedImage := &cameraPicture{
-			img:     resizedImg.Img(),
-			fetched: resizedImg.Fetched(),
-			expires: laterTime(resizedImg.Expires(), resizedImg.Fetched().Add(refreshInterval)),
-			uuid:    resizedImg.Uuid(),
-			err:     resizedImg.Err(),
+			img:     rawImg.Img(),
+			fetched: rawImg.Fetched(),
+			expires: laterTime(rawImg.Expires(), rawImg.Fetched().Add(refreshInterval)),
+			uuid:    rawImg.Uuid(),
+			err:     rawImg.Err(),
 		}
 
 		log.Printf("cameraClient[%s]: delayed image cache MISS, updated, cacheKey=%s", c.Name(), cacheKey)

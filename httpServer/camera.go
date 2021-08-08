@@ -53,7 +53,7 @@ func handleCameraImage(
 	r *http.Request,
 ) Error {
 	// fetch image
-	cameraImage := cameraClient.GetDelayedImage(view.RefreshInterval(), getDimensions(view, r))
+	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, r))
 
 	// handle camera fetching errors
 	if cameraImage.Err() != nil {

@@ -6,9 +6,11 @@ import (
 	"github.com/disintegration/imaging"
 	"image/jpeg"
 	"log"
+	"time"
 )
 
 type resizedImageReadRequest struct {
+	refreshInterval time.Duration
 	dim      Dimension
 	response chan *cameraPicture
 }
@@ -21,8 +23,9 @@ func (c *Client) resizedImageRoutine() {
 }
 
 func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) {
+	refreshInterval := request.refreshInterval
 	dim := request.dim
-	cacheKey := dimensionCacheKey(dim)
+	cacheKey := refreshInterval.String() + "-" + dimensionCacheKey(dim)
 
 	c.resizeCache.purgeExpired()
 
@@ -30,19 +33,19 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 		log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s", c.Name(), cacheKey)
 		request.response <- cp
 	} else {
-		rawImg := c.GetRawImage()
+		delayedImg := c.GetDelayedImage(refreshInterval)
 
 		var img []byte
-		err := rawImg.Err()
+		err := delayedImg.Err()
 		if err == nil {
-			img, err = imageResize(rawImg.Img(), dim.Width(), dim.Height())
+			img, err = imageResize(delayedImg.Img(), dim.Width(), dim.Height())
 		}
 
 		resizedImage := &cameraPicture{
 			img:     img,
-			fetched: rawImg.Fetched(),
-			expires: rawImg.Expires(),
-			uuid:    rawImg.Uuid(),
+			fetched: delayedImg.Fetched(),
+			expires: delayedImg.Expires(),
+			uuid:    delayedImg.Uuid(),
 			err:     err,
 		}
 		log.Printf("cameraClient[%s]: resize image cache MISS, computed, cacheKey=%s", c.Name(), cacheKey)

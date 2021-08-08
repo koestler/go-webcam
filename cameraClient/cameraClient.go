@@ -57,8 +57,8 @@ func RunClient(config Config) (*Client, error) {
 	}
 
 	go client.rawImageRoutine()
-	go client.resizedImageRoutine()
 	go client.delayedImageRoutine()
+	go client.resizedImageRoutine()
 
 	return client, nil
 }
@@ -79,14 +79,15 @@ func (c *Client) GetRawImage() CameraPicture {
 	return <-response
 }
 
-func (c *Client) GetResizedImage(dim Dimension) CameraPicture {
+func (c *Client) GetDelayedImage(refreshInterval time.Duration) CameraPicture {
 	response := make(chan *cameraPicture)
-	c.resizedImageReadRequestChannel <- resizedImageReadRequest{dim, response}
+	c.delayedImageReadRequestChannel <- delayedImageReadRequest{refreshInterval, response}
 	return <-response
 }
 
-func (c *Client) GetDelayedImage(refreshInterval time.Duration, dim Dimension) CameraPicture {
+func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) CameraPicture {
 	response := make(chan *cameraPicture)
-	c.delayedImageReadRequestChannel <- delayedImageReadRequest{refreshInterval, dim, response}
+	c.resizedImageReadRequestChannel <- resizedImageReadRequest{refreshInterval,dim, response}
 	return <-response
 }
+
