@@ -1,6 +1,7 @@
 package httpServer
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
 	"net/http"
@@ -20,18 +21,18 @@ func (c Dimension) Height() int {
 	return c.height
 }
 
-func getDimensions(view *config.ViewConfig, r *http.Request) (dim Dimension) {
+func getDimensions(view *config.ViewConfig, c *gin.Context) (dim Dimension) {
 	dim.width = view.ResolutionMaxWidth()
 	dim.height = view.ResolutionMaxHeight()
 
-	if list, ok := r.URL.Query()["width"]; ok {
-		if width, err := strconv.Atoi(list[0]); err == nil {
+	if width := c.Query("width"); len(width) > 0 {
+		if width, err := strconv.Atoi(width); err == nil {
 			dim.width = min(dim.width, width)
 		}
 	}
 
-	if list, ok := r.URL.Query()["height"]; ok {
-		if height, err := strconv.Atoi(list[0]); err == nil {
+	if height := c.Query("height"); len(height) > 0 {
+		if height, err := strconv.Atoi(height); err == nil {
 			dim.height = min(dim.height, height)
 		}
 	}
@@ -49,22 +50,18 @@ func min(a, b int) int {
 func handleCameraImage(
 	cameraClient *cameraClient.Client,
 	view *config.ViewConfig,
-	w http.ResponseWriter,
-	r *http.Request,
-) Error {
+	c *gin.Context,
+) {
 	// fetch image
-	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, r))
+	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
 
 	// handle camera fetching errors
 	if cameraImage.Err() != nil {
-		return StatusError{http.StatusServiceUnavailable, cameraImage.Err()}
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": cameraImage.Err()})
 	}
 
-	// set headers
-	w.Header().Set("Content-Type", "image/jpeg")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Header("Content-Type", "image/jpeg")
+	c.Header("Access-Control-Allow-Origin", "*")
 
-	w.Write(cameraImage.Img())
-
-	return nil
+	c.Writer.Write(cameraImage.Img())
 }

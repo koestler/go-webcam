@@ -1,6 +1,9 @@
 package httpServer
 
-import "net/http"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
 type view struct {
 	Name        string
@@ -9,7 +12,7 @@ type view struct {
 	HasHtaccess bool
 }
 
-func HandleViewsIndex(env *Environment, w http.ResponseWriter, r *http.Request) Error {
+func HandleViewsIndex(env *Environment, c *gin.Context) {
 	views := make([]view, 0)
 
 	for _, v := range env.Views {
@@ -21,5 +24,5 @@ func HandleViewsIndex(env *Environment, w http.ResponseWriter, r *http.Request) 
 		})
 	}
 
-	return writeJsonResponse(w, views)
+	c.JSON(http.StatusOK, views)
 }
