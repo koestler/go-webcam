@@ -93,6 +93,12 @@ Views:                                                     # mandatory, a list o
       - "user:password"
 ```  
 
+## Local Production Build
+```
+docker build -f docker/Dockerfile -t go-webcam .
+docker run -it -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
+```
+
 # License
 
 MIT License
