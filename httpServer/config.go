@@ -11,18 +11,23 @@ type configResponse struct {
 }
 
 type viewResponse struct {
-	Name              string
-	Title             string
-	Cameras           []string
-	RefreshIntervalMs int64
-	Autoplay          bool
-	Authentication    bool
+	Name              string   `json:"name" example:"public"`
+	Title             string   `json:"title" example:"Outlook"`
+	Cameras           []string `json:"cameras" example:"cam0"`
+	RefreshIntervalMs int64    `json:"refreshIntervalMs" example:"5000"`
+	Autoplay          bool     `json:"autoplay" example:"True"`
+	Authentication    bool     `json:"authentication" example:"False"`
 }
 
 // handleConfig godoc
-// @Summary Show a account
-// @Description get string by ID
-// @Produce  json
+// @Summary Frontend configuration structure
+// @Description Includes a project title,
+//   a list of possible views (collection of cameras / authentication / refresh intervals)
+//   and for every view names of the cameras.
+// @ID config
+// @Produce json
+// @Success 200 {object} configResponse
+// @Failure 500 {object} ErrorResponse
 // @Router /config [get]
 func handleConfig(env *Environment, c *gin.Context) {
 	response := configResponse{
