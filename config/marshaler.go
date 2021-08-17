@@ -67,6 +67,7 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 		ResolutionMaxWidth:  &c.resolutionMaxWidth,
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
 		RefreshInterval:     c.refreshInterval.String(),
+		Autoplay:            &c.autoplay,
 	}
 }
 

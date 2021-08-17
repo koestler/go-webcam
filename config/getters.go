@@ -118,6 +118,10 @@ func (c ViewConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }
 
+func (c ViewConfig) Autoplay() bool {
+	return c.autoplay
+}
+
 func (c HttpServerConfig) Enabled() bool {
 	return c.enabled
 }

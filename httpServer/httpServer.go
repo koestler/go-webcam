@@ -17,6 +17,7 @@ type HttpServer struct {
 }
 
 type Environment struct {
+	ProjectTitle             string
 	Views                    []*config.ViewConfig
 	CameraClientPoolInstance *cameraClient.ClientPool
 }
@@ -38,7 +39,6 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
-
 	addRoutes(engine, env)
 
 	server := &http.Server{

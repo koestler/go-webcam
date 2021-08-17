@@ -295,6 +295,10 @@ func (c viewConfigRead) TransformAndValidate(
 		err = append(err, fmt.Errorf("Views->Name='%s' does not match %s", ret.name, NameRegexp))
 	}
 
+	if len(c.Title) < 1 {
+		err = append(err, fmt.Errorf("Views->%s->Title must not be empty", name))
+	}
+
 	// validate that all listed cameras exist
 	for _, cameraName := range ret.cameras {
 		found := false
@@ -339,6 +343,10 @@ func (c viewConfigRead) TransformAndValidate(
 		))
 	} else {
 		ret.refreshInterval = refreshInterval
+	}
+
+	if c.Autoplay != nil && *c.Autoplay {
+		ret.autoplay = true
 	}
 
 	return

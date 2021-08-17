@@ -6,18 +6,19 @@ import (
 )
 
 func addRoutes(r *gin.Engine, env *Environment) {
-	r.GET("/api/v0/debug/vars", expvar.Handler())
-	r.GET("/api/v0/views", func(c *gin.Context) {
-		HandleViewsIndex(env, c)
+	v0 := r.Group("/api/v0/")
+	addApiV0(v0, env)
+}
+
+func addApiV0(r *gin.RouterGroup, env *Environment) {
+	r.GET("debug/vars", expvar.Handler())
+	r.GET("config", func(c *gin.Context) {
+		handleConfig(env, c)
 	})
 
 	// add dynamic routes
 	for _, v := range env.Views {
 		view := v
-		r.GET("/"+view.Name(), func(c *gin.Context) {
-			handleViewIndex(view, c)
-		})
-
 		for _, c := range view.Cameras() {
 			camera := c
 
@@ -26,7 +27,7 @@ func addRoutes(r *gin.Engine, env *Environment) {
 				continue
 			}
 
-			r.GET("/api/v0/images/"+view.Name()+"/"+camera+".jpg", func(c *gin.Context) {
+			r.GET("images/"+view.Name()+"/"+camera+".jpg", func(c *gin.Context) {
 				handleCameraImage(cameraClient, view, c)
 			})
 		}
