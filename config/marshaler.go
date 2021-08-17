@@ -72,11 +72,17 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 }
 
 func (c HttpServerConfig) convertToRead() httpServerConfigRead {
+	frontendProxy := ""
+	if c.frontendProxy != nil {
+		frontendProxy = c.frontendProxy.String()
+	}
+
 	return httpServerConfigRead{
 		Bind:          c.bind,
 		Port:          &c.port,
 		LogRequests:   &c.logRequests,
 		EnableDocs:    &c.enableDocs,
-		ProxyFrontend: c.proxyFrontend,
+		FrontendProxy: frontendProxy,
+		FrontendPath:  c.frontendPath,
 	}
 }

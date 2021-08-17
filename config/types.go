@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"net/url"
+	"time"
+)
 
 type Config struct {
 	version        int                 `yaml:"Version"`        // must be 0
@@ -45,12 +48,13 @@ type ViewConfig struct {
 }
 
 type HttpServerConfig struct {
-	enabled       bool   // defined automatically if HttpServer section exists
-	bind          string // optional: defaults to ::1 (ipv6 loopback)
-	port          int    // optional: defaults to 8043
-	logRequests   bool   // optional: default False
-	enableDocs    bool   // optional: default False
-	proxyFrontend string // optional: default deactivated; otherwise an address of the frontend dev-server
+	enabled       bool     // defined automatically if HttpServer section exists
+	bind          string   // optional: defaults to ::1 (ipv6 loopback)
+	port          int      // optional: defaults to 8043
+	logRequests   bool     // optional: default False
+	enableDocs    bool     // optional: default False
+	frontendProxy *url.URL // optional: default deactivated; otherwise an address of the frontend dev-server
+	frontendPath  string   // optional: default deactivated; otherwise set to a path where the frontend build is located
 }
 
 // Read structs are given to yaml for decoding and are slightly less exact in types
@@ -104,5 +108,6 @@ type httpServerConfigRead struct {
 	Port          *int   `yaml:"Port"`
 	LogRequests   *bool  `yaml:"LogRequests"`
 	EnableDocs    *bool  `yaml:"EnableDocs"`
-	ProxyFrontend string `yaml:"ProxyFrontend"`
+	FrontendProxy string `yaml:"FrontendProxy"`
+	FrontendPath  string `yaml:"FrontendPath"`
 }

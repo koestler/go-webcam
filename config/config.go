@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -121,8 +122,17 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		ret.enableDocs = true
 	}
 
-	if len(c.ProxyFrontend) > 0 {
-		ret.proxyFrontend = c.ProxyFrontend
+	if len(c.FrontendProxy) > 0 {
+		u, parseError := url.Parse(c.FrontendProxy)
+		if parseError == nil {
+			ret.frontendProxy = u
+		} else {
+			err = append(err, fmt.Errorf("HttpServerConfig->FrontendProxy must not be empty (=disabled) or a valid URL, err: %s", parseError))
+		}
+	}
+
+	if len(c.FrontendPath) > 0 {
+		ret.frontendPath = c.FrontendPath
 	}
 
 	return

@@ -5,9 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -28,6 +28,8 @@ type Config interface {
 	Port() int
 	LogRequests() bool
 	EnableDocs() bool
+	FrontendProxy() *url.URL
+	FrontendPath() string
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {
@@ -38,14 +40,11 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 
-	engine.NoRoute(func(c *gin.Context) {
-		NewErrorResponse(c, 404, errors.New("route not found"))
-	})
-
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
 	addApiV0Routes(engine, env)
+	setupFrontend(engine, config)
 
 	server := &http.Server{
 		Addr:    config.Bind() + ":" + strconv.Itoa(config.Port()),

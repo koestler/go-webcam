@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"net/url"
+	"time"
+)
 
 func (c Config) Version() int {
 	return c.version
@@ -142,10 +145,10 @@ func (c HttpServerConfig) EnableDocs() bool {
 	return c.enableDocs
 }
 
-func (c HttpServerConfig) EnableProxyFrontend() bool {
-	return len(c.proxyFrontend) > 0
+func (c HttpServerConfig) FrontendProxy() *url.URL {
+	return c.frontendProxy
 }
 
-func (c HttpServerConfig) ProxyFrontend() string {
-	return c.proxyFrontend
+func (c HttpServerConfig) FrontendPath() string {
+	return c.frontendPath
 }
