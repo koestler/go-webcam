@@ -8,18 +8,19 @@ import (
 )
 
 func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.ClientPool) *httpServer.HttpServer {
-	if !cfg.HttpServer.Enabled() {
+	httpServerCfg := cfg.HttpServer()
+	if !httpServerCfg.Enabled() {
 		return nil
 	}
 
-	if cfg.LogWorkerStart {
-		log.Printf("httpServer: start: bind=%s, port=%d", cfg.HttpServer.Bind(), cfg.HttpServer.Port())
+	if cfg.LogWorkerStart() {
+		log.Printf("httpServer: start: bind=%s, port=%d", httpServerCfg.Bind(), httpServerCfg.Port())
 	}
 
 	return httpServer.Run(
-		&cfg.HttpServer,
+		cfg.HttpServer(),
 		&httpServer.Environment{
-			Views:                    cfg.Views,
+			Views:                    cfg.Views(),
 			CameraClientPoolInstance: cameraClientPoolInstance,
 		},
 	)

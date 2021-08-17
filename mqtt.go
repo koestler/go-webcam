@@ -13,14 +13,14 @@ func runMqttClient(
 	initiateShutdown chan<- error,
 ) map[string]*mqttClient.MqttClient {
 	mqtt.ERROR = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
-	if cfg.LogMqttDebug {
+	if cfg.LogMqttDebug() {
 		mqtt.DEBUG = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
 	}
 
 	mqttClientInstances := make(map[string]*mqttClient.MqttClient)
 
-	for _, mqttClientConfig := range cfg.MqttClients {
-		if cfg.LogWorkerStart {
+	for _, mqttClientConfig := range cfg.MqttClients() {
+		if cfg.LogWorkerStart() {
 			log.Printf(
 				"mqttClient[%s]: start: Broker='%s', ClientId='%s'",
 				mqttClientConfig.Name(), mqttClientConfig.Broker(), mqttClientConfig.ClientId(),

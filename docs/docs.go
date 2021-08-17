@@ -17,12 +17,7 @@ var doc = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
+        "contact": {},
         "license": {
             "name": "MIT",
             "url": "https://github.com/koestler/go-webcam/blob/main/LICENSE"
@@ -60,11 +55,11 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "0.0",
-	Host:        "http://localhost:8043/",
+	Host:        "",
 	BasePath:    "/api/v0",
 	Schemes:     []string{},
 	Title:       "go-webcam API v0",
-	Description: "This server exposes webcam images to the public allowing for resizing, caching and authentication.",
+	Description: "This server fetches images from ip cameras and serves them over http.",
 }
 
 type s struct{}

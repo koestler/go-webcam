@@ -3,14 +3,15 @@ package config
 import "time"
 
 type Config struct {
-	Version        int                 `yaml:"Version"`        // must be 0
-	MqttClients    []*MqttClientConfig `yaml:"MqttClient"`     // mandatory: at least 1 must be defined
-	Cameras        []*CameraConfig     `yaml:"Cameras"`        // mandatory: at least 1 must be defined
-	Views          []*ViewConfig       `yaml:"Views"`          // mandatory: at least 1 must be defined
-	HttpServer     HttpServerConfig    `yaml:"HttpServer"`     // optional: default Disabled
-	LogConfig      bool                `yaml:"LogConfig"`      // optional: default False
-	LogWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
-	LogMqttDebug   bool                `yaml:"LogMqttDebug"`   // optional: default False
+	version        int                 `yaml:"Version"`        // must be 0
+	mqttClients    []*MqttClientConfig `yaml:"MqttClient"`     // mandatory: at least 1 must be defined
+	cameras        []*CameraConfig     `yaml:"Cameras"`        // mandatory: at least 1 must be defined
+	views          []*ViewConfig       `yaml:"Views"`          // mandatory: at least 1 must be defined
+	httpServer     HttpServerConfig    `yaml:"HttpServer"`     // optional: default Disabled
+	logConfig      bool                `yaml:"LogConfig"`      // optional: default False
+	logWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
+	logMqttDebug   bool                `yaml:"LogMqttDebug"`   // optional: default False
+	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
 }
 
 type MqttClientConfig struct {
@@ -43,10 +44,12 @@ type ViewConfig struct {
 }
 
 type HttpServerConfig struct {
-	enabled     bool   // defined automatically if HttpServer section exists
-	bind        string // optional: defaults to ::1 (ipv6 loopback)
-	port        int    // optional: defaults to 8043
-	logRequests bool   // optional:  default False
+	enabled       bool   // defined automatically if HttpServer section exists
+	bind          string // optional: defaults to ::1 (ipv6 loopback)
+	port          int    // optional: defaults to 8043
+	logRequests   bool   // optional: default False
+	enableDocs    bool   // optional: default False
+	proxyFrontend string // optional: default deactivated; otherwise an address of the frontend dev-server
 }
 
 // Read structs are given to yaml for decoding and are slightly less exact in types
@@ -59,6 +62,7 @@ type configRead struct {
 	LogConfig      *bool                   `yaml:"LogConfig"`
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
 	LogMqttDebug   *bool                   `yaml:"LogMqttDebug"`
+	ProjectTitle   string                  `yaml:"ProjectTitle"`
 }
 
 type mqttClientConfigRead struct {
@@ -94,7 +98,9 @@ type viewConfigRead struct {
 type viewConfigReadMap map[string]viewConfigRead
 
 type httpServerConfigRead struct {
-	Bind        string `yaml:"Bind"`
-	Port        *int   `yaml:"Port"`
-	LogRequests *bool  `yaml:"LogRequests"`
+	Bind          string `yaml:"Bind"`
+	Port          *int   `yaml:"Port"`
+	LogRequests   *bool  `yaml:"LogRequests"`
+	EnableDocs    *bool  `yaml:"EnableDocs"`
+	ProxyFrontend string `yaml:"ProxyFrontend"`
 }

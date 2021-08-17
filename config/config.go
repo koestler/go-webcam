@@ -52,37 +52,43 @@ func (c Config) PrintConfig() (err error) {
 
 func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	var e []error
-	ret.MqttClients, e = c.MqttClients.TransformAndValidate()
+	ret.mqttClients, e = c.MqttClients.TransformAndValidate()
 	err = append(err, e...)
 
-	ret.Cameras, e = c.Cameras.TransformAndValidate()
+	ret.cameras, e = c.Cameras.TransformAndValidate()
 	err = append(err, e...)
 
-	ret.Views, e = c.Views.TransformAndValidate(ret.Cameras)
+	ret.views, e = c.Views.TransformAndValidate(ret.cameras)
 	err = append(err, e...)
 
-	ret.HttpServer, e = c.HttpServer.TransformAndValidate()
+	ret.httpServer, e = c.HttpServer.TransformAndValidate()
 	err = append(err, e...)
 
 	if c.Version == nil {
 		err = append(err, fmt.Errorf("Version must be defined. Use Version=0."))
 	} else {
-		ret.Version = *c.Version
-		if ret.Version != 0 {
-			err = append(err, fmt.Errorf("Version=%d is not supported.", ret.Version))
+		ret.version = *c.Version
+		if ret.version != 0 {
+			err = append(err, fmt.Errorf("Version=%d is not supported.", ret.version))
 		}
 	}
 
 	if c.LogConfig != nil && *c.LogConfig {
-		ret.LogConfig = true
+		ret.logConfig = true
 	}
 
 	if c.LogWorkerStart != nil && *c.LogWorkerStart {
-		ret.LogWorkerStart = true
+		ret.logWorkerStart = true
 	}
 
 	if c.LogMqttDebug != nil && *c.LogMqttDebug {
-		ret.LogMqttDebug = true
+		ret.logMqttDebug = true
+	}
+
+	if len(c.ProjectTitle) > 0 {
+		ret.projectTitle = c.ProjectTitle
+	} else {
+		ret.projectTitle = "go-webcam"
 	}
 
 	return
@@ -109,6 +115,14 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 
 	if c.LogRequests != nil && *c.LogRequests {
 		ret.logRequests = true
+	}
+
+	if c.EnableDocs != nil && *c.EnableDocs {
+		ret.enableDocs = true
+	}
+
+	if len(c.ProxyFrontend) > 0 {
+		ret.proxyFrontend = c.ProxyFrontend
 	}
 
 	return

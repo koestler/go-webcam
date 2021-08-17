@@ -25,6 +25,7 @@ type Config interface {
 	Bind() string
 	Port() int
 	LogRequests() bool
+	EnableDocs() bool
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {
@@ -34,7 +35,10 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 
-	setupSwaggerDocs(engine, config)
+	if config.EnableDocs() {
+		setupSwaggerDocs(engine, config)
+	}
+
 	addRoutes(engine, env)
 
 	server := &http.Server{

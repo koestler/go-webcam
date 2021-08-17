@@ -2,6 +2,42 @@ package config
 
 import "time"
 
+func (c Config) Version() int {
+	return c.version
+}
+
+func (c Config) MqttClients() []*MqttClientConfig {
+	return c.mqttClients
+}
+
+func (c Config) Cameras() []*CameraConfig {
+	return c.cameras
+}
+
+func (c Config) Views() []*ViewConfig {
+	return c.views
+}
+
+func (c Config) HttpServer() HttpServerConfig {
+	return c.httpServer
+}
+
+func (c Config) LogConfig() bool {
+	return c.logConfig
+}
+
+func (c Config) LogWorkerStart() bool {
+	return c.logWorkerStart
+}
+
+func (c Config) LogMqttDebug() bool {
+	return c.logMqttDebug
+}
+
+func (c Config) ProjectTitle() string {
+	return c.projectTitle
+}
+
 func (c MqttClientConfig) Name() string {
 	return c.name
 }
@@ -96,4 +132,16 @@ func (c HttpServerConfig) Port() int {
 
 func (c HttpServerConfig) LogRequests() bool {
 	return c.logRequests
+}
+
+func (c HttpServerConfig) EnableDocs() bool {
+	return c.enableDocs
+}
+
+func (c HttpServerConfig) EnableProxyFrontend() bool {
+	return len(c.proxyFrontend) > 0
+}
+
+func (c HttpServerConfig) ProxyFrontend() string {
+	return c.proxyFrontend
 }

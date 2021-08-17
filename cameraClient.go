@@ -15,8 +15,8 @@ func runCameraClient(
 
 	countStarted := 0
 
-	for _, cameraClientConfig := range cfg.Cameras {
-		if cfg.LogWorkerStart {
+	for _, cameraClientConfig := range cfg.Cameras() {
+		if cfg.LogWorkerStart() {
 			log.Printf(
 				"cameraClient[%s]: start: address='%s'",
 				cameraClientConfig.Name(),
@@ -29,7 +29,7 @@ func runCameraClient(
 		} else {
 			cameraClientPoolInstance.AddClient(client)
 			countStarted += 1
-			if cfg.LogWorkerStart {
+			if cfg.LogWorkerStart() {
 				log.Printf(
 					"cameraClient[%s]: started",
 					cameraClientConfig.Name(),

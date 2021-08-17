@@ -1,16 +1,10 @@
 basePath: /api/v0
-host: http://localhost:8043/
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This server exposes webcam images to the public allowing for resizing,
-    caching and authentication.
+  contact: {}
+  description: This server fetches images from ip cameras and serves them over http.
   license:
     name: MIT
     url: https://github.com/koestler/go-webcam/blob/main/LICENSE
-  termsOfService: http://swagger.io/terms/
   title: go-webcam API v0
   version: "0.0"
 paths:

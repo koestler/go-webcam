@@ -60,7 +60,7 @@ func getConfig(cmdOptions CmdOptions, cmdName string) *config.Config {
 		os.Exit(ExitDueToConfig)
 	}
 
-	if cfg.LogConfig {
+	if cfg.LogConfig() {
 		if err := cfg.PrintConfig(); err != nil {
 			log.Printf("config: cannot print: %s", err)
 		}
@@ -79,7 +79,7 @@ func main() {
 		// whenever an error is pushed to this chan, main is terminated
 		initiateShutdown := make(chan error, 4)
 
-		if cfg.LogWorkerStart {
+		if cfg.LogWorkerStart() {
 			log.Printf("main: start go-webcam version=%s", buildVersion)
 		}
 
@@ -102,7 +102,7 @@ func main() {
 			defer client.Shutdown()
 		}
 
-		if cfg.LogWorkerStart {
+		if cfg.LogWorkerStart() {
 			log.Print("main: start completed; run until SIGTERM or SIGINT is received")
 		}
 
@@ -117,7 +117,7 @@ func main() {
 			log.Printf("main: forced shutdown due to fatal error: %s", err)
 			exitCode = ExitDueToModuleStart
 		case sig := <-gracefulStop:
-			if cfg.LogWorkerStart {
+			if cfg.LogWorkerStart() {
 				log.Printf("main: graceful shutdown; caught signal: %+v", sig)
 			}
 			exitCode = ExitSuccess
@@ -129,7 +129,7 @@ func main() {
 		return
 	}()
 
-	if cfg.LogWorkerStart {
+	if cfg.LogWorkerStart() {
 		log.Printf("main: stutdown completed; exit %d", exitCode)
 	}
 	os.Exit(exitCode)

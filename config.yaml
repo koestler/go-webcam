@@ -2,11 +2,14 @@ Version: 0                                                 # mandatory, version 
 LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
 LogWorkerStart: True                                       # optional, default False, write log for starting / stoping of workers
 LogMqttDebug: True                                         # optional, default False, enable debug output of the mqtt module
+ProjectTitle: go-webcam Development Project                # optional: default go-webcam
 
 HttpServer: # optional, default Disabled, start the http server
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
   Port: 8043                                               # optional, default 8043
   LogRequests: True                                        # optional, default False, log all requests to stdout
+  EnableDocs : True                                        # optional: default False
+  ProxyFrontend: "http://localhost:8080/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
 
 Cameras:
   0-cam-east:
@@ -17,7 +20,7 @@ Cameras:
 
   1-cam-north:
     Address: 192.168.8.64
-    User: ubnt
+    User: ubnto
     Password: gDtDFhjUfcYQthKQX7zN
     RefreshInterval: 1500ms
 

@@ -2,38 +2,39 @@ package config
 
 func (c Config) MarshalYAML() (interface{}, error) {
 	return configRead{
-		Version: &c.Version,
+		Version: &c.version,
 		MqttClients: func() mqttClientConfigReadMap {
-			mqttClients := make(mqttClientConfigReadMap, len(c.MqttClients))
-			for _, c := range c.MqttClients {
-				mqttClients[c.Name()] = c.convertToRead()
+			mqttClients := make(mqttClientConfigReadMap, len(c.mqttClients))
+			for _, c := range c.mqttClients {
+				mqttClients[c.name] = c.convertToRead()
 			}
 			return mqttClients
 		}(),
 		Cameras: func() cameraConfigReadMap {
-			cameras := make(cameraConfigReadMap, len(c.Cameras))
-			for _, c := range c.Cameras {
-				cameras[c.Name()] = c.convertToRead()
+			cameras := make(cameraConfigReadMap, len(c.cameras))
+			for _, c := range c.cameras {
+				cameras[c.name] = c.convertToRead()
 			}
 			return cameras
 		}(),
 		Views: func() viewConfigReadMap {
-			views := make(viewConfigReadMap, len(c.Views))
-			for _, c := range c.Views {
-				views[c.Name()] = c.convertToRead()
+			views := make(viewConfigReadMap, len(c.views))
+			for _, c := range c.views {
+				views[c.name] = c.convertToRead()
 			}
 			return views
 		}(),
 		HttpServer: func() *httpServerConfigRead {
-			if !c.HttpServer.Enabled() {
+			if !c.httpServer.enabled {
 				return nil
 			}
-			r := c.HttpServer.convertToRead()
+			r := c.httpServer.convertToRead()
 			return &r
 		}(),
-		LogConfig:      &c.LogConfig,
-		LogWorkerStart: &c.LogWorkerStart,
-		LogMqttDebug:   &c.LogMqttDebug,
+		LogConfig:      &c.logConfig,
+		LogWorkerStart: &c.logWorkerStart,
+		LogMqttDebug:   &c.logMqttDebug,
+		ProjectTitle:   c.projectTitle,
 	}, nil
 }
 
@@ -71,8 +72,10 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 
 func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 	return httpServerConfigRead{
-		Bind:        c.bind,
-		Port:        &c.port,
-		LogRequests: &c.logRequests,
+		Bind:          c.bind,
+		Port:          &c.port,
+		LogRequests:   &c.logRequests,
+		EnableDocs:    &c.enableDocs,
+		ProxyFrontend: c.proxyFrontend,
 	}
 }
