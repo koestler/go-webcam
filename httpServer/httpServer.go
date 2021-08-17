@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,16 +31,21 @@ type Config interface {
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {
+	gin.SetMode("release")
 	engine := gin.New()
 	if config.LogRequests() {
 		engine.Use(gin.Logger())
 	}
 	engine.Use(gin.Recovery())
 
+	engine.NoRoute(func(c *gin.Context) {
+		NewErrorResponse(c, 404, errors.New("route not found"))
+	})
+
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
-	addRoutes(engine, env)
+	addApiV0Routes(engine, env)
 
 	server := &http.Server{
 		Addr:    config.Bind() + ":" + strconv.Itoa(config.Port()),
@@ -66,4 +72,11 @@ func (s *HttpServer) Shutdown() {
 	if err != nil {
 		log.Printf("httpServer: graceful shutdown failed: %s", err)
 	}
+}
+
+func addApiV0Routes(r *gin.Engine, env *Environment) {
+	v0 := r.Group("/api/v0/")
+	setupExpVar(v0)
+	setupConfig(v0, env)
+	setupImages(v0, env)
 }
