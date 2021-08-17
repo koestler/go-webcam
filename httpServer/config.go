@@ -2,6 +2,7 @@ package httpServer
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -49,4 +50,5 @@ func setupConfig(r *gin.RouterGroup, env *Environment) {
 
 		c.JSON(http.StatusOK, response)
 	})
+	log.Printf("httpServer: %sconfig -> serve config", r.BasePath())
 }

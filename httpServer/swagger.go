@@ -6,6 +6,7 @@ import (
 	"github.com/koestler/go-webcam/docs"
 	"github.com/swaggo/files"       // swagger embed files
 	"github.com/swaggo/gin-swagger" // gin-swagger middleware
+	"log"
 )
 
 // @title go-webcam API v0
@@ -19,5 +20,6 @@ import (
 // @BasePath /api/v0
 func setupSwaggerDocs(r *gin.Engine, config Config) {
 	docs.SwaggerInfo.Host = fmt.Sprintf("127.0.0.1:%d", config.Port())
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	log.Print("httpServer: /swagger/* -> serve using ginSwagger wrapper")
 }

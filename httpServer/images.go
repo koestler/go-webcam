@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -34,9 +35,11 @@ func setupImages(r *gin.RouterGroup, env *Environment) {
 				continue
 			}
 
-			r.GET("images/"+view.Name()+"/"+camera+".jpg", func(c *gin.Context) {
+			relativePath := "images/" + view.Name() + "/" + camera + ".jpg"
+			r.GET(relativePath, func(c *gin.Context) {
 				handleCameraImage(client, view, c)
 			})
+			log.Printf("httpServer: %s%s -> serve image", r.BasePath(), relativePath)
 		}
 	}
 }

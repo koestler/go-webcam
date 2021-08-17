@@ -40,6 +40,7 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 
+	setupExpVar(engine)
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
@@ -75,7 +76,6 @@ func (s *HttpServer) Shutdown() {
 
 func addApiV0Routes(r *gin.Engine, env *Environment) {
 	v0 := r.Group("/api/v0/")
-	setupExpVar(v0)
 	setupConfig(v0, env)
 	setupImages(v0, env)
 }
