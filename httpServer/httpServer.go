@@ -34,7 +34,7 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 
-
+	setupSwaggerDocs(engine, config)
 	addRoutes(engine, env)
 
 	server := &http.Server{
@@ -63,4 +63,3 @@ func (s *HttpServer) Shutdown() {
 		log.Printf("httpServer: graceful shutdown failed: %s", err)
 	}
 }
-

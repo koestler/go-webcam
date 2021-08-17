@@ -6,7 +6,7 @@ import (
 )
 
 func addRoutes(r *gin.Engine, env *Environment) {
-	r.GET("/debug/vars", expvar.Handler())
+	r.GET("/api/v0/debug/vars", expvar.Handler())
 	r.GET("/api/v0/views", func(c *gin.Context) {
 		HandleViewsIndex(env, c)
 	})

@@ -16,5 +16,5 @@ func handleViewIndex(view *config.ViewConfig, c *gin.Context) {
 
 	ret += "</ul>"
 
-	c.Data(http.StatusOK, "text/html; charset=utf-8",[]byte(ret))
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(ret))
 }

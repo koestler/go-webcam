@@ -12,6 +12,13 @@ type view struct {
 	HasHtaccess bool
 }
 
+// HandleViewIndex godoc
+// @Summary Show a account
+// @Description get string by ID
+// @ID get-string-by-int
+// @Accept  json
+// @Produce  json
+// @Router /views [get]
 func HandleViewsIndex(env *Environment, c *gin.Context) {
 	views := make([]view, 0)
 
