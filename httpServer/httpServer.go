@@ -40,7 +40,6 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 
-	setupExpVar(engine)
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
