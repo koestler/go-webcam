@@ -9,8 +9,8 @@ HttpServer: # optional, default Disabled, start the http server
   Port: 8043                                               # optional, default 8043
   LogRequests: True                                        # optional, default False, log all requests to stdout
   EnableDocs : True                                        # optional: default False
-  #FrontendProxy: "http://localhost:8080/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
-  FrontendPath: /Users/lk/git/js-webcam/build
+  FrontendProxy: "http://localhost:8080/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
+  #FrontendPath: /Users/lk/git/js-webcam/build
 
 Cameras:
   0-cam-east:
@@ -21,7 +21,7 @@ Cameras:
 
   1-cam-north:
     Address: 192.168.8.64
-    User: ubnto
+    User: ubnt
     Password: gDtDFhjUfcYQthKQX7zN
     RefreshInterval: 1500ms
 
