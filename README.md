@@ -96,7 +96,7 @@ Views:                                                     # mandatory, a list o
 ## Local Production Build
 ```
 docker build -f docker/Dockerfile -t go-webcam .
-docker run -it -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
 ```
 
 # License
