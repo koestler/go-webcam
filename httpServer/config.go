@@ -7,8 +7,8 @@ import (
 )
 
 type configResponse struct {
-	ProjectTitle string
-	Views        []viewResponse
+	ProjectTitle string         `json:"projectTitle" example:"go-webcam"`
+	Views        []viewResponse `json:"views"`
 }
 
 type viewResponse struct {
