@@ -21,7 +21,8 @@ func (c *Client) ubntLogin(force bool) (err error) {
 	}
 
 	// create address
-	loginUrl, err := url.Parse("http://" + path.Join(c.Config().Address(), "api/1.1/login"))
+	addr := "http://" + path.Join(c.Config().Address(), "api/1.1/login")
+	loginUrl, err := url.Parse(addr)
 	if err != nil {
 		return
 	}
@@ -46,6 +47,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 	}
 
 	if res.StatusCode != 200 {
+		log.Printf("cameraClient[%s]: ubntLogin failed, code=%d, addr=%s, requestBody=%s", c.Name(), res.StatusCode, addr, bodyJson)
 		return fmt.Errorf("got code %d from camera during ubntLogin", res.StatusCode)
 	}
 
