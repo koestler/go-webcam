@@ -30,6 +30,7 @@ type Config interface {
 	EnableDocs() bool
 	FrontendProxy() *url.URL
 	FrontendPath() string
+	GetViewNames() []string
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {

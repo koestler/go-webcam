@@ -20,11 +20,23 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 	}
 
 	return httpServer.Run(
-		cfg.HttpServer(),
+		httpServerConfig{
+			cfg.HttpServer(),
+			cfg.GetViewNames(),
+		},
 		&httpServer.Environment{
 			ProjectTitle:             cfg.ProjectTitle(),
 			Views:                    cfg.Views(),
 			CameraClientPoolInstance: cameraClientPoolInstance,
 		},
 	)
+}
+
+type httpServerConfig struct {
+	config.HttpServerConfig
+	viewNames []string
+}
+
+func (c httpServerConfig) GetViewNames() []string {
+	return c.viewNames
 }

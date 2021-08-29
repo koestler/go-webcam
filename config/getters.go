@@ -152,3 +152,11 @@ func (c HttpServerConfig) FrontendProxy() *url.URL {
 func (c HttpServerConfig) FrontendPath() string {
 	return c.frontendPath
 }
+
+func (c Config) GetViewNames() (ret []string) {
+	ret = []string{}
+	for _, v := range c.Views() {
+		ret = append(ret, v.Name())
+	}
+	return
+}

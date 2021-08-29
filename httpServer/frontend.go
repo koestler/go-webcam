@@ -37,14 +37,19 @@ func setupFrontend(engine *gin.Engine, config Config) {
 					}
 
 					route := path[len(frontendPath):]
-					if route == "/index.html" {
-						route = "/"
-					}
 					engine.StaticFile(route, path)
 					log.Printf("httpServer: %s -> serve %s", route, path)
 
 					return nil
 				})
+
+				// load index file single page frontend application
+				path := frontendPath + "/index.html"
+				for _, route := range append(config.GetViewNames(), "") {
+					route = "/" + route
+					engine.StaticFile(route, path)
+					log.Printf("httpServer: %s -> serve %s", route, path)
+				}
 
 				if err != nil {
 					log.Printf("httpServer: failed to serve from local folder: %s", err)
