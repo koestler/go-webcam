@@ -45,7 +45,7 @@ func setupFrontend(engine *gin.Engine, config Config) {
 
 				// load index file single page frontend application
 				path := frontendPath + "/index.html"
-				for _, route := range append(config.GetViewNames(), "") {
+				for _, route := range append(config.GetViewNames(), "", "login") {
 					route = "/" + route
 					engine.StaticFile(route, path)
 					log.Printf("httpServer: %s -> serve %s", route, path)
