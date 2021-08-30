@@ -17,6 +17,7 @@ RUN  VERSION=`git symbolic-ref -q --short HEAD || git describe --tags --exact-ma
 
 # build frontend
 FROM node:16 as js-builder
+ENV GENERATE_SOURCEMAP=false
 
 WORKDIR /app
 RUN git clone https://github.com/koestler/js-webcam.git
