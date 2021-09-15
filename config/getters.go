@@ -97,6 +97,14 @@ func (c CameraConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }
 
+func (c ViewCameraConfig) Name() string {
+	return c.name
+}
+
+func (c ViewCameraConfig) Title() string {
+	return c.title
+}
+
 func (c ViewConfig) Name() string {
 	return c.name
 }
@@ -105,8 +113,16 @@ func (c ViewConfig) Title() string {
 	return c.title
 }
 
-func (c ViewConfig) Cameras() []string {
+func (c ViewConfig) Cameras() []*ViewCameraConfig {
 	return c.cameras
+}
+
+func (c ViewConfig) CameraNames() []string {
+	names := make([]string, len(c.cameras))
+	for i, camera := range c.cameras {
+		names[i] = camera.Name()
+	}
+	return names
 }
 
 func (c ViewConfig) ResolutionMaxWidth() int {

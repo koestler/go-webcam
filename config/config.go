@@ -296,9 +296,8 @@ func (c viewConfigRead) TransformAndValidate(
 	cameras []*CameraConfig,
 ) (ret ViewConfig, err []error) {
 	ret = ViewConfig{
-		name:    name,
-		title:   c.Title,
-		cameras: c.Cameras,
+		name:  name,
+		title: c.Title,
 	}
 
 	if !nameMatcher.MatchString(ret.name) {
@@ -309,18 +308,11 @@ func (c viewConfigRead) TransformAndValidate(
 		err = append(err, fmt.Errorf("Views->%s->Title must not be empty", name))
 	}
 
-	// validate that all listed cameras exist
-	for _, cameraName := range ret.cameras {
-		found := false
-		for _, client := range cameras {
-			if cameraName == client.name {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			err = append(err, fmt.Errorf("Views->%s->Cameras='%s' is not defined", name, cameraName))
+	{
+		var camerasErr []error
+		ret.cameras, camerasErr = c.Cameras.TransformAndValidate(cameras)
+		for ce := range camerasErr {
+			err = append(err, fmt.Errorf("Views->%s: %s", name, ce))
 		}
 	}
 
@@ -360,4 +352,49 @@ func (c viewConfigRead) TransformAndValidate(
 	}
 
 	return
+}
+
+func (c viewCameraConfigReadMap) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewCameraConfig, err []error) {
+	if len(c) < 1 {
+		return ret, []error{fmt.Errorf("Cameras section must no be empty.")}
+	}
+
+	ret = make([]*ViewCameraConfig, len(c))
+	j := 0
+	for name, camera := range c {
+		r, e := camera.TransformAndValidate(name, cameras)
+		ret[j] = &r
+		err = append(err, e...)
+		j++
+	}
+	return
+
+}
+
+func (c viewCameraConfigRead) TransformAndValidate(
+	name string,
+	cameras []*CameraConfig,
+) (ret ViewCameraConfig, err []error) {
+	if !cameraExists(name, cameras) {
+		err = append(err, fmt.Errorf("Camera='%s' is not defined", name))
+	}
+
+	ret = ViewCameraConfig{
+		name:  name,
+		title: c.Title,
+	}
+
+	log.Printf("viewCameraConfigRead: %v", ret)
+
+	return
+}
+
+func cameraExists(cameraName string,
+	cameras []*CameraConfig) bool {
+	for _, client := range cameras {
+		if cameraName == client.name {
+			return true
+		}
+	}
+	return false
 }

@@ -37,14 +37,19 @@ type CameraConfig struct {
 	refreshInterval time.Duration // optional: default 200ms
 }
 
+type ViewCameraConfig struct {
+	name  string // defined automatically by map key
+	title string // mandatory: a nice title for the frontend
+}
+
 type ViewConfig struct {
-	name                string        // defined automatically by map key
-	title               string        // mandatory: a nice title for the view
-	cameras             []string      // mandatory: a list of cameraClient naems
-	resolutionMaxWidth  int           // optional: defaults to 3840
-	resolutionMaxHeight int           // optional: defaults  2160
-	refreshInterval     time.Duration // optional: default 1m
-	autoplay            bool          // optional: default false
+	name                string              // defined automatically by map key
+	title               string              // mandatory: a nice title for the frontend
+	cameras             []*ViewCameraConfig // mandatory: a list of cameraClient names
+	resolutionMaxWidth  int                 // optional: defaults to 3840
+	resolutionMaxHeight int                 // optional: defaults  2160
+	refreshInterval     time.Duration       // optional: default 1m
+	autoplay            bool                // optional: default false
 }
 
 type HttpServerConfig struct {
@@ -92,13 +97,19 @@ type cameraConfigRead struct {
 
 type cameraConfigReadMap map[string]cameraConfigRead
 
+type viewCameraConfigRead struct {
+	Title string `yaml:"Title"`
+}
+
+type viewCameraConfigReadMap map[string]viewCameraConfigRead
+
 type viewConfigRead struct {
-	Title               string   `yaml:"Title"`
-	Cameras             []string `yaml:"Cameras"`
-	ResolutionMaxWidth  *int     `yaml:"ResolutionMaxWidth"`
-	ResolutionMaxHeight *int     `yaml:"ResolutionMaxHeight"`
-	RefreshInterval     string   `yaml:"RefreshInterval"`
-	Autoplay            *bool    `yaml:"Autoplay"`
+	Title               string                  `yaml:"Title"`
+	Cameras             viewCameraConfigReadMap `yaml:"Cameras"`
+	ResolutionMaxWidth  *int                    `yaml:"ResolutionMaxWidth"`
+	ResolutionMaxHeight *int                    `yaml:"ResolutionMaxHeight"`
+	RefreshInterval     string                  `yaml:"RefreshInterval"`
+	Autoplay            *bool                   `yaml:"Autoplay"`
 }
 
 type viewConfigReadMap map[string]viewConfigRead

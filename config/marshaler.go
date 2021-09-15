@@ -60,10 +60,22 @@ func (c CameraConfig) convertToRead() cameraConfigRead {
 	}
 }
 
+func (c ViewCameraConfig) convertToRead() viewCameraConfigRead {
+	return viewCameraConfigRead{
+		Title: c.title,
+	}
+}
+
 func (c ViewConfig) convertToRead() viewConfigRead {
 	return viewConfigRead{
-		Title:               c.title,
-		Cameras:             c.cameras,
+		Title: c.title,
+		Cameras: func() viewCameraConfigReadMap {
+			views := make(viewCameraConfigReadMap, len(c.cameras))
+			for _, c := range c.cameras {
+				views[c.name] = c.convertToRead()
+			}
+			return views
+		}(),
 		ResolutionMaxWidth:  &c.resolutionMaxWidth,
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
 		RefreshInterval:     c.refreshInterval.String(),

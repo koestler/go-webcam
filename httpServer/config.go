@@ -2,6 +2,7 @@ package httpServer
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/koestler/go-webcam/config"
 	"log"
 	"net/http"
 )
@@ -12,12 +13,17 @@ type configResponse struct {
 }
 
 type viewResponse struct {
-	Name              string   `json:"name" example:"public"`
-	Title             string   `json:"title" example:"Outlook"`
-	Cameras           []string `json:"cameras" example:"cam0"`
-	RefreshIntervalMs int64    `json:"refreshIntervalMs" example:"5000"`
-	Autoplay          bool     `json:"autoplay" example:"True"`
-	Authentication    bool     `json:"authentication" example:"False"`
+	Name              string               `json:"name" example:"public"`
+	Title             string               `json:"title" example:"Outlook"`
+	Cameras           []cameraViewResponse `json:"cameras"`
+	RefreshIntervalMs int64                `json:"refreshIntervalMs" example:"5000"`
+	Autoplay          bool                 `json:"autoplay" example:"True"`
+	Authentication    bool                 `json:"authentication" example:"False"`
+}
+
+type cameraViewResponse struct {
+	Name  string `json:"name" example:"0-cam-east"`
+	Title string `json:"title" example:"East"`
 }
 
 // setupConfig godoc
@@ -39,9 +45,18 @@ func setupConfig(r *gin.RouterGroup, env *Environment) {
 
 		for _, v := range env.Views {
 			response.Views = append(response.Views, viewResponse{
-				Name:              v.Name(),
-				Title:             v.Title(),
-				Cameras:           v.Cameras(),
+				Name:  v.Name(),
+				Title: v.Title(),
+				Cameras: func(cameras []*config.ViewCameraConfig) (ret []cameraViewResponse) {
+					ret = make([]cameraViewResponse, len(cameras))
+					for i, c := range cameras {
+						ret[i] = cameraViewResponse{
+							Name:  c.Name(),
+							Title: c.Title(),
+						}
+					}
+					return
+				}(v.Cameras()),
 				RefreshIntervalMs: v.RefreshInterval().Milliseconds(),
 				Autoplay:          v.Autoplay(),
 				Authentication:    false,

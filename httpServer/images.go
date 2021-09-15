@@ -27,7 +27,7 @@ func setupImages(r *gin.RouterGroup, env *Environment) {
 	// add dynamic routes
 	for _, v := range env.Views {
 		view := v
-		for _, c := range view.Cameras() {
+		for _, c := range view.CameraNames() {
 			camera := c
 
 			client := env.CameraClientPoolInstance.GetClient(camera)
