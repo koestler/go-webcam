@@ -35,7 +35,9 @@ func (cp cameraPicture) Expires() time.Time {
 }
 
 func (cp cameraPicture) Expired() bool {
-	return time.Now().After(cp.expires)
+	// expire images 50ms early
+	// this ensures that always a new image is fetched during periodic reloads with a jitter of up to 50ms
+	return time.Now().Add(50 * time.Millisecond).After(cp.expires)
 }
 
 func (cp cameraPicture) Uuid() string {
