@@ -93,6 +93,10 @@ Views:                                                     # mandatory, a list o
       - "user:password"
 ```  
 
+## API
+
+A swagger documentation of the API is build and available under: http://localhost:8043/swagger
+
 ## Local Development
 
 ### Install dependencies
