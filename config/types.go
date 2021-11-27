@@ -6,15 +6,18 @@ import (
 )
 
 type Config struct {
-	version        int                 `yaml:"Version"`        // must be 0
-	mqttClients    []*MqttClientConfig `yaml:"MqttClient"`     // mandatory: at least 1 must be defined
-	cameras        []*CameraConfig     `yaml:"Cameras"`        // mandatory: at least 1 must be defined
-	views          []*ViewConfig       `yaml:"Views"`          // mandatory: at least 1 must be defined
-	httpServer     HttpServerConfig    `yaml:"HttpServer"`     // optional: default Disabled
-	logConfig      bool                `yaml:"LogConfig"`      // optional: default False
-	logWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
-	logMqttDebug   bool                `yaml:"LogMqttDebug"`   // optional: default False
-	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
+	version               int                 `yaml:"Version"`           // must be 0
+	mqttClients           []*MqttClientConfig `yaml:"MqttClient"`        // mandatory: at least 1 must be defined
+	cameras               []*CameraConfig     `yaml:"Cameras"`           // mandatory: at least 1 must be defined
+	views                 []*ViewConfig       `yaml:"Views"`             // mandatory: at least 1 must be defined
+	httpServer            HttpServerConfig    `yaml:"HttpServer"`        // optional: default Disabled
+	logConfig             bool                `yaml:"LogConfig"`         // optional: default False
+	logWorkerStart        bool                `yaml:"LogWorkerStart"`    // optional: default False
+	logMqttDebug          bool                `yaml:"LogMqttDebug"`      // optional: default False
+	projectTitle          string              `yaml:"ProjectTitle"`      // optional: default go-webcam
+	authJwtSecret         string              `yaml:"JwtSecret"`         // optional: default new random string on startup
+	authJwtValidityPeriod time.Duration       `yaml:"JwtValidityPeriod"` // optional: default 1h
+	authHtaccessFile      string              `yaml:"authHtaccessFile"`  // optional: default no valid users
 }
 
 type MqttClientConfig struct {
@@ -74,6 +77,10 @@ type configRead struct {
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
 	LogMqttDebug   *bool                   `yaml:"LogMqttDebug"`
 	ProjectTitle   string                  `yaml:"ProjectTitle"`
+	AuthJwtSecret         *string              `yaml:"JwtSecret"`
+	AuthJwtValidityPeriod string     `yaml:"JwtValidityPeriod"`
+	AuthHtaccessFile      *string              `yaml:"authHtaccessFile"`
+
 }
 
 type mqttClientConfigRead struct {

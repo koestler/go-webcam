@@ -91,7 +91,40 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	} else {
 		ret.projectTitle = "go-webcam"
 	}
+	
+	if c.AuthJwtSecret != nil {
+		if len(*c.AuthJwtSecret) < 32 {
+			err = append(err, fmt.Errorf("AuthJwtSecret must be empty ot >= 32 chars"))
+		} else {
+			ret.authJwtSecret = *c.AuthJwtSecret
+		}		
+	}
+	
+	if len(c.AuthJwtValidityPeriod) < 1 {
+		// use default 1h
+		ret.authJwtValidityPeriod = time.Hour
+	} else if authJwtValidityPeriod, e := time.ParseDuration(c.AuthJwtValidityPeriod); e != nil {
+		err = append(err, fmt.Errorf("AuthJwtValidityPeriod='%s' parse error: %s",
+			c.AuthJwtValidityPeriod, e,
+		))
+	} else if authJwtValidityPeriod < 0 {
+		err = append(err, fmt.Errorf("AuthJwtValidityPeriod='%s' must be positive",
+	c.AuthJwtValidityPeriod,
+		))
+	} else {
+		ret.authJwtValidityPeriod = authJwtValidityPeriod
+	}
 
+	if c.AuthHtaccessFile != nil && len(*c.AuthHtaccessFile) > 0 {
+		if _, e := os.Stat(*c.AuthHtaccessFile); err != nil {
+			err = append(err, fmt.Errorf("AuthHtaccessFile='%s' cannot open file. error: %s",
+				c.AuthHtaccessFile, e,
+			))
+		}
+
+		ret.authHtaccessFile = *c.AuthHtaccessFile
+	}
+	
 	return
 }
 

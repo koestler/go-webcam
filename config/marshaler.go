@@ -35,6 +35,9 @@ func (c Config) MarshalYAML() (interface{}, error) {
 		LogWorkerStart: &c.logWorkerStart,
 		LogMqttDebug:   &c.logMqttDebug,
 		ProjectTitle:   c.projectTitle,
+		AuthJwtSecret: &c.authJwtSecret,
+		AuthJwtValidityPeriod: c.authJwtValidityPeriod.String(),
+		AuthHtaccessFile: &c.authHtaccessFile,
 	}, nil
 }
 
