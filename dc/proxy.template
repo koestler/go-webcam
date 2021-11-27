@@ -1,0 +1,21 @@
+proxy_cache_path /srv/nginx-cache/main levels=1:2 keys_zone=main:10m max_size=1g inactive=7d use_temp_path=off;
+
+server {
+  listen      80;
+  listen [::]:80;
+  server_name localhost;
+
+  location / {
+    proxy_pass ${UPSTREAM};
+    proxy_cache main;
+
+    # only one request per cache-key at the same time (there is a default timeout of 5s)
+    proxy_cache_lock on;
+
+    # expose upstream cache status
+    add_header X-Cache-Status $upstream_cache_status;
+
+    # honor Pragma:no-cache header
+    proxy_cache_bypass $http_pragma;
+  }
+}
