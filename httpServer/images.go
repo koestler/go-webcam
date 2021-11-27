@@ -59,18 +59,16 @@ func handleCameraImage(
 		NewErrorResponse(c, http.StatusServiceUnavailable, cameraImage.Err())
 	}
 
-	c.Header("Content-Type", "image/jpeg")
-
 	//  output cache header
 	maxAge := int(cameraImage.Expires().Sub(time.Now()).Seconds())
 	visibility := "private"
 	if view.IsPublic() {
 		visibility = "public"
 	}
-
 	c.Header("Cache-Control", fmt.Sprintf("%s, max-age=%d", visibility, maxAge))
 
-	c.Writer.Write(cameraImage.Img())
+	// send image
+	c.Data(http.StatusOK, "image/jpeg", cameraImage.Img())
 }
 
 type Dimension struct {
