@@ -93,6 +93,18 @@ Views:                                                     # mandatory, a list o
       - "user:password"
 ```  
 
+## Local Development
+
+### Install dependencies
+```
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+### Compile run
+```
+go generate && go build && ./go-webcam
+```
+
 ## Local Production Build
 ```
 docker build -f docker/Dockerfile -t go-webcam .
