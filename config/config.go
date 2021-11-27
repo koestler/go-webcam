@@ -296,8 +296,9 @@ func (c viewConfigRead) TransformAndValidate(
 	cameras []*CameraConfig,
 ) (ret ViewConfig, err []error) {
 	ret = ViewConfig{
-		name:  name,
-		title: c.Title,
+		name:         name,
+		title:        c.Title,
+		allowedUsers: c.AllowedUsers,
 	}
 
 	if !nameMatcher.MatchString(ret.name) {
@@ -383,8 +384,6 @@ func (c viewCameraConfigRead) TransformAndValidate(
 		name:  name,
 		title: c.Title,
 	}
-
-	log.Printf("viewCameraConfigRead: %v", ret)
 
 	return
 }

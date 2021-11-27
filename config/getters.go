@@ -141,6 +141,19 @@ func (c ViewConfig) Autoplay() bool {
 	return c.autoplay
 }
 
+func (c ViewConfig) IsAllowed(user string) bool {
+	for _, u := range c.allowedUsers {
+		if u == user {
+			return true
+		}
+	}
+	return false
+}
+
+func (c ViewConfig) IsPublic() bool {
+	return len(c.allowedUsers) == 0
+}
+
 func (c HttpServerConfig) Enabled() bool {
 	return c.enabled
 }

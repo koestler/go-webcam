@@ -50,6 +50,7 @@ type ViewConfig struct {
 	resolutionMaxHeight int                 // optional: defaults  2160
 	refreshInterval     time.Duration       // optional: default 1m
 	autoplay            bool                // optional: default false
+	allowedUsers        []string
 }
 
 type HttpServerConfig struct {
@@ -110,6 +111,7 @@ type viewConfigRead struct {
 	ResolutionMaxHeight *int                    `yaml:"ResolutionMaxHeight"`
 	RefreshInterval     string                  `yaml:"RefreshInterval"`
 	Autoplay            *bool                   `yaml:"Autoplay"`
+	AllowedUsers        []string                `yaml:"AllowedUsers"`
 }
 
 type viewConfigReadMap map[string]viewConfigRead

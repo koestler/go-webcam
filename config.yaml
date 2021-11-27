@@ -9,7 +9,7 @@ HttpServer: # optional, default Disabled, start the http server
   Port: 8043                                               # optional, default 8043
   LogRequests: True                                        # optional, default False, log all requests to stdout
   EnableDocs : True                                        # optional: default False
-  FrontendProxy: "http://localhost:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
+  FrontendProxy: "http://192.168.8.44:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
   #FrontendPath: frontend-build
   #FrontendPath: /Users/lk/git/js-webcam/build
 
@@ -67,11 +67,11 @@ Views: # mandatory, a list of Views that shall be available
         Title: Camera North One
       4-cam-north:
         Title: Camera North Three
-
-    Htaccess:
-      - "user:password"
     RefreshInterval: 20s
     Autoplay: True
+    AllowedUsers:
+      - tester
+      - lorenz
 
 #MqttClients:                                               # mandatory, a list of MQTT servers to connect to
 #  1-local-mosquitto:                                       # optional, a second MQTT erver

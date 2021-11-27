@@ -1,12 +1,14 @@
 package httpServer
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // setupImages godoc
@@ -58,6 +60,15 @@ func handleCameraImage(
 	}
 
 	c.Header("Content-Type", "image/jpeg")
+
+	//  output cache header
+	maxAge := int(cameraImage.Expires().Sub(time.Now()).Seconds())
+	visibility := "private"
+	if view.IsPublic() {
+		visibility = "public"
+	}
+
+	c.Header("Cache-Control", fmt.Sprintf("%s, max-age=%d", visibility, maxAge))
 
 	c.Writer.Write(cameraImage.Img())
 }
