@@ -74,8 +74,18 @@ Views: # mandatory, a list of Views that shall be available
     Autoplay: True
     AllowedUsers:
       - tester
-      - lorenz
-
+      - lk
+  private2:
+    Title: For Staff High-Speed
+    Cameras:
+      3-cam-north:
+        Title: Camera North One
+      4-cam-north:
+        Title: Camera North Three
+    RefreshInterval: 100ms
+    Autoplay: False
+    AllowedUsers:
+      - tester
 #MqttClients:                                               # mandatory, a list of MQTT servers to connect to
 #  1-local-mosquitto:                                       # optional, a second MQTT erver
 #    Broker: "tcp://172.17.0.2:1883"                         # optional, the second MQTT servers broker...

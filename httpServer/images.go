@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,6 +24,7 @@ import (
 // @Produce jpeg
 // @Success 200
 // @Failure 500 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /images/{view}/{cameraName}.jpg [get]
 // @Security ApiKeyAuth
@@ -53,6 +55,10 @@ func handleCameraImage(
 	c *gin.Context,
 ) {
 	// check authorization
+	if !isAuthenticated(view, c) {
+		jsonErrorResponse(c, http.StatusForbidden, errors.New("User is not allowed here"))
+		return
+	}
 
 	// fetch image
 	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
@@ -60,6 +66,7 @@ func handleCameraImage(
 	// handle camera fetching errors
 	if cameraImage.Err() != nil {
 		jsonErrorResponse(c, http.StatusServiceUnavailable, cameraImage.Err())
+		return
 	}
 
 	//  output cache header

@@ -17,6 +17,7 @@ type loginRequest struct {
 
 type loginResponse struct {
 	Token string `json:"token"`
+	AllowedViews []string `json:"alllowedViews"`
 }
 
 // setupLogin godoc
@@ -65,7 +66,15 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 			return
 		}
 
-		c.JSON(http.StatusOK, loginResponse{Token: tokenStr})
+		// get allowed views
+		allowedViews := make([]string, 0)
+		for _, v := range env.Views {
+			if v.IsAllowed(req.User) {
+				allowedViews = append(allowedViews, v.Name())
+			}
+		}
+
+		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, AllowedViews: allowedViews})
 	})
 	log.Printf("httpServer: %slogin -> serve login", r.BasePath())
 }
