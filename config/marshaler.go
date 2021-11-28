@@ -97,8 +97,18 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
 		RefreshInterval:     c.refreshInterval.String(),
 		Autoplay:            &c.autoplay,
-		AllowedUsers:        c.allowedUsers,
+		AllowedUsers:        mapKeys(c.allowedUsers),
 	}
+}
+
+func mapKeys(m map[string]struct{}) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	return keys
 }
 
 func (c HttpServerConfig) convertToRead() httpServerConfigRead {

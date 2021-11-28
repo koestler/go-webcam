@@ -58,7 +58,7 @@ type ViewConfig struct {
 	resolutionMaxHeight int                 // optional: defaults  2160
 	refreshInterval     time.Duration       // optional: default 1m
 	autoplay            bool                // optional: default false
-	allowedUsers        []string
+	allowedUsers        map[string]struct{}
 }
 
 type HttpServerConfig struct {

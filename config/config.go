@@ -351,7 +351,7 @@ func (c viewConfigRead) TransformAndValidate(
 	ret = ViewConfig{
 		name:         name,
 		title:        c.Title,
-		allowedUsers: c.AllowedUsers,
+		allowedUsers: make(map[string]struct{}),
 	}
 
 	if !nameMatcher.MatchString(ret.name) {
@@ -403,6 +403,10 @@ func (c viewConfigRead) TransformAndValidate(
 
 	if c.Autoplay != nil && *c.Autoplay {
 		ret.autoplay = true
+	}
+
+	for _, user := range c.AllowedUsers {
+		ret.allowedUsers[user] = struct{}{}
 	}
 
 	return

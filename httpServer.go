@@ -27,7 +27,7 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 		&httpServer.Environment{
 			ProjectTitle:             cfg.ProjectTitle(),
 			Views:                    cfg.Views(),
-			Auth:  cfg.Auth(),
+			Auth:                     cfg.Auth(),
 			CameraClientPoolInstance: cameraClientPoolInstance,
 		},
 	)

@@ -52,6 +52,8 @@ func handleCameraImage(
 	view *config.ViewConfig,
 	c *gin.Context,
 ) {
+	// check authorization
+
 	// fetch image
 	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
 
@@ -109,4 +111,17 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func isAuthenticated(view *config.ViewConfig, c *gin.Context) bool {
+	if view.IsPublic() {
+		return true
+	}
+
+	user := c.GetString("AuthUser")
+	if len(user) < 1 {
+		return false
+	}
+
+	return view.IsAllowed(user)
 }

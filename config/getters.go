@@ -162,12 +162,8 @@ func (c ViewConfig) Autoplay() bool {
 }
 
 func (c ViewConfig) IsAllowed(user string) bool {
-	for _, u := range c.allowedUsers {
-		if u == user {
-			return true
-		}
-	}
-	return false
+	_, ok := c.allowedUsers[user]
+	return ok
 }
 
 func (c ViewConfig) IsPublic() bool {
