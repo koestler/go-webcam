@@ -1,8 +1,16 @@
 package config
 
 func (c Config) MarshalYAML() (interface{}, error) {
+
 	return configRead{
 		Version: &c.version,
+		Auth: func() *authConfigRead {
+			if !c.auth.enabled {
+				return nil
+			}
+			r := c.auth.convertToRead()
+			return &r
+		}(),
 		MqttClients: func() mqttClientConfigReadMap {
 			mqttClients := make(mqttClientConfigReadMap, len(c.mqttClients))
 			for _, c := range c.mqttClients {
@@ -35,10 +43,16 @@ func (c Config) MarshalYAML() (interface{}, error) {
 		LogWorkerStart: &c.logWorkerStart,
 		LogMqttDebug:   &c.logMqttDebug,
 		ProjectTitle:   c.projectTitle,
-		AuthJwtSecret: &c.authJwtSecret,
-		AuthJwtValidityPeriod: c.authJwtValidityPeriod.String(),
-		AuthHtaccessFile: &c.authHtaccessFile,
 	}, nil
+}
+
+func (c AuthConfig) convertToRead() authConfigRead {
+	jwtSecret := string(c.jwtSecret)
+	return authConfigRead{
+		JwtSecret:         &jwtSecret,
+		JwtValidityPeriod: c.jwtValidityPeriod.String(),
+		HtaccessFile:      &c.htaccessFile,
+	}
 }
 
 func (c MqttClientConfig) convertToRead() mqttClientConfigRead {

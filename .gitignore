@@ -1,3 +1,4 @@
 config.yaml
 go-webcam
 *_mock.go
+*.passwd

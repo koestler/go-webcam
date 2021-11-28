@@ -9,6 +9,10 @@ func (c Config) Version() int {
 	return c.version
 }
 
+func (c Config) Auth() AuthConfig {
+	return c.auth
+}
+
 func (c Config) MqttClients() []*MqttClientConfig {
 	return c.mqttClients
 }
@@ -39,6 +43,22 @@ func (c Config) LogMqttDebug() bool {
 
 func (c Config) ProjectTitle() string {
 	return c.projectTitle
+}
+
+func (c AuthConfig) Enabled() bool {
+	return c.enabled
+}
+
+func (c AuthConfig) JwtSecret() []byte {
+	return c.jwtSecret
+}
+
+func (c AuthConfig) JwtValidityPeriod() time.Duration {
+	return c.jwtValidityPeriod
+}
+
+func (c AuthConfig) HtaccessFile() string {
+	return c.htaccessFile
 }
 
 func (c MqttClientConfig) Name() string {

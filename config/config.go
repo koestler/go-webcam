@@ -53,6 +53,9 @@ func (c Config) PrintConfig() (err error) {
 
 func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	var e []error
+	ret.auth, e = c.Auth.TransformAndValidate()
+	err = append(err, e...)
+
 	ret.mqttClients, e = c.MqttClients.TransformAndValidate()
 	err = append(err, e...)
 
@@ -91,40 +94,57 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	} else {
 		ret.projectTitle = "go-webcam"
 	}
-	
-	if c.AuthJwtSecret != nil {
-		if len(*c.AuthJwtSecret) < 32 {
-			err = append(err, fmt.Errorf("AuthJwtSecret must be empty ot >= 32 chars"))
-		} else {
-			ret.authJwtSecret = *c.AuthJwtSecret
-		}		
-	}
-	
-	if len(c.AuthJwtValidityPeriod) < 1 {
-		// use default 1h
-		ret.authJwtValidityPeriod = time.Hour
-	} else if authJwtValidityPeriod, e := time.ParseDuration(c.AuthJwtValidityPeriod); e != nil {
-		err = append(err, fmt.Errorf("AuthJwtValidityPeriod='%s' parse error: %s",
-			c.AuthJwtValidityPeriod, e,
-		))
-	} else if authJwtValidityPeriod < 0 {
-		err = append(err, fmt.Errorf("AuthJwtValidityPeriod='%s' must be positive",
-	c.AuthJwtValidityPeriod,
-		))
-	} else {
-		ret.authJwtValidityPeriod = authJwtValidityPeriod
+
+	return
+}
+
+func (c *authConfigRead) TransformAndValidate() (ret AuthConfig, err []error) {
+	ret.enabled = false
+	ret.jwtValidityPeriod = time.Hour
+	ret.jwtSecret = []byte(randomString(64))
+
+	if c == nil {
+		return
 	}
 
-	if c.AuthHtaccessFile != nil && len(*c.AuthHtaccessFile) > 0 {
-		if _, e := os.Stat(*c.AuthHtaccessFile); err != nil {
-			err = append(err, fmt.Errorf("AuthHtaccessFile='%s' cannot open file. error: %s",
-				c.AuthHtaccessFile, e,
+	ret.enabled = true
+
+	if c.JwtSecret != nil {
+		if len(*c.JwtSecret) < 32 {
+			err = append(err, fmt.Errorf("JwtSecret must be empty ot >= 32 chars"))
+		} else {
+			ret.jwtSecret = []byte(*c.JwtSecret)
+		}
+	}
+
+	if len(c.JwtValidityPeriod) < 1 {
+		// use default
+	} else if authJwtValidityPeriod, e := time.ParseDuration(c.JwtValidityPeriod); e != nil {
+		err = append(err, fmt.Errorf("Auth->JwtValidityPeriod='%s' parse error: %s",
+			c.JwtValidityPeriod, e,
+		))
+	} else if authJwtValidityPeriod < 0 {
+		err = append(err, fmt.Errorf("Auth->JwtValidityPeriod='%s' must be positive",
+			c.JwtValidityPeriod,
+		))
+	} else {
+		ret.jwtValidityPeriod = authJwtValidityPeriod
+	}
+
+	if c.HtaccessFile != nil && len(*c.HtaccessFile) > 0 {
+		if info, e := os.Stat(*c.HtaccessFile); e != nil {
+			err = append(err, fmt.Errorf("Auth->HtaccessFile='%s' cannot open file. error: %s",
+				*c.HtaccessFile, e,
+			))
+		} else if info.IsDir() {
+			err = append(err, fmt.Errorf("Auth->HtaccessFile='%s' must be a file, not a directory",
+				*c.HtaccessFile,
 			))
 		}
 
-		ret.authHtaccessFile = *c.AuthHtaccessFile
+		ret.htaccessFile = *c.HtaccessFile
 	}
-	
+
 	return
 }
 

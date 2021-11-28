@@ -19,6 +19,10 @@ import (
 // @license.url https://github.com/koestler/go-webcam/blob/main/LICENSE
 
 // @BasePath /api/v0
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func setupSwaggerDocs(r *gin.Engine, config Config) {
 	docs.SwaggerInfo.Host = fmt.Sprintf("127.0.0.1:%d", config.Port())
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

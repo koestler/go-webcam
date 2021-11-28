@@ -9,7 +9,18 @@ import (
 	"strings"
 )
 
-func jsonResponse(c *gin.Context, obj interface{}) {
+type ErrorResponse struct {
+	Message string `json:"message" example:"status bad request"`
+}
+
+func jsonErrorResponse(c *gin.Context, status int, err error) {
+	er := ErrorResponse{
+		Message: err.Error(),
+	}
+	c.JSON(status, er)
+}
+
+func jsonGetResponse(c *gin.Context, obj interface{}) {
 	jsonBytes, err := json.Marshal(obj)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)

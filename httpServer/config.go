@@ -62,7 +62,7 @@ func setupConfig(r *gin.RouterGroup, env *Environment) {
 			})
 		}
 
-		jsonResponse(c, response)
+		jsonGetResponse(c, response)
 	})
 	log.Printf("httpServer: %sconfig -> serve config", r.BasePath())
 }

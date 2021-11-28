@@ -6,18 +6,23 @@ import (
 )
 
 type Config struct {
-	version               int                 `yaml:"Version"`           // must be 0
-	mqttClients           []*MqttClientConfig `yaml:"MqttClient"`        // mandatory: at least 1 must be defined
-	cameras               []*CameraConfig     `yaml:"Cameras"`           // mandatory: at least 1 must be defined
-	views                 []*ViewConfig       `yaml:"Views"`             // mandatory: at least 1 must be defined
-	httpServer            HttpServerConfig    `yaml:"HttpServer"`        // optional: default Disabled
-	logConfig             bool                `yaml:"LogConfig"`         // optional: default False
-	logWorkerStart        bool                `yaml:"LogWorkerStart"`    // optional: default False
-	logMqttDebug          bool                `yaml:"LogMqttDebug"`      // optional: default False
-	projectTitle          string              `yaml:"ProjectTitle"`      // optional: default go-webcam
-	authJwtSecret         string              `yaml:"JwtSecret"`         // optional: default new random string on startup
-	authJwtValidityPeriod time.Duration       `yaml:"JwtValidityPeriod"` // optional: default 1h
-	authHtaccessFile      string              `yaml:"authHtaccessFile"`  // optional: default no valid users
+	version        int                 `yaml:"Version"`        // must be 0
+	auth           AuthConfig          `yaml:"Auth"`           // optional: default Disabled
+	mqttClients    []*MqttClientConfig `yaml:"MqttClient"`     // mandatory: at least 1 must be defined
+	cameras        []*CameraConfig     `yaml:"Cameras"`        // mandatory: at least 1 must be defined
+	views          []*ViewConfig       `yaml:"Views"`          // mandatory: at least 1 must be defined
+	httpServer     HttpServerConfig    `yaml:"HttpServer"`     // optional: default Disabled
+	logConfig      bool                `yaml:"LogConfig"`      // optional: default False
+	logWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
+	logMqttDebug   bool                `yaml:"LogMqttDebug"`   // optional: default False
+	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
+}
+
+type AuthConfig struct {
+	enabled           bool          // defined automatically if Auth section exists
+	jwtSecret         []byte        `yaml:"JwtSecret"`         // optional: default new random string on startup
+	jwtValidityPeriod time.Duration `yaml:"JwtValidityPeriod"` // optional: default 1h
+	htaccessFile      string        `yaml:"HtaccessFile"`      // optional: default no valid users
 }
 
 type MqttClientConfig struct {
@@ -69,6 +74,7 @@ type HttpServerConfig struct {
 // Read structs are given to yaml for decoding and are slightly less exact in types
 type configRead struct {
 	Version        *int                    `yaml:"Version"`
+	Auth           *authConfigRead         `yaml:"Auth"`
 	MqttClients    mqttClientConfigReadMap `yaml:"MqttClients"`
 	Cameras        cameraConfigReadMap     `yaml:"Cameras"`
 	Views          viewConfigReadMap       `yaml:"Views"`
@@ -77,10 +83,12 @@ type configRead struct {
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
 	LogMqttDebug   *bool                   `yaml:"LogMqttDebug"`
 	ProjectTitle   string                  `yaml:"ProjectTitle"`
-	AuthJwtSecret         *string              `yaml:"JwtSecret"`
-	AuthJwtValidityPeriod string     `yaml:"JwtValidityPeriod"`
-	AuthHtaccessFile      *string              `yaml:"authHtaccessFile"`
+}
 
+type authConfigRead struct {
+	JwtSecret         *string `yaml:"JwtSecret"`
+	JwtValidityPeriod string  `yaml:"JwtValidityPeriod"`
+	HtaccessFile      *string `yaml:"HtaccessFile"`
 }
 
 type mqttClientConfigRead struct {

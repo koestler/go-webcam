@@ -25,6 +25,7 @@ import (
 // @Failure 500 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /images/{view}/{cameraName}.jpg [get]
+// @Security ApiKeyAuth
 func setupImages(r *gin.RouterGroup, env *Environment) {
 	// add dynamic routes
 	for _, v := range env.Views {
@@ -56,7 +57,7 @@ func handleCameraImage(
 
 	// handle camera fetching errors
 	if cameraImage.Err() != nil {
-		NewErrorResponse(c, http.StatusServiceUnavailable, cameraImage.Err())
+		jsonErrorResponse(c, http.StatusServiceUnavailable, cameraImage.Err())
 	}
 
 	//  output cache header

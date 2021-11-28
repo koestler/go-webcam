@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"log"
+	"net/http"
 	"net/http/httputil"
 	"os"
 	"path"
@@ -59,7 +60,7 @@ func setupFrontend(engine *gin.Engine, config Config) {
 			log.Print("httpServer: no frontend configured")
 		}
 		engine.NoRoute(func(c *gin.Context) {
-			NewErrorResponse(c, 404, errors.New("route not found"))
+			jsonErrorResponse(c, http.StatusNotFound, errors.New("route not found"))
 		})
 	}
 }

@@ -20,6 +20,7 @@ type HttpServer struct {
 type Environment struct {
 	ProjectTitle             string
 	Views                    []*config.ViewConfig
+	Auth                     config.AuthConfig
 	CameraClientPoolInstance *cameraClient.ClientPool
 }
 
@@ -40,6 +41,7 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 		engine.Use(gin.Logger())
 	}
 	engine.Use(gin.Recovery())
+	engine.Use(authJwtMiddleware(env))
 
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
