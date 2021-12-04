@@ -16,8 +16,9 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	Token string `json:"token"`
-	AllowedViews []string `json:"alllowedViews"`
+	User         string   `json:"user"`
+	Token        string   `json:"token"`
+	AllowedViews []string `json:"allowedViews"`
 }
 
 // setupLogin godoc
@@ -74,7 +75,7 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 			}
 		}
 
-		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, AllowedViews: allowedViews})
+		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, User: req.User, AllowedViews: allowedViews})
 	})
 	log.Printf("httpServer: %slogin -> serve login", r.BasePath())
 }
