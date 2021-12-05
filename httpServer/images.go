@@ -24,6 +24,7 @@ import (
 // @Produce jpeg
 // @Success 200
 // @Failure 500 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /images/{view}/{cameraName}.jpg [get]

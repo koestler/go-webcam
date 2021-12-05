@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/koestler/go-webcam/config"
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
 )
@@ -39,18 +40,9 @@ func authJwtMiddleware(env *Environment) gin.HandlerFunc {
 		tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return env.Auth.JwtSecret(), nil
 		})
-		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
-				c.AbortWithStatus(http.StatusUnauthorized)
-				return
-			}
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-
-		// abort request if invalid token is given
-		if !tkn.Valid {
-			c.AbortWithStatus(http.StatusUnauthorized)
+		if err != nil || !tkn.Valid {
+			jsonErrorResponse(c, http.StatusUnauthorized, errors.New("error while parsing token"))
+			c.Abort()
 			return
 		}
 
