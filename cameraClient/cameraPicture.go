@@ -12,6 +12,11 @@ type CameraPicture interface {
 	Err() error
 }
 
+type SizedCameraPicture interface {
+	CameraPicture
+	Dimension() dimension
+}
+
 type cameraPicture struct {
 	img     []byte
 	fetched time.Time
@@ -20,10 +25,20 @@ type cameraPicture struct {
 	err     error
 }
 
+type sizedCameraPicture struct {
+	cameraPicture
+	dimension dimension
+}
+
 type cameraPictureMap map[string]*cameraPicture
+type sizedCameraPictureMap map[string]*sizedCameraPicture
 
 func (cp cameraPicture) Img() []byte {
 	return cp.img
+}
+
+func (cp sizedCameraPicture) Dimension() dimension {
+	return cp.dimension
 }
 
 func (cp cameraPicture) Fetched() time.Time {
@@ -34,10 +49,8 @@ func (cp cameraPicture) Expires() time.Time {
 	return cp.expires
 }
 
-func (cp cameraPicture) Expired() bool {
-	// expire images 50ms early
-	// this ensures that always a new image is fetched during periodic reloads with a jitter of up to 50ms
-	return time.Now().Add(50 * time.Millisecond).After(cp.expires)
+func (cp cameraPicture) Expired(delay time.Duration) bool {
+	return time.Now().Add(-delay).After(cp.expires)
 }
 
 func (cp cameraPicture) Uuid() string {
@@ -48,9 +61,17 @@ func (cp cameraPicture) Err() error {
 	return cp.err
 }
 
-func (m cameraPictureMap) purgeExpired() {
+func (m cameraPictureMap) purgeExpired(delay time.Duration) {
 	for k, e := range m {
-		if e.Expired() {
+		if e.Expired(delay) {
+			delete(m, k)
+		}
+	}
+}
+
+func (m sizedCameraPictureMap) purgeExpired(delay time.Duration) {
+	for k, e := range m {
+		if e.Expired(delay) {
 			delete(m, k)
 		}
 	}

@@ -22,7 +22,9 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 
 	cacheKey := refreshInterval.String()
 
-	c.delayedCache.purgeExpired()
+	// expire images 50ms early
+	// this ensures that always a new image is fetched during periodic reloads with a jitter of up to 50ms
+	c.delayedCache.purgeExpired(-50 * time.Millisecond)
 
 	if cp, ok := c.delayedCache[cacheKey]; ok {
 		log.Printf("cameraClient[%s]: delayed image cache HIT, cacheKey=%s", c.Name(), cacheKey)

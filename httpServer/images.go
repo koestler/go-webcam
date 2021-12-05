@@ -17,17 +17,18 @@ import (
 // @Description Fetches the images from the camera (or from a cache), scales it to the requested resolution
 // @Description and then returns it.
 // @ID images
-// @Param view path string true "View Name as provided by the config endpoint"
+// @Param viewName path string true "View Name as provided by the config endpoint"
 // @Param cameraName path string true "Camera Name as provided in Cameras array of the config endpoint"
 // @Param width query int false "Downscale image to this width"
 // @Param height query int false "Downscale image to this height"
 // @Produce jpeg
 // @Success 200
+// @Success 307
 // @Failure 500 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /images/{view}/{cameraName}.jpg [get]
+// @Router /images/{viewName}/{cameraName}.jpg [get]
 // @Security ApiKeyAuth
 func setupImages(r *gin.RouterGroup, env *Environment) {
 	// add dynamic routes
@@ -62,24 +63,23 @@ func handleCameraImage(
 	}
 
 	// fetch image
-	cameraImage := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
+	cameraPicture := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
 
 	// handle camera fetching errors
-	if cameraImage.Err() != nil {
-		jsonErrorResponse(c, http.StatusServiceUnavailable, cameraImage.Err())
+	if cameraPicture.Err() != nil {
+		jsonErrorResponse(c, http.StatusServiceUnavailable, cameraPicture.Err())
 		return
 	}
 
-	//  output cache header
-	maxAge := int(cameraImage.Expires().Sub(time.Now()).Seconds())
-	visibility := "private"
 	if view.IsPublic() {
-		visibility = "public"
-	}
-	c.Header("Cache-Control", fmt.Sprintf("%s, max-age=%d", visibility, maxAge))
+		//  output cache header
+		maxAge := int(cameraPicture.Expires().Sub(time.Now()).Seconds())
+		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
 
-	// send image
-	c.Data(http.StatusOK, "image/jpeg", cameraImage.Img())
+		c.Data(http.StatusOK, "image/jpeg", cameraPicture.Img())
+	} else {
+		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture) )
+	}
 }
 
 type Dimension struct {
@@ -133,3 +133,4 @@ func isAuthenticated(view *config.ViewConfig, c *gin.Context) bool {
 
 	return view.IsAllowed(user)
 }
+

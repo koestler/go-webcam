@@ -6,6 +6,7 @@ ProjectTitle: go-webcam Development Project                # optional: default g
 
 Auth:
   HtaccessFile: ./test-auth.passwd
+  JwtValidityPeriod: 2h
 
 HttpServer: # optional, default Disabled, start the http server
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)

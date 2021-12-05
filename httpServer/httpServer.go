@@ -80,5 +80,6 @@ func addApiV0Routes(r *gin.Engine, env *Environment) {
 	v0 := r.Group("/api/v0/")
 	setupConfig(v0, env)
 	setupLogin(v0, env)
+	setupImagesByHash(v0, env)
 	setupImages(v0, env)
 }
