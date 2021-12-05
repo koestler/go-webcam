@@ -12,7 +12,7 @@ HttpServer: # optional, default Disabled, start the http server
   Port: 8043                                               # optional, default 8043
   LogRequests: True                                        # optional, default False, log all requests to stdout
   EnableDocs : True                                        # optional: default False
-  FrontendProxy: "http://192.168.8.44:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
+  FrontendProxy: "http://192.168.8.65:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
   #FrontendPath: frontend-build
   #FrontendPath: /Users/lk/git/js-webcam/build
 
@@ -21,7 +21,7 @@ Cameras:
     Address: 192.168.8.63
     User: ubnt
     Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 5s
+    RefreshInterval: 1s
 
   1-cam-north:
     Address: 192.168.8.64
@@ -56,7 +56,7 @@ Views: # mandatory, a list of Views that shall be available
         title: Camera East
     ResolutionMaxWidth: 1024
     ResolutionMaxHeight: 768
-    RefreshInterval: 5s
+    RefreshInterval: 1s
   private:
     Title: For Staff
     Cameras:
@@ -70,7 +70,7 @@ Views: # mandatory, a list of Views that shall be available
         Title: Camera North One
       4-cam-north:
         Title: Camera North Three
-    RefreshInterval: 20s
+    RefreshInterval: 2s
     Autoplay: True
     AllowedUsers:
       - tester
@@ -86,6 +86,18 @@ Views: # mandatory, a list of Views that shall be available
     Autoplay: False
     AllowedUsers:
       - tester
+  private3:
+    Title: I'm hidden
+    Cameras:
+      3-cam-north:
+        Title: Camera North One
+      4-cam-north:
+        Title: Camera North Three
+    RefreshInterval: 100ms
+    Autoplay: False
+    AllowedUsers:
+      - tester
+    Hidden: True
 #MqttClients:                                               # mandatory, a list of MQTT servers to connect to
 #  1-local-mosquitto:                                       # optional, a second MQTT erver
 #    Broker: "tcp://172.17.0.2:1883"                         # optional, the second MQTT servers broker...

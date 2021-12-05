@@ -98,6 +98,7 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 		RefreshInterval:     c.refreshInterval.String(),
 		Autoplay:            &c.autoplay,
 		AllowedUsers:        mapKeys(c.allowedUsers),
+		Hidden:              &c.hidden,
 	}
 }
 

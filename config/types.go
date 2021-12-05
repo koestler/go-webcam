@@ -58,7 +58,8 @@ type ViewConfig struct {
 	resolutionMaxHeight int                 // optional: defaults  2160
 	refreshInterval     time.Duration       // optional: default 1m
 	autoplay            bool                // optional: default false
-	allowedUsers        map[string]struct{}
+	allowedUsers        map[string]struct{} // optional: if empty: view is public; otherwise only allowed to listed users
+	hidden              bool                // optional: if true, view is not shown in menu unless logged in
 }
 
 type HttpServerConfig struct {
@@ -127,6 +128,7 @@ type viewConfigRead struct {
 	RefreshInterval     string                  `yaml:"RefreshInterval"`
 	Autoplay            *bool                   `yaml:"Autoplay"`
 	AllowedUsers        []string                `yaml:"AllowedUsers"`
+	Hidden              *bool                   `yaml:"Hidden"`
 }
 
 type viewConfigReadMap map[string]viewConfigRead

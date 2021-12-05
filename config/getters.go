@@ -170,6 +170,10 @@ func (c ViewConfig) IsPublic() bool {
 	return len(c.allowedUsers) == 0
 }
 
+func (c ViewConfig) Hidden() bool {
+	return c.hidden
+}
+
 func (c HttpServerConfig) Enabled() bool {
 	return c.enabled
 }

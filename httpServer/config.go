@@ -17,7 +17,8 @@ type viewResponse struct {
 	Cameras           []cameraViewResponse `json:"cameras"`
 	RefreshIntervalMs int64                `json:"refreshIntervalMs" example:"5000"`
 	Autoplay          bool                 `json:"autoplay" example:"True"`
-	Authentication    bool                 `json:"authentication" example:"False"`
+	IsPublic          bool                 `json:"isPublic" example:"False"`
+	Hidden            bool                 `json:"hidden" example:"False"`
 }
 
 type cameraViewResponse struct {
@@ -58,7 +59,8 @@ func setupConfig(r *gin.RouterGroup, env *Environment) {
 				}(v.Cameras()),
 				RefreshIntervalMs: v.RefreshInterval().Milliseconds(),
 				Autoplay:          v.Autoplay(),
-				Authentication:    false,
+				IsPublic:          v.IsPublic(),
+				Hidden:            v.Hidden(),
 			})
 		}
 
