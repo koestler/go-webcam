@@ -27,6 +27,8 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 		log.Printf("cameraClient[%s]: delayed image cache HIT, cacheKey=%s", c.Name(), cacheKey)
 		request.response <- cp
 	} else {
+		log.Printf("cameraClient[%s]: delayed image cache MISS, cacheKey=%s", c.Name(), cacheKey)
+
 		rawImg := c.GetRawImage()
 
 		delayedImage := &cameraPicture{
@@ -36,8 +38,6 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 			uuid:    rawImg.Uuid(),
 			err:     rawImg.Err(),
 		}
-
-		log.Printf("cameraClient[%s]: delayed image cache MISS, updated, cacheKey=%s", c.Name(), cacheKey)
 
 		request.response <- delayedImage
 		c.delayedCache[cacheKey] = delayedImage

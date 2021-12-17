@@ -21,9 +21,14 @@ func (c *Client) rawImageRoutine() {
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
 	if c.raw.Expired(-c.Config().ExpireEarly()) {
-		rawImg, err := c.ubntGetRawImage()
+		log.Printf("cameraClient[%s]: raw image cache MISS", c.Name())
 
-		log.Printf("cameraClient[%s]: raw image cache MISS, fetched", c.Name())
+		log.Printf("cameraClient[%s]: GetRawImage start", c.Name())
+
+		rawImg, err := c.ubntGetRawImage()
+		time.Sleep(time.Second)
+
+		log.Printf("cameraClient[%s]: GetRawImage finish", c.Name())
 
 		now := time.Now()
 
