@@ -12,6 +12,7 @@ type Config interface {
 	User() string
 	Password() string
 	RefreshInterval() time.Duration
+	ExpireEarly() time.Duration
 }
 
 type Client struct {
@@ -20,8 +21,8 @@ type Client struct {
 
 	// interfacing
 	rawImageReadRequestChannel     chan rawImageReadRequest
-	resizedImageReadRequestChannel chan resizedImageReadRequest
 	delayedImageReadRequestChannel chan delayedImageReadRequest
+	resizedImageReadRequestChannel chan resizedImageReadRequest
 
 	// fetching
 	httpClient    *http.Client
@@ -30,9 +31,11 @@ type Client struct {
 	// raw image
 	raw cameraPicture
 
-	// resized image cache
-	resizeCache  sizedCameraPictureMap
+	// delayed image cache
 	delayedCache cameraPictureMap
+
+	// resized image cache
+	resizeCache sizedCameraPictureMap
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -50,10 +53,10 @@ func RunClient(config Config) (*Client, error) {
 			Timeout: 10 * time.Second,
 		},
 		rawImageReadRequestChannel:     make(chan rawImageReadRequest, 16),
-		resizedImageReadRequestChannel: make(chan resizedImageReadRequest, 16),
 		delayedImageReadRequestChannel: make(chan delayedImageReadRequest, 16),
-		resizeCache:                    make(sizedCameraPictureMap),
+		resizedImageReadRequestChannel: make(chan resizedImageReadRequest, 16),
 		delayedCache:                   make(cameraPictureMap),
+		resizeCache:                    make(sizedCameraPictureMap),
 	}
 
 	go client.rawImageRoutine()

@@ -13,16 +13,14 @@ type rawImageReadRequest struct {
 func (c *Client) rawImageRoutine() {
 	for {
 		readRequest := <-c.rawImageReadRequestChannel
+		// per camera, maximum one fetch operation is in progress
 		c.handleRawImageReadRequest(readRequest)
 	}
 }
 
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
-
-	// expire images 50ms early
-	// this ensures that always a new image is fetched during periodic reloads with a jitter of up to 50ms
-	if c.raw.Expired(-50 * time.Millisecond) {
+	if c.raw.Expired(-c.Config().ExpireEarly()) {
 		rawImg, err := c.ubntGetRawImage()
 
 		log.Printf("cameraClient[%s]: raw image cache MISS, fetched", c.Name())

@@ -117,6 +117,12 @@ func (c CameraConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }
 
+func (c CameraConfig) ExpireEarly() time.Duration {
+	// expire images 50ms early
+	// this ensures that always a new image is fetched during periodic reloads with a jitter of up to 50ms
+	return 50 * time.Millisecond
+}
+
 func (c ViewCameraConfig) Name() string {
 	return c.name
 }
