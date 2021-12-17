@@ -117,9 +117,8 @@ docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:
 
 ## Dockerhub Production Build
 ```
-docker buildx build --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
-docker push koestler/go-webcam
+docker buildx build --push --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --push --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 
 ```
 
