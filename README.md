@@ -104,22 +104,40 @@ A swagger documentation of the API is build and available under: http://localhos
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
-### Compile run
+### Compile and run on host
 ```
 go generate && go build && ./go-webcam
 ```
 
+### Compile and run inside docker
+```
+docker build -f docker/Dockerfile.dev -t go-webcam .
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
+```
+
+## Production build
+### Install dependencies
+Buildx must be installed: https://docs.docker.com/buildx/working-with-buildx/
+On Linux, binfmt_misc needs to be installed:
+```
+docker run --privileged --rm tonistiigi/binfmt --install all
+```
+
 ## Local Production Build
 ```
-docker build -f docker/Dockerfile -t go-webcam .
-docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
+docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
+```
+
+Test it:
+```
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro koestler/go-webcam
 ```
 
 ## Dockerhub Production Build
 ```
-docker buildx build --push --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --push --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
-
+docker buildx build --no-cache --push --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --no-cache --push --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
 # License
