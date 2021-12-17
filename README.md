@@ -97,6 +97,13 @@ Views:                                                     # mandatory, a list o
 
 A swagger documentation of the API is build and available under: http://localhost:8043/swagger
 
+## Generating HtaccessFile
+Use `htpasswd` to generate password files like this:
+```
+sudo apt install apache2-utils
+htpasswd -c auth.passwd username
+```
+
 ## Local Development
 
 ### Install dependencies
