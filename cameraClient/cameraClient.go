@@ -1,8 +1,6 @@
 package cameraClient
 
 import (
-	"net/http"
-	"net/http/cookiejar"
 	"time"
 )
 
@@ -19,30 +17,17 @@ type Client struct {
 	// configuration
 	config Config
 
-	// fetching
-	httpClient    *http.Client
-	authenticated bool
-
-	// processing
+	ubnt    ubntState
 	raw     rawState
 	delayed delayedState
 	resize  resizeState
 }
 
 func RunClient(config Config) (*Client, error) {
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return nil, err
-	}
 
 	client := &Client{
-		config: config,
-		httpClient: &http.Client{
-			Jar: jar,
-			// this tool is designed to serve cameras running on the local network
-			// -> us a relatively short timeout
-			Timeout: 10 * time.Second,
-		},
+		config:  config,
+		ubnt:    createUbntState(),
 		raw:     createRawState(),
 		delayed: createDelayedState(),
 		resize:  createResizeState(),
@@ -55,7 +40,9 @@ func RunClient(config Config) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) Shutdown() {}
+func (c *Client) Shutdown() {
+	// todo: implement proper shutdown
+}
 
 func (c *Client) Name() string {
 	return c.config.Name()

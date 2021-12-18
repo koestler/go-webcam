@@ -7,16 +7,37 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"path"
+	"time"
 )
+
+type ubntState struct {
+	httpClient    *http.Client
+	authenticated bool
+}
+
+func createUbntState() ubntState {
+	jar, _ := cookiejar.New(nil)
+
+	return ubntState{
+		httpClient: &http.Client{
+			Jar: jar,
+			// this tool is designed to serve cameras running on the local network
+			// -> us a relatively short timeout
+			Timeout: 10 * time.Second,
+		},
+		authenticated: false,
+	}
+}
 
 func (c *Client) ubntLogin(force bool) (err error) {
 	if force {
-		c.authenticated = false
+		c.ubnt.authenticated = false
 	}
 
-	if c.authenticated {
+	if c.ubnt.authenticated {
 		return
 	}
 
@@ -41,7 +62,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 		return
 	}
 
-	res, err := c.httpClient.Post(loginUrl.String(), "application/json", bytes.NewBuffer(bodyJson))
+	res, err := c.ubnt.httpClient.Post(loginUrl.String(), "application/json", bytes.NewBuffer(bodyJson))
 	if err != nil {
 		return
 	}
@@ -52,7 +73,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 	}
 
 	// we are authenticated
-	c.authenticated = true
+	c.ubnt.authenticated = true
 	log.Printf("cameraClient[%s]: ubntLogin successful", c.Name())
 
 	return nil
@@ -72,7 +93,7 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	}
 
 	// first attempt
-	res, err := c.httpClient.Get(imageUrl.String())
+	res, err := c.ubnt.httpClient.Get(imageUrl.String())
 	if err != nil {
 		return
 	}
@@ -85,7 +106,7 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 			return
 		}
 
-		res, err = c.httpClient.Get(imageUrl.String())
+		res, err = c.ubnt.httpClient.Get(imageUrl.String())
 		if err != nil {
 			return
 		}
