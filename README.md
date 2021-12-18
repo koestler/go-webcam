@@ -119,7 +119,10 @@ go generate && go build && ./go-webcam
 ### Compile and run inside docker
 ```
 docker build -f docker/Dockerfile.dev -t go-webcam .
-docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro go-webcam
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
+  -v "$(pwd)"/config.yaml:/app/config.yaml:ro \
+  -v "$(pwd)"/auth.passwd:/app/auth.passwd:ro \
+  go-webcam
 ```
 
 ## Production build
