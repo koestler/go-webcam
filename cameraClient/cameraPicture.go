@@ -1,44 +1,40 @@
 package cameraClient
 
 import (
+	"image"
 	"time"
 )
 
 type CameraPicture interface {
-	Img() []byte
+	JpgImg() []byte
+	DecodedImg() image.Image
 	Fetched() time.Time
 	Expires() time.Time
 	Uuid() string
 	Err() error
 }
 
-type SizedCameraPicture interface {
-	CameraPicture
-	Dimension() dimension
-}
-
 type cameraPicture struct {
-	img     []byte
-	fetched time.Time
-	expires time.Time
-	uuid    string
-	err     error
-}
-
-type sizedCameraPicture struct {
-	cameraPicture
-	dimension dimension
+	jpgImg     []byte
+	decodedImg image.Image
+	fetched    time.Time
+	expires    time.Time
+	uuid       string
+	err        error
 }
 
 type cameraPictureMap map[string]*cameraPicture
-type sizedCameraPictureMap map[string]*sizedCameraPicture
 
-func (cp cameraPicture) Img() []byte {
-	return cp.img
+func (cp cameraPicture) JpgImg() []byte {
+	return cp.jpgImg
 }
 
-func (cp sizedCameraPicture) Dimension() dimension {
-	return cp.dimension
+func (cp cameraPicture) DecodedImg() image.Image {
+	return cp.decodedImg
+}
+
+func (cp cameraPicture) Dimension() Dimension {
+	return DimensionOfImage(cp.decodedImg)
 }
 
 func (cp cameraPicture) Fetched() time.Time {
@@ -62,14 +58,6 @@ func (cp cameraPicture) Err() error {
 }
 
 func (m cameraPictureMap) purgeExpired(delay time.Duration) {
-	for k, e := range m {
-		if e.Expired(delay) {
-			delete(m, k)
-		}
-	}
-}
-
-func (m sizedCameraPictureMap) purgeExpired(delay time.Duration) {
 	for k, e := range m {
 		if e.Expired(delay) {
 			delete(m, k)

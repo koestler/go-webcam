@@ -32,11 +32,12 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 		rawImg := c.GetRawImage()
 
 		delayedImage := &cameraPicture{
-			img:     rawImg.Img(),
-			fetched: rawImg.Fetched(),
-			expires: laterTime(rawImg.Expires(), rawImg.Fetched().Add(refreshInterval)),
-			uuid:    rawImg.Uuid(),
-			err:     rawImg.Err(),
+			jpgImg:     rawImg.JpgImg(),
+			decodedImg: rawImg.DecodedImg(),
+			fetched:    rawImg.Fetched(),
+			expires:    laterTime(rawImg.Expires(), rawImg.Fetched().Add(refreshInterval)),
+			uuid:       rawImg.Uuid(),
+			err:        rawImg.Err(),
 		}
 
 		request.response <- delayedImage

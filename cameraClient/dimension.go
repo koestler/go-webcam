@@ -15,14 +15,19 @@ type dimension struct {
 	height int
 }
 
-func dimensionCacheKey(dim Dimension) string {
+func DimensionCacheKey(dim Dimension) string {
 	return strconv.Itoa(dim.Width()) + "x" + strconv.Itoa(dim.Height())
 }
 
-func dimensionFromBound(bounds image.Rectangle) dimension {
+func DimensionOfImage(img image.Image) Dimension {
+	if img == nil {
+		return dimension{0, 0}
+	}
+
+	bounds := img.Bounds()
 	return dimension{
-		width:  bounds.Max.X - bounds.Min.X,
-		height: bounds.Max.Y - bounds.Min.Y,
+		width:  bounds.Dx(),
+		height: bounds.Dy(),
 	}
 }
 

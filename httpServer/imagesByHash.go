@@ -26,7 +26,7 @@ import (
 // @Router /imagesByHash/{hash}.jpg [get]
 // @Security ApiKeyAuth
 func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
-	r.GET("imagesByHash/:filename", func (c *gin.Context) {
+	r.GET("imagesByHash/:filename", func(c *gin.Context) {
 		filename := c.Param("filename")
 		if !hashFileNameMatcher.MatchString(filename) {
 			jsonErrorResponse(c, http.StatusNotFound, fmt.Errorf("invalid filename: '%s", filename))
@@ -36,15 +36,17 @@ func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
 	})
 	log.Printf("httpServer: %simagesByHash/<hash>.jpg -> serve imagesByHash", r.BasePath())
 }
+
 var hashFileNameMatcher = regexp.MustCompilePOSIX(`^[0-9a-f]{40}\.jpg$`)
 
-
-func getImageByHashUrl(cp cameraClient.SizedCameraPicture) string {
+func getImageByHashUrl(cp cameraClient.CameraPicture) string {
 	return fmt.Sprintf("/api/v0/imagesByUuid/%s.jpg", getHash(cp))
 }
 
-func getHash(cp cameraClient.SizedCameraPicture) string {
-	str := fmt.Sprintf("%s-%s-%dx%d", randomPrefix, cp.Uuid(), cp.Dimension().Width(), cp.Dimension().Height())
+func getHash(cp cameraClient.CameraPicture) string {
+	dim := cameraClient.DimensionOfImage(cp.DecodedImg())
+
+	str := fmt.Sprintf("%s-%s-%s", randomPrefix, cp.Uuid(), cameraClient.DimensionCacheKey(dim))
 	log.Printf("str: %s", str)
 	h := sha1.New()
 	h.Write([]byte(str))

@@ -35,9 +35,9 @@ type Client struct {
 	delayedCache cameraPictureMap
 
 	// resized image cache
-	resizeCache                  sizedCameraPictureMap
+	resizeCache                  cameraPictureMap
 	resizeComputeResponseChannel chan resizedImageComputeResponse
-	resizeWaitingResponses       map[string][]chan *sizedCameraPicture
+	resizeWaitingResponses       map[string][]chan *cameraPicture
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -58,9 +58,9 @@ func RunClient(config Config) (*Client, error) {
 		delayedImageReadRequestChannel: make(chan delayedImageReadRequest, 16),
 		resizedImageReadRequestChannel: make(chan resizedImageReadRequest, 16),
 		delayedCache:                   make(cameraPictureMap),
-		resizeCache:                    make(sizedCameraPictureMap),
+		resizeCache:                    make(cameraPictureMap),
 		resizeComputeResponseChannel:   make(chan resizedImageComputeResponse, 16),
-		resizeWaitingResponses:         make(map[string][]chan *sizedCameraPicture),
+		resizeWaitingResponses:         make(map[string][]chan *cameraPicture),
 	}
 
 	go client.rawImageRoutine()
@@ -92,8 +92,8 @@ func (c *Client) GetDelayedImage(refreshInterval time.Duration) CameraPicture {
 	return <-response
 }
 
-func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) SizedCameraPicture {
-	response := make(chan *sizedCameraPicture)
+func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) CameraPicture {
+	response := make(chan *cameraPicture)
 	c.resizedImageReadRequestChannel <- resizedImageReadRequest{
 		resizedImageRequest{refreshInterval, dim},
 		response}

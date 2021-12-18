@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/disintegration/imaging"
+	"image"
 	"image/jpeg"
 	"log"
 	"time"
@@ -17,12 +18,12 @@ type resizedImageRequest struct {
 
 type resizedImageReadRequest struct {
 	resizedImageRequest
-	response chan *sizedCameraPicture
+	response chan *cameraPicture
 }
 
 type resizedImageComputeResponse struct {
 	cacheKey     string
-	resizedImage *sizedCameraPicture
+	resizedImage *cameraPicture
 }
 
 func (c *Client) resizedImageRoutine() {
@@ -49,7 +50,7 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 			c.resizeWaitingResponses[cacheKey] = append(responses, request.response)
 		} else {
 			log.Printf("cameraClient[%s]: resizeWaitingResponses MISS, cacheKey=%s", c.Name(), cacheKey)
-			c.resizeWaitingResponses[cacheKey] = []chan *sizedCameraPicture{request.response}
+			c.resizeWaitingResponses[cacheKey] = []chan *cameraPicture{request.response}
 			go c.resizeOperation(request.resizedImageRequest)
 		}
 	}
@@ -71,24 +72,20 @@ func (c *Client) resizeOperation(request resizedImageRequest) {
 
 	log.Printf("cameraClient[%s]: resizeOperation(%s) start", c.Name(), request.computeCacheKey())
 
-	var img []byte
-	var imgDim dimension
+	var oupJpgImg []byte
+	var oupDecodedImg image.Image
 	err := delayedImg.Err()
 	if err == nil {
-		dim := request.dim
-		img, imgDim, err = imageResize(delayedImg.Img(), dim.Width(), dim.Height())
-		time.Sleep(2 * time.Second)
+		oupJpgImg, oupDecodedImg, err = imageResize(delayedImg.JpgImg(), delayedImg.DecodedImg(), request.dim)
 	}
 
-	resizedImage := &sizedCameraPicture{
-		cameraPicture: cameraPicture{
-			img:     img,
-			fetched: delayedImg.Fetched(),
-			expires: delayedImg.Expires(),
-			uuid:    delayedImg.Uuid(),
-			err:     err,
-		},
-		dimension: imgDim,
+	resizedImage := &cameraPicture{
+		jpgImg:     oupJpgImg,
+		decodedImg: oupDecodedImg,
+		fetched:    delayedImg.Fetched(),
+		expires:    delayedImg.Expires(),
+		uuid:       delayedImg.Uuid(),
+		err:        err,
 	}
 
 	log.Printf("cameraClient[%s]: resizeOperation(%s) finish", c.Name(), request.computeCacheKey())
@@ -99,45 +96,46 @@ func (c *Client) resizeOperation(request resizedImageRequest) {
 }
 
 func (request resizedImageRequest) computeCacheKey() string {
-	return fmt.Sprintf("%s-%s", request.refreshInterval.String(), dimensionCacheKey(request.dim))
+	return fmt.Sprintf("%s-%s", request.refreshInterval.String(), DimensionCacheKey(request.dim))
 }
 
-func imageResize(inpImg []byte, requestedWidth, requestedHeight int) (oupImg []byte, oupDim dimension, err error) {
-	if len(inpImg) == 0 {
-		return inpImg, oupDim, nil
+func imageResize(
+	inpJpgImg []byte, inpDecodedImg image.Image, requestedDim Dimension,
+) (oupJpgImg []byte, oupDecodedImg image.Image, err error) {
+	if inpDecodedImg == nil {
+		return inpJpgImg, inpDecodedImg, nil
 	}
 
-	decodedImg, err := jpeg.Decode(bytes.NewReader(inpImg))
-	if err != nil {
-		return
-	}
-
-	inpDim := dimensionFromBound(decodedImg.Bounds())
-
+	inpDim := DimensionOfImage(inpDecodedImg)
 	var width, height int
-	if requestedWidth*inpDim.height/inpDim.width < requestedHeight {
-		width = minInt(inpDim.width, requestedWidth)
+	if requestedDim.Width()*inpDim.Height()/inpDim.Width() < requestedDim.Height() {
+		width = minInt(inpDim.Width(), requestedDim.Width())
 		height = 0
 	} else {
 		width = 0
-		height = minInt(inpDim.height, requestedHeight)
+		height = minInt(inpDim.Height(), requestedDim.Height())
 	}
 
-	if inpDim.width == width || inpDim.height == height {
-		return inpImg, oupDim, nil
+	if inpDim.Width() == width || inpDim.Height() == height {
+		return inpJpgImg, inpDecodedImg, nil
 	}
 
-	resizedImp := imaging.Resize(decodedImg, width, height, imaging.Box)
+	t := time.Now()
+	resizedImp := imaging.Resize(inpDecodedImg, width, height, imaging.Box)
+	log.Printf("jpg resize took: %s", time.Since(t))
 
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
 
+	t = time.Now()
 	err = jpeg.Encode(w, resizedImp, &jpeg.Options{Quality: 90})
+	log.Printf("jpg encode took: %s", time.Since(t))
+
 	if err != nil {
 		return
 	}
 
-	return b.Bytes(), dimensionFromBound(resizedImp.Bounds()), nil
+	return b.Bytes(), resizedImp, nil
 }
 
 func minInt(x, y int) int {

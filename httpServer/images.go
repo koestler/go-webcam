@@ -76,9 +76,9 @@ func handleCameraImage(
 		maxAge := int(cameraPicture.Expires().Sub(time.Now()).Seconds())
 		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
 
-		c.Data(http.StatusOK, "image/jpeg", cameraPicture.Img())
+		c.Data(http.StatusOK, "image/jpeg", cameraPicture.JpgImg())
 	} else {
-		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture) )
+		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture))
 	}
 }
 
@@ -133,4 +133,3 @@ func isAuthenticated(view *config.ViewConfig, c *gin.Context) bool {
 
 	return view.IsAllowed(user)
 }
-
