@@ -39,17 +39,12 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	if c.raw.img.Expired(-c.Config().ExpireEarly()) {
 		log.Printf("cameraClient[%s]: img image cache MISS", c.Name())
 
-		log.Printf("cameraClient[%s]: GetRawImage start", c.Name())
-
 		rawImg, err := c.ubntGetRawImage()
 		var decodedRawImg image.Image
 
-		t := time.Now()
 		if err == nil {
 			decodedRawImg, err = jpeg.Decode(bytes.NewReader(rawImg))
 		}
-		log.Printf("jpg decode took: %s", time.Since(t))
-		log.Printf("cameraClient[%s]: GetRawImage finis", c.Name())
 
 		now := time.Now()
 		c.raw.img = cameraPicture{

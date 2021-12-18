@@ -44,7 +44,7 @@ func setupImages(r *gin.RouterGroup, env *Environment) {
 
 			relativePath := "images/" + view.Name() + "/" + camera + ".jpg"
 			r.GET(relativePath, func(c *gin.Context) {
-				handleCameraImage(client, view, c)
+				handleCameraImage(client, view, c, env)
 			})
 			log.Printf("httpServer: %s%s -> serve image", r.BasePath(), relativePath)
 		}
@@ -55,6 +55,7 @@ func handleCameraImage(
 	cameraClient *cameraClient.Client,
 	view *config.ViewConfig,
 	c *gin.Context,
+	env *Environment,
 ) {
 	// check authorization
 	if !isAuthenticated(view, c) {
@@ -75,10 +76,9 @@ func handleCameraImage(
 		//  output cache header
 		maxAge := int(cameraPicture.Expires().Sub(time.Now()).Seconds())
 		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
-
 		c.Data(http.StatusOK, "image/jpeg", cameraPicture.JpgImg())
 	} else {
-		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture))
+		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
 	}
 }
 

@@ -10,6 +10,7 @@ type CameraPicture interface {
 	DecodedImg() image.Image
 	Fetched() time.Time
 	Expires() time.Time
+	Expired(delay time.Duration) bool
 	Uuid() string
 	Err() error
 }

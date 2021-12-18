@@ -52,19 +52,19 @@ func (c *Client) Config() Config {
 	return c.config
 }
 
-func (c *Client) GetRawImage() CameraPicture {
+func (c *Client) GetRawImage() *cameraPicture {
 	response := make(chan *cameraPicture)
 	c.raw.readRequestChannel <- rawImageReadRequest{response}
 	return <-response
 }
 
-func (c *Client) GetDelayedImage(refreshInterval time.Duration) CameraPicture {
+func (c *Client) GetDelayedImage(refreshInterval time.Duration) *cameraPicture {
 	response := make(chan *cameraPicture)
 	c.delayed.readRequestChannel <- delayedImageReadRequest{refreshInterval, response}
 	return <-response
 }
 
-func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) CameraPicture {
+func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) *cameraPicture {
 	response := make(chan *cameraPicture)
 	c.resize.readRequestChannel <- resizedImageReadRequest{
 		resizedImageRequest{refreshInterval, dim},

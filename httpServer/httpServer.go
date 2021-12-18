@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
+	"github.com/koestler/go-webcam/hashStore"
 	"log"
 	"net/http"
 	"net/url"
@@ -22,6 +23,7 @@ type Environment struct {
 	Views                    []*config.ViewConfig
 	Auth                     config.AuthConfig
 	CameraClientPoolInstance *cameraClient.ClientPool
+	HashStorage              *hashStore.HashStore
 }
 
 type Config interface {

@@ -63,13 +63,14 @@ type ViewConfig struct {
 }
 
 type HttpServerConfig struct {
-	enabled       bool     // defined automatically if HttpServer section exists
-	bind          string   // optional: defaults to ::1 (ipv6 loopback)
-	port          int      // optional: defaults to 8043
-	logRequests   bool     // optional: default False
-	enableDocs    bool     // optional: default False
-	frontendProxy *url.URL // optional: default deactivated; otherwise an address of the frontend dev-server
-	frontendPath  string   // optional: default deactivated; otherwise set to a path where the frontend build is located
+	enabled       bool          // defined automatically if HttpServer section exists
+	bind          string        // optional: defaults to ::1 (ipv6 loopback)
+	port          int           // optional: defaults to 8043
+	logRequests   bool          // optional: default False
+	enableDocs    bool          // optional: default False
+	frontendProxy *url.URL      // optional: default deactivated; otherwise an address of the frontend dev-server
+	frontendPath  string        // optional: default deactivated; otherwise set to a path where the frontend build is located
+	hashTimeout   time.Duration // optional: default 10s; for how long, after a redirect to a imageByHash is made, the entry is stored
 }
 
 // Read structs are given to yaml for decoding and are slightly less exact in types
@@ -140,4 +141,5 @@ type httpServerConfigRead struct {
 	EnableDocs    *bool  `yaml:"EnableDocs"`
 	FrontendProxy string `yaml:"FrontendProxy"`
 	FrontendPath  string `yaml:"FrontendPath"`
+	HashTimeout   string `yaml:"HashTimeout"`
 }

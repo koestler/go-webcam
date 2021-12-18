@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
+	"github.com/koestler/go-webcam/hashStore"
 	"github.com/koestler/go-webcam/httpServer"
 	"log"
 )
@@ -29,6 +30,7 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 			Views:                    cfg.Views(),
 			Auth:                     cfg.Auth(),
 			CameraClientPoolInstance: cameraClientPoolInstance,
+			HashStorage:              hashStore.Run(cfg.HttpServer()),
 		},
 	)
 }

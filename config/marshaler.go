@@ -125,5 +125,6 @@ func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 		EnableDocs:    &c.enableDocs,
 		FrontendProxy: frontendProxy,
 		FrontendPath:  c.frontendPath,
+		HashTimeout:   c.hashTimeout.String(),
 	}
 }

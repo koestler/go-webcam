@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
-	"github.com/pkg/errors"
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
 	"regexp"
@@ -32,22 +32,30 @@ func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
 			jsonErrorResponse(c, http.StatusNotFound, fmt.Errorf("invalid filename: '%s", filename))
 			return
 		}
-		jsonErrorResponse(c, http.StatusForbidden, errors.New("TODO"))
+		hash := filename[0:40]
+		cp := env.HashStorage.Get(hash)
+		if cp == nil {
+			jsonErrorResponse(c, http.StatusNotFound, fmt.Errorf("unknown hash: '%s", hash))
+			return
+		}
+		maxAge := math.Ceil(env.HashStorage.Config().HashTimeout().Seconds())
+		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
+		c.Data(http.StatusOK, "image/jpeg", cp.JpgImg())
 	})
 	log.Printf("httpServer: %simagesByHash/<hash>.jpg -> serve imagesByHash", r.BasePath())
 }
 
 var hashFileNameMatcher = regexp.MustCompilePOSIX(`^[0-9a-f]{40}\.jpg$`)
 
-func getImageByHashUrl(cp cameraClient.CameraPicture) string {
-	return fmt.Sprintf("/api/v0/imagesByUuid/%s.jpg", getHash(cp))
+func getImageByHashUrl(cp cameraClient.CameraPicture, env *Environment) string {
+	hash := getHash(cp)
+	env.HashStorage.Set(hash, cp)
+	return fmt.Sprintf("/api/v0/imagesByHash/%s.jpg", hash)
 }
 
 func getHash(cp cameraClient.CameraPicture) string {
-	dim := cameraClient.DimensionOfImage(cp.DecodedImg())
-
-	str := fmt.Sprintf("%s-%s-%s", randomPrefix, cp.Uuid(), cameraClient.DimensionCacheKey(dim))
-	log.Printf("str: %s", str)
+	dimKey := cameraClient.DimensionCacheKey(cameraClient.DimensionOfImage(cp.DecodedImg()))
+	str := fmt.Sprintf("%s-%s-%s", randomPrefix, cp.Uuid(), dimKey)
 	h := sha1.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))

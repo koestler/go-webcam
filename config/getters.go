@@ -208,6 +208,10 @@ func (c HttpServerConfig) FrontendPath() string {
 	return c.frontendPath
 }
 
+func (c HttpServerConfig) HashTimeout() time.Duration {
+	return c.hashTimeout
+}
+
 func (c Config) GetViewNames() (ret []string) {
 	ret = []string{}
 	for _, v := range c.Views() {

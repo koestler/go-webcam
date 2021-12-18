@@ -87,8 +87,6 @@ func (c *Client) handleResizeComputeResponse(response resizedImageComputeRespons
 func (c *Client) resizeOperation(request resizedImageRequest) {
 	delayedImg := c.GetDelayedImage(request.refreshInterval)
 
-	log.Printf("cameraClient[%s]: resizeOperation(%s) start", c.Name(), request.computeCacheKey())
-
 	var oupJpgImg []byte
 	var oupDecodedImg image.Image
 	err := delayedImg.Err()
@@ -105,7 +103,6 @@ func (c *Client) resizeOperation(request resizedImageRequest) {
 		err:        err,
 	}
 
-	log.Printf("cameraClient[%s]: resizeOperation(%s) finish", c.Name(), request.computeCacheKey())
 	c.resize.computeResponseChannel <- resizedImageComputeResponse{
 		request.computeCacheKey(),
 		resizedImage,
@@ -137,16 +134,12 @@ func imageResize(
 		return inpJpgImg, inpDecodedImg, nil
 	}
 
-	t := time.Now()
 	resizedImp := imaging.Resize(inpDecodedImg, width, height, imaging.Box)
-	log.Printf("jpg resize took: %s", time.Since(t))
 
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
 
-	t = time.Now()
 	err = jpeg.Encode(w, resizedImp, &jpeg.Options{Quality: 90})
-	log.Printf("jpg encode took: %s", time.Since(t))
 
 	if err != nil {
 		return

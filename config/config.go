@@ -188,6 +188,17 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		ret.frontendPath = c.FrontendPath
 	}
 
+	if len(c.HashTimeout) < 1 {
+		// use default 10s
+		ret.hashTimeout = 10 * time.Second
+	} else if hashTimeout, e := time.ParseDuration(c.HashTimeout); e != nil {
+		err = append(err, fmt.Errorf("HttpServerConfig->HashTimeout='%s' parse error: %s", c.HashTimeout, e))
+	} else if hashTimeout < 0 {
+		err = append(err, fmt.Errorf("HttpServerConfig->HashTimeout='%s' must be positive", c.HashTimeout))
+	} else {
+		ret.hashTimeout = hashTimeout
+	}
+
 	return
 }
 
@@ -300,7 +311,7 @@ func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, e
 	}
 
 	if len(c.RefreshInterval) < 1 {
-		// use default 0
+		// use default 200ms
 		ret.refreshInterval = 200 * time.Millisecond
 	} else if refreshInterval, e := time.ParseDuration(c.RefreshInterval); e != nil {
 		err = append(err, fmt.Errorf("CameraConfig->%s->RefreshInterval='%s' parse error: %s",
