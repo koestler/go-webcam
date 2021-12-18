@@ -19,25 +19,14 @@ type Client struct {
 	// configuration
 	config Config
 
-	// interfacing
-	rawImageReadRequestChannel     chan rawImageReadRequest
-	delayedImageReadRequestChannel chan delayedImageReadRequest
-	resizedImageReadRequestChannel chan resizedImageReadRequest
-
 	// fetching
 	httpClient    *http.Client
 	authenticated bool
 
-	// raw image
-	raw cameraPicture
-
-	// delayed image cache
-	delayedCache cameraPictureMap
-
-	// resized image cache
-	resizeCache                  cameraPictureMap
-	resizeComputeResponseChannel chan resizedImageComputeResponse
-	resizeWaitingResponses       map[string][]chan *cameraPicture
+	// processing
+	raw     rawState
+	delayed delayedState
+	resize  resizeState
 }
 
 func RunClient(config Config) (*Client, error) {
@@ -54,13 +43,9 @@ func RunClient(config Config) (*Client, error) {
 			// -> us a relatively short timeout
 			Timeout: 10 * time.Second,
 		},
-		rawImageReadRequestChannel:     make(chan rawImageReadRequest, 16),
-		delayedImageReadRequestChannel: make(chan delayedImageReadRequest, 16),
-		resizedImageReadRequestChannel: make(chan resizedImageReadRequest, 16),
-		delayedCache:                   make(cameraPictureMap),
-		resizeCache:                    make(cameraPictureMap),
-		resizeComputeResponseChannel:   make(chan resizedImageComputeResponse, 16),
-		resizeWaitingResponses:         make(map[string][]chan *cameraPicture),
+		raw:     createRawState(),
+		delayed: createDelayedState(),
+		resize:  createResizeState(),
 	}
 
 	go client.rawImageRoutine()
@@ -82,19 +67,19 @@ func (c *Client) Config() Config {
 
 func (c *Client) GetRawImage() CameraPicture {
 	response := make(chan *cameraPicture)
-	c.rawImageReadRequestChannel <- rawImageReadRequest{response}
+	c.raw.readRequestChannel <- rawImageReadRequest{response}
 	return <-response
 }
 
 func (c *Client) GetDelayedImage(refreshInterval time.Duration) CameraPicture {
 	response := make(chan *cameraPicture)
-	c.delayedImageReadRequestChannel <- delayedImageReadRequest{refreshInterval, response}
+	c.delayed.readRequestChannel <- delayedImageReadRequest{refreshInterval, response}
 	return <-response
 }
 
 func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) CameraPicture {
 	response := make(chan *cameraPicture)
-	c.resizedImageReadRequestChannel <- resizedImageReadRequest{
+	c.resize.readRequestChannel <- resizedImageReadRequest{
 		resizedImageRequest{refreshInterval, dim},
 		response}
 	return <-response

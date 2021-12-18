@@ -9,13 +9,26 @@ import (
 	"time"
 )
 
+type rawState struct {
+	readRequestChannel chan rawImageReadRequest
+
+	// img image
+	img cameraPicture
+}
+
 type rawImageReadRequest struct {
 	response chan *cameraPicture
 }
 
+func createRawState() rawState {
+	return rawState{
+		readRequestChannel: make(chan rawImageReadRequest, 16),
+	}
+}
+
 func (c *Client) rawImageRoutine() {
 	for {
-		readRequest := <-c.rawImageReadRequestChannel
+		readRequest := <-c.raw.readRequestChannel
 		// per camera, maximum one fetch operation is in progress
 		c.handleRawImageReadRequest(readRequest)
 	}
@@ -23,14 +36,12 @@ func (c *Client) rawImageRoutine() {
 
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
-	if c.raw.Expired(-c.Config().ExpireEarly()) {
-		log.Printf("cameraClient[%s]: raw image cache MISS", c.Name())
+	if c.raw.img.Expired(-c.Config().ExpireEarly()) {
+		log.Printf("cameraClient[%s]: img image cache MISS", c.Name())
 
 		log.Printf("cameraClient[%s]: GetRawImage start", c.Name())
 
 		rawImg, err := c.ubntGetRawImage()
-		time.Sleep(time.Second)
-
 		var decodedRawImg image.Image
 
 		t := time.Now()
@@ -41,7 +52,7 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 		log.Printf("cameraClient[%s]: GetRawImage finis", c.Name())
 
 		now := time.Now()
-		c.raw = cameraPicture{
+		c.raw.img = cameraPicture{
 			jpgImg:     rawImg,
 			decodedImg: decodedRawImg,
 			fetched:    now,
@@ -50,8 +61,8 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 			err:        err,
 		}
 	} else {
-		log.Printf("cameraClient[%s]: raw image cache HIT", c.Name())
+		log.Printf("cameraClient[%s]: img image cache HIT, expiresIn=%s", c.Name(), time.Until(c.raw.img.expires))
 	}
 
-	request.response <- &c.raw
+	request.response <- &c.raw.img
 }

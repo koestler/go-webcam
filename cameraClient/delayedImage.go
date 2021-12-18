@@ -5,14 +5,26 @@ import (
 	"time"
 )
 
+type delayedState struct {
+	readRequestChannel chan delayedImageReadRequest
+	cache              cameraPictureMap
+}
+
 type delayedImageReadRequest struct {
 	refreshInterval time.Duration
 	response        chan *cameraPicture
 }
 
+func createDelayedState() delayedState {
+	return delayedState{
+		readRequestChannel: make(chan delayedImageReadRequest, 16),
+		cache:              make(cameraPictureMap),
+	}
+}
+
 func (c *Client) delayedImageRoutine() {
 	for {
-		readRequest := <-c.delayedImageReadRequestChannel
+		readRequest := <-c.delayed.readRequestChannel
 		c.handleDelayedImageReadRequest(readRequest)
 	}
 }
@@ -21,10 +33,14 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 	refreshInterval := request.refreshInterval
 	cacheKey := refreshInterval.String()
 
-	c.delayedCache.purgeExpired(-c.Config().ExpireEarly())
+	c.delayed.cache.purgeExpired(-c.Config().ExpireEarly())
 
-	if cp, ok := c.delayedCache[cacheKey]; ok {
-		log.Printf("cameraClient[%s]: delayed image cache HIT, cacheKey=%s", c.Name(), cacheKey)
+	if cp, ok := c.delayed.cache[cacheKey]; ok {
+		log.Printf(
+			"cameraClient[%s]: delayed image cache HIT, cacheKey=%s, expiresIn=%s",
+			c.Name(), cacheKey,
+			time.Until(cp.expires),
+		)
 		request.response <- cp
 	} else {
 		log.Printf("cameraClient[%s]: delayed image cache MISS, cacheKey=%s", c.Name(), cacheKey)
@@ -41,7 +57,7 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 		}
 
 		request.response <- delayedImage
-		c.delayedCache[cacheKey] = delayedImage
+		c.delayed.cache[cacheKey] = delayedImage
 	}
 }
 

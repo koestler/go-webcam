@@ -11,6 +11,14 @@ import (
 	"time"
 )
 
+type resizeState struct {
+	readRequestChannel chan resizedImageReadRequest
+
+	cache                  cameraPictureMap
+	computeResponseChannel chan resizedImageComputeResponse
+	waitingResponses       map[string][]chan *cameraPicture
+}
+
 type resizedImageRequest struct {
 	refreshInterval time.Duration
 	dim             Dimension
@@ -26,12 +34,21 @@ type resizedImageComputeResponse struct {
 	resizedImage *cameraPicture
 }
 
+func createResizeState() resizeState {
+	return resizeState{
+		readRequestChannel:     make(chan resizedImageReadRequest, 16),
+		cache:                  make(cameraPictureMap),
+		computeResponseChannel: make(chan resizedImageComputeResponse, 16),
+		waitingResponses:       make(map[string][]chan *cameraPicture),
+	}
+}
+
 func (c *Client) resizedImageRoutine() {
 	for {
 		select {
-		case readRequest := <-c.resizedImageReadRequestChannel:
+		case readRequest := <-c.resize.readRequestChannel:
 			c.handleResizedImageReadRequest(readRequest)
-		case computeResponse := <-c.resizeComputeResponseChannel:
+		case computeResponse := <-c.resize.computeResponseChannel:
 			c.handleResizeComputeResponse(computeResponse)
 		}
 	}
@@ -39,18 +56,18 @@ func (c *Client) resizedImageRoutine() {
 
 func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) {
 	cacheKey := request.computeCacheKey()
-	c.resizeCache.purgeExpired(-c.Config().ExpireEarly())
-	if cp, ok := c.resizeCache[cacheKey]; ok {
-		log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s", c.Name(), cacheKey)
+	c.resize.cache.purgeExpired(-c.Config().ExpireEarly())
+	if cp, ok := c.resize.cache[cacheKey]; ok {
+		log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s, expiresIn=%s", c.Name(), cacheKey, time.Until(cp.expires))
 		request.response <- cp
 	} else {
 		log.Printf("cameraClient[%s]: resize image cache MISS, cacheKey=%s", c.Name(), cacheKey)
-		if responses, ok := c.resizeWaitingResponses[cacheKey]; ok {
-			log.Printf("cameraClient[%s]: resizeWaitingResponses HIT, cacheKey=%s", c.Name(), cacheKey)
-			c.resizeWaitingResponses[cacheKey] = append(responses, request.response)
+		if responses, ok := c.resize.waitingResponses[cacheKey]; ok {
+			log.Printf("cameraClient[%s]: waitingResponses HIT, cacheKey=%s", c.Name(), cacheKey)
+			c.resize.waitingResponses[cacheKey] = append(responses, request.response)
 		} else {
-			log.Printf("cameraClient[%s]: resizeWaitingResponses MISS, cacheKey=%s", c.Name(), cacheKey)
-			c.resizeWaitingResponses[cacheKey] = []chan *cameraPicture{request.response}
+			log.Printf("cameraClient[%s]: waitingResponses MISS, cacheKey=%s", c.Name(), cacheKey)
+			c.resize.waitingResponses[cacheKey] = []chan *cameraPicture{request.response}
 			go c.resizeOperation(request.resizedImageRequest)
 		}
 	}
@@ -58,13 +75,13 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 
 func (c *Client) handleResizeComputeResponse(response resizedImageComputeResponse) {
 	// response to all pending read requests
-	for _, r := range c.resizeWaitingResponses[response.cacheKey] {
+	for _, r := range c.resize.waitingResponses[response.cacheKey] {
 		r <- response.resizedImage
 	}
-	delete(c.resizeWaitingResponses, response.cacheKey)
+	delete(c.resize.waitingResponses, response.cacheKey)
 
 	// add new image to cache
-	c.resizeCache[response.cacheKey] = response.resizedImage
+	c.resize.cache[response.cacheKey] = response.resizedImage
 }
 
 func (c *Client) resizeOperation(request resizedImageRequest) {
@@ -89,7 +106,7 @@ func (c *Client) resizeOperation(request resizedImageRequest) {
 	}
 
 	log.Printf("cameraClient[%s]: resizeOperation(%s) finish", c.Name(), request.computeCacheKey())
-	c.resizeComputeResponseChannel <- resizedImageComputeResponse{
+	c.resize.computeResponseChannel <- resizedImageComputeResponse{
 		request.computeCacheKey(),
 		resizedImage,
 	}
