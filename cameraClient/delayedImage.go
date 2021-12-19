@@ -36,14 +36,18 @@ func (c *Client) handleDelayedImageReadRequest(request delayedImageReadRequest) 
 	c.delayed.cache.purgeExpired(-c.Config().ExpireEarly())
 
 	if cp, ok := c.delayed.cache[cacheKey]; ok {
-		log.Printf(
-			"cameraClient[%s]: delayed image cache HIT, cacheKey=%s, expiresIn=%s",
-			c.Name(), cacheKey,
-			time.Until(cp.expires),
-		)
+		if c.Config().LogDebug() {
+			log.Printf(
+				"cameraClient[%s]: delayed image cache HIT, cacheKey=%s, expiresIn=%s",
+				c.Name(), cacheKey,
+				time.Until(cp.expires),
+			)
+		}
 		request.response <- cp
 	} else {
-		log.Printf("cameraClient[%s]: delayed image cache MISS, cacheKey=%s", c.Name(), cacheKey)
+		if c.Config().LogDebug() {
+			log.Printf("cameraClient[%s]: delayed image cache MISS, cacheKey=%s", c.Name(), cacheKey)
+		}
 
 		rawImg := c.GetRawImage()
 

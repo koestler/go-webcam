@@ -25,7 +25,7 @@ import (
 // @Failure 404 {object} ErrorResponse
 // @Router /imagesByHash/{hash}.jpg [get]
 // @Security ApiKeyAuth
-func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
+func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
 	r.GET("imagesByHash/:filename", func(c *gin.Context) {
 		filename := c.Param("filename")
 		if !hashFileNameMatcher.MatchString(filename) {
@@ -42,7 +42,9 @@ func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
 		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
 		c.Data(http.StatusOK, "image/jpeg", cp.JpgImg())
 	})
-	log.Printf("httpServer: %simagesByHash/<hash>.jpg -> serve imagesByHash", r.BasePath())
+	if config.LogConfig() {
+		log.Printf("httpServer: %simagesByHash/<hash>.jpg -> serve imagesByHash", r.BasePath())
+	}
 }
 
 var hashFileNameMatcher = regexp.MustCompilePOSIX(`^[0-9a-f]{40}\.jpg$`)

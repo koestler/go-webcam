@@ -19,7 +19,9 @@ func setupFrontend(engine *gin.Engine, config Config) {
 			proxy := httputil.NewSingleHostReverseProxy(frontendUrl)
 			proxy.ServeHTTP(c.Writer, c.Request)
 		})
-		log.Printf("httpServer: /* -> proxy %s*", frontendUrl)
+		if config.LogConfig() {
+			log.Printf("httpServer: /* -> proxy %s*", frontendUrl)
+		}
 	} else {
 		frontendPath := path.Clean(config.FrontendPath())
 
@@ -68,5 +70,7 @@ func serveStatic(engine *gin.Engine, config Config, route, filePath string) {
 		// c.File calls http.serveContent which sets / checks Last-Modified / If-Modified-Since
 		c.File(filePath)
 	})
-	log.Printf("httpServer: %s -> serve static %s", route, filePath)
+	if config.LogConfig() {
+		log.Printf("httpServer: %s -> serve static %s", route, filePath)
+	}
 }

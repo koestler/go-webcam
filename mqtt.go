@@ -13,7 +13,7 @@ func runMqttClient(
 	initiateShutdown chan<- error,
 ) map[string]*mqttClient.MqttClient {
 	mqtt.ERROR = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
-	if cfg.LogMqttDebug() {
+	if cfg.LogDebug() {
 		mqtt.DEBUG = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
 	}
 

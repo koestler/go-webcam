@@ -25,6 +25,8 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 		httpServerConfig{
 			cfg.HttpServer(),
 			cfg.GetViewNames(),
+			cfg.LogConfig(),
+			cfg.LogDebug(),
 		},
 		&httpServer.Environment{
 			ProjectTitle:             cfg.ProjectTitle(),
@@ -39,8 +41,18 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 type httpServerConfig struct {
 	config.HttpServerConfig
 	viewNames []string
+	logConfig bool
+	logDebug  bool
 }
 
 func (c httpServerConfig) GetViewNames() []string {
 	return c.viewNames
+}
+
+func (c httpServerConfig) LogConfig() bool {
+	return c.logConfig
+}
+
+func (c httpServerConfig) LogDebug() bool {
+	return c.logDebug
 }

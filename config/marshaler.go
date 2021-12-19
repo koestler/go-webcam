@@ -41,7 +41,7 @@ func (c Config) MarshalYAML() (interface{}, error) {
 		}(),
 		LogConfig:      &c.logConfig,
 		LogWorkerStart: &c.logWorkerStart,
-		LogMqttDebug:   &c.logMqttDebug,
+		LogDebug:       &c.logDebug,
 		ProjectTitle:   c.projectTitle,
 	}, nil
 }

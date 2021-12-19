@@ -14,7 +14,7 @@ type Config struct {
 	httpServer     HttpServerConfig    `yaml:"HttpServer"`     // optional: default Disabled
 	logConfig      bool                `yaml:"LogConfig"`      // optional: default False
 	logWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
-	logMqttDebug   bool                `yaml:"LogMqttDebug"`   // optional: default False
+	logDebug       bool                `yaml:"LogDebug"`       // optional: default False
 	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
 }
 
@@ -85,7 +85,7 @@ type configRead struct {
 	HttpServer     *httpServerConfigRead   `yaml:"HttpServer"`
 	LogConfig      *bool                   `yaml:"LogConfig"`
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
-	LogMqttDebug   *bool                   `yaml:"LogMqttDebug"`
+	LogDebug       *bool                   `yaml:"LogDebug"`
 	ProjectTitle   string                  `yaml:"ProjectTitle"`
 }
 

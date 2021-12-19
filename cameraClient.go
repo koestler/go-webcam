@@ -15,24 +15,29 @@ func runCameraClient(
 
 	countStarted := 0
 
-	for _, cameraClientConfig := range cfg.Cameras() {
+	for _, camera := range cfg.Cameras() {
 		if cfg.LogWorkerStart() {
 			log.Printf(
 				"cameraClient[%s]: start: address='%s'",
-				cameraClientConfig.Name(),
-				cameraClientConfig.Address(),
+				camera.Name(),
+				camera.Address(),
 			)
 		}
 
-		if client, err := cameraClient.RunClient(cameraClientConfig); err != nil {
-			log.Printf("cameraClient[%s]: start failed: %s", cameraClientConfig.Name(), err)
+		cameraConfig := cameraClientConfig{
+			CameraConfig: *camera,
+			logDebug:     cfg.LogDebug(),
+		}
+
+		if client, err := cameraClient.RunClient(&cameraConfig); err != nil {
+			log.Printf("cameraClient[%s]: start failed: %s", camera.Name(), err)
 		} else {
 			cameraClientPoolInstance.AddClient(client)
 			countStarted += 1
 			if cfg.LogWorkerStart() {
 				log.Printf(
 					"cameraClient[%s]: started",
-					cameraClientConfig.Name(),
+					camera.Name(),
 				)
 			}
 		}
@@ -43,4 +48,13 @@ func runCameraClient(
 	}
 
 	return cameraClientPoolInstance
+}
+
+type cameraClientConfig struct {
+	config.CameraConfig
+	logDebug bool
+}
+
+func (cc *cameraClientConfig) LogDebug() bool {
+	return cc.logDebug
 }

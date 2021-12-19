@@ -67,5 +67,7 @@ func setupConfig(r *gin.RouterGroup, cfg Config, env *Environment) {
 		setCacheControlPublic(c, cfg.ConfigExpires())
 		jsonGetResponse(c, response)
 	})
-	log.Printf("httpServer: %sconfig -> serve config", r.BasePath())
+	if cfg.LogConfig() {
+		log.Printf("httpServer: %sconfig -> serve config", r.BasePath())
+	}
 }

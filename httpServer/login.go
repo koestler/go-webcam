@@ -34,9 +34,9 @@ type loginResponse struct {
 // @Failure 500 {object} ErrorResponse
 // @Failure 503 {object} ErrorResponse
 // @Router /login [post]
-func setupLogin(r *gin.RouterGroup, env *Environment) {
+func setupLogin(r *gin.RouterGroup, config Config, env *Environment) {
 	if !env.Auth.Enabled() {
-		disableLogin(r)
+		disableLogin(r, config)
 		return
 	}
 
@@ -44,7 +44,7 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 	authChecker, err := htpasswd.New(env.Auth.HtaccessFile(), htpasswd.DefaultSystems, nil)
 	if err != nil {
 		log.Printf("httpServer: cannot load htaccess file: %s", err)
-		disableLogin(r)
+		disableLogin(r, config)
 		return
 	}
 
@@ -55,7 +55,7 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 			return
 		}
 
-		reloadAuthChecker(authChecker)
+		reloadAuthChecker(authChecker, config)
 		if !authChecker.Match(req.User, req.Password) {
 			jsonErrorResponse(c, http.StatusUnauthorized, errors.New("Invalid credentials"))
 			return
@@ -77,20 +77,24 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 
 		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, User: req.User, AllowedViews: allowedViews})
 	})
-	log.Printf("httpServer: %slogin -> serve login", r.BasePath())
+	if config.LogConfig() {
+		log.Printf("httpServer: %slogin -> serve login", r.BasePath())
+	}
 }
 
-func disableLogin(r *gin.RouterGroup) {
+func disableLogin(r *gin.RouterGroup, config Config) {
 	r.POST("login", func(c *gin.Context) {
 		jsonErrorResponse(c, http.StatusServiceUnavailable, errors.New("Authentication module is disabled"))
 	})
-	log.Printf("httpServer: %slogin -> login disabled", r.BasePath())
+	if config.LogConfig() {
+		log.Printf("httpServer: %slogin -> login disabled", r.BasePath())
+	}
 }
 
 var sem = semaphore.NewWeighted(1)
 var lastAuthReload time.Time
 
-func reloadAuthChecker(file *htpasswd.File) {
+func reloadAuthChecker(file *htpasswd.File, config Config) {
 	// make sure this code run only once at a time
 	if !sem.TryAcquire(1) {
 		return
@@ -112,5 +116,7 @@ func reloadAuthChecker(file *htpasswd.File) {
 		log.Printf("httpServer: login: error while reading htaccess file: %s", err)
 	}
 
-	log.Printf("httpServer: login: auth reloaded")
+	if config.LogDebug() {
+		log.Printf("httpServer: login: auth file reloaded")
+	}
 }

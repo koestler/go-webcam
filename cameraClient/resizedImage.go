@@ -58,15 +58,23 @@ func (c *Client) handleResizedImageReadRequest(request resizedImageReadRequest) 
 	cacheKey := request.computeCacheKey()
 	c.resize.cache.purgeExpired(-c.Config().ExpireEarly())
 	if cp, ok := c.resize.cache[cacheKey]; ok {
-		log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s, expiresIn=%s", c.Name(), cacheKey, time.Until(cp.expires))
+		if c.Config().LogDebug() {
+			log.Printf("cameraClient[%s]: resize image cache HIT, cacheKey=%s, expiresIn=%s", c.Name(), cacheKey, time.Until(cp.expires))
+		}
 		request.response <- cp
 	} else {
-		log.Printf("cameraClient[%s]: resize image cache MISS, cacheKey=%s", c.Name(), cacheKey)
+		if c.Config().LogDebug() {
+			log.Printf("cameraClient[%s]: resize image cache MISS, cacheKey=%s", c.Name(), cacheKey)
+		}
 		if responses, ok := c.resize.waitingResponses[cacheKey]; ok {
-			log.Printf("cameraClient[%s]: waitingResponses HIT, cacheKey=%s", c.Name(), cacheKey)
+			if c.Config().LogDebug() {
+				log.Printf("cameraClient[%s]: waitingResponses HIT, cacheKey=%s", c.Name(), cacheKey)
+			}
 			c.resize.waitingResponses[cacheKey] = append(responses, request.response)
 		} else {
-			log.Printf("cameraClient[%s]: waitingResponses MISS, cacheKey=%s", c.Name(), cacheKey)
+			if c.Config().LogDebug() {
+				log.Printf("cameraClient[%s]: waitingResponses MISS, cacheKey=%s", c.Name(), cacheKey)
+			}
 			c.resize.waitingResponses[cacheKey] = []chan *cameraPicture{request.response}
 			go c.resizeOperation(request.resizedImageRequest)
 		}

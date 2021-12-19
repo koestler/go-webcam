@@ -21,7 +21,7 @@ func debugHeaderMiddleware() gin.HandlerFunc {
 				filteredHeaders[k] = v
 			}
 		}
-		log.Printf("httpDebug, %s, request headers: %v", c.Request.RequestURI, filteredHeaders)
+		log.Printf("httpServer: %s, request headers: %v", c.Request.RequestURI, filteredHeaders)
 		c.Next()
 	}
 }

@@ -74,7 +74,9 @@ func (c *Client) ubntLogin(force bool) (err error) {
 
 	// we are authenticated
 	c.ubnt.authenticated = true
-	log.Printf("cameraClient[%s]: ubntLogin successful", c.Name())
+	if c.Config().LogDebug() {
+		log.Printf("cameraClient[%s]: ubntLogin successful", c.Name())
+	}
 
 	return nil
 }

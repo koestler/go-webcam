@@ -37,7 +37,9 @@ func (c *Client) rawImageRoutine() {
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 	// fetch new image every RefreshInterval
 	if c.raw.img.Expired(-c.Config().ExpireEarly()) {
-		log.Printf("cameraClient[%s]: img image cache MISS", c.Name())
+		if c.Config().LogDebug() {
+			log.Printf("cameraClient[%s]: raw image cache MISS", c.Name())
+		}
 
 		rawImg, err := c.ubntGetRawImage()
 		var decodedRawImg image.Image
@@ -55,8 +57,8 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 			uuid:       uuid.New().String(),
 			err:        err,
 		}
-	} else {
-		log.Printf("cameraClient[%s]: img image cache HIT, expiresIn=%s", c.Name(), time.Until(c.raw.img.expires))
+	} else if c.Config().LogDebug() {
+		log.Printf("cameraClient[%s]: raw image cache HIT, expiresIn=%s", c.Name(), time.Until(c.raw.img.expires))
 	}
 
 	request.response <- &c.raw.img

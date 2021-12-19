@@ -46,7 +46,7 @@ default value.
 Version: 0                                                 # mandatory, version is always 0 (reserved for later use)
 LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
 LogWorkerStart: True                                       # optional, default False, write log for starting / stoping of workers
-LogMqttDebug: False                                        # optional, default False, enable debug output of the mqtt module
+LogDebug: False                                            # optional, default False, enable debug output
 HttpServer:                                                # optional, default Disabled, start the http server
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
   Port: 80                                                 # optional, default 8042

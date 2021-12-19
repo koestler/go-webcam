@@ -30,6 +30,8 @@ type Config interface {
 	Bind() string
 	Port() int
 	LogRequests() bool
+	LogDebug() bool
+	LogConfig() bool
 	EnableDocs() bool
 	FrontendProxy() *url.URL
 	FrontendPath() string
@@ -46,7 +48,9 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 	engine.Use(authJwtMiddleware(env))
-	engine.Use(debugHeaderMiddleware())
+	if config.LogDebug() {
+		engine.Use(debugHeaderMiddleware())
+	}
 
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
@@ -60,7 +64,9 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 
 	go func() {
-		log.Printf("httpServer: listening on %v", server.Addr)
+		if config.LogDebug() {
+			log.Printf("httpServer: listening on %v", server.Addr)
+		}
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
 			log.Printf("httpServer: stopped due to error: %s", err)
 		}
@@ -84,7 +90,7 @@ func (s *HttpServer) Shutdown() {
 func addApiV0Routes(r *gin.Engine, config Config, env *Environment) {
 	v0 := r.Group("/api/v0/")
 	setupConfig(v0, config, env)
-	setupLogin(v0, env)
-	setupImagesByHash(v0, env)
-	setupImages(v0, env)
+	setupLogin(v0, config, env)
+	setupImagesByHash(v0, config, env)
+	setupImages(v0, config, env)
 }

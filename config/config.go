@@ -85,8 +85,8 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 		ret.logWorkerStart = true
 	}
 
-	if c.LogMqttDebug != nil && *c.LogMqttDebug {
-		ret.logMqttDebug = true
+	if c.LogDebug != nil && *c.LogDebug {
+		ret.logDebug = true
 	}
 
 	if len(c.ProjectTitle) > 0 {

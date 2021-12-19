@@ -2,7 +2,6 @@ package hashStore
 
 import (
 	"github.com/koestler/go-webcam/cameraClient"
-	"log"
 	"time"
 )
 
@@ -83,7 +82,6 @@ func (h *HashStore) worker() {
 	for {
 		select {
 		case setRequest := <-h.setChannel:
-			log.Printf("hashStore set: %s", setRequest.hash)
 			if v, ok := h.storage[setRequest.hash]; ok {
 				v.touched = time.Now()
 			} else {
@@ -94,7 +92,6 @@ func (h *HashStore) worker() {
 			}
 			close(setRequest.response)
 		case getRequest := <-h.getChannel:
-			log.Printf("hashStore get: %s", getRequest.hash)
 			if v, ok := h.storage[getRequest.hash]; ok {
 				getRequest.response <- v.cp
 			} else {
@@ -104,7 +101,6 @@ func (h *HashStore) worker() {
 			now := time.Now()
 			for k, v := range h.storage {
 				if v.touched.Add(h.config.HashTimeout()).Before(now) {
-					log.Printf("hashStore cleanup: %s", k)
 					delete(h.storage, k)
 				}
 			}

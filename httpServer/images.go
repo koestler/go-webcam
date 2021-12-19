@@ -29,7 +29,7 @@ import (
 // @Failure 404 {object} ErrorResponse
 // @Router /images/{viewName}/{cameraName}.jpg [get]
 // @Security ApiKeyAuth
-func setupImages(r *gin.RouterGroup, env *Environment) {
+func setupImages(r *gin.RouterGroup, config Config, env *Environment) {
 	// add dynamic routes
 	for _, v := range env.Views {
 		view := v
@@ -45,7 +45,9 @@ func setupImages(r *gin.RouterGroup, env *Environment) {
 			r.GET(relativePath, func(c *gin.Context) {
 				handleCameraImage(client, view, c, env)
 			})
-			log.Printf("httpServer: %s%s -> serve image", r.BasePath(), relativePath)
+			if config.LogConfig() {
+				log.Printf("httpServer: %s%s -> serve image", r.BasePath(), relativePath)
+			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
 Version: 0                                                 # mandatory, version is always 0 (reserved for later use)
-LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
-LogWorkerStart: True                                       # optional, default False, write log for starting / stoping of workers
-LogMqttDebug: True                                         # optional, default False, enable debug output of the mqtt module
+LogConfig: True                                           # optional, default False, outputs the configuration including defaults on startup
+LogWorkerStart: True                                      # optional, default False, write log for starting / stopping of workers
+LogDebug: False                                             # optional, default False, enable debug output of the mqtt module
 ProjectTitle: go-webcam Development Project                # optional: default go-webcam
 
 Auth:

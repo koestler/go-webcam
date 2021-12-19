@@ -37,8 +37,8 @@ func (c Config) LogWorkerStart() bool {
 	return c.logWorkerStart
 }
 
-func (c Config) LogMqttDebug() bool {
-	return c.logMqttDebug
+func (c Config) LogDebug() bool {
+	return c.logDebug
 }
 
 func (c Config) ProjectTitle() string {

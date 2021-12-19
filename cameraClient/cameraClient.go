@@ -11,6 +11,7 @@ type Config interface {
 	Password() string
 	RefreshInterval() time.Duration
 	ExpireEarly() time.Duration
+	LogDebug() bool
 }
 
 type Client struct {
@@ -24,7 +25,6 @@ type Client struct {
 }
 
 func RunClient(config Config) (*Client, error) {
-
 	client := &Client{
 		config:  config,
 		ubnt:    createUbntState(),
