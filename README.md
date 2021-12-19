@@ -135,15 +135,17 @@ docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
 ## Production build
 ### Install dependencies
 Buildx must be installed: https://docs.docker.com/buildx/working-with-buildx/
-On Linux, binfmt_misc needs to be installed:
+On Linux, binfmt_misc needs to be installed and a builder needs to be created:
 ```
 docker run --privileged --rm tonistiigi/binfmt --install all
+docker buildx create --name mbuilder
+docker buildx use mbuilder
 ```
 
 ## Local Production Build
 ```
-docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
 docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
 Test it:
@@ -153,7 +155,7 @@ docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:
 
 ## Dockerhub Production amd64/arm64 Build
 ```
-docker buildx build --no-cache --push --platform linux/arm64,linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --push --platform linux/arm64,linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
 # License
