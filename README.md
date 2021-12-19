@@ -118,7 +118,7 @@ go generate && go build && ./go-webcam
 
 ### Compile and run inside docker
 ```
-docker build -f docker/Dockerfile.dev -t go-webcam .
+docker build -f docker/Dockerfile -t go-webcam .
 docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
   -v "$(pwd)"/config.yaml:/config.yaml:ro \
   -v "$(pwd)"/auth.passwd:/auth.passwd:ro \
@@ -144,10 +144,9 @@ Test it:
 docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro koestler/go-webcam
 ```
 
-## Dockerhub Production Build
+## Dockerhub Production amd64/arm64 Build
 ```
-docker buildx build --no-cache --push --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --no-cache --push --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --no-cache --push --platform linux/arm64,linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
 # License

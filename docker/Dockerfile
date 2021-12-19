@@ -1,12 +1,11 @@
 # build backend
-FROM golang:1.16-alpine as go-builder
+FROM golang:1.16 as go-builder
 
-RUN apk add git upx
-
+RUN apt-get update && apt-get install -y git upx
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-COPY . /app
 WORKDIR /app
+COPY . /app
 
 RUN go get
 RUN go generate
@@ -20,22 +19,19 @@ RUN  VERSION=`git symbolic-ref -q --short HEAD || git describe --tags --exact-ma
 
 RUN upx /go-webcam
 
-# used to update /etc/passwd
-RUN addgroup -S app && adduser -S app -G app
+# used to generate /etc/passwd /etc/group
+RUN groupadd -g 1000 app && \
+    useradd -r -u 1000 -g app app
+RUN chown app:app /go-webcam
 
-# build frontend
-FROM node:16 as js-builder
-ENV GENERATE_SOURCEMAP=false
-
-WORKDIR /app
-RUN git clone https://github.com/koestler/js-webcam.git
-RUN cd js-webcam && npm install && npm run build
+# use already compiled frontend
+FROM koestler/js-webcam AS js-builder
 
 # build final image
 FROM scratch
 USER app
-COPY --from=go-builder /go-webcam           /go-webcam
-COPY --from=go-builder /etc/group           /etc/group
-COPY --from=go-builder /etc/passwd          /etc/passwd
-COPY --from=js-builder /app/js-webcam/build /frontend-build
+COPY --from=go-builder /go-webcam      /go-webcam
+COPY --from=go-builder /etc/group      /etc/group
+COPY --from=go-builder /etc/passwd     /etc/passwd
+COPY --from=js-builder /frontend-build /frontend-build
 CMD ["/go-webcam", "-c", "/config.yaml"]
