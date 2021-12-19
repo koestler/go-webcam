@@ -2,8 +2,8 @@ package httpServer
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -25,8 +25,8 @@ func jsonGetResponse(c *gin.Context, obj interface{}) {
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	}
-	etag := fmt.Sprintf("%x", md5.Sum(jsonBytes))
-
+	hash := md5.Sum(jsonBytes)
+	etag := hex.EncodeToString(hash[:])
 	if match := c.GetHeader("If-None-Match"); match != "" {
 		if strings.Contains(match, etag) {
 			c.AbortWithStatus(http.StatusNotModified)
