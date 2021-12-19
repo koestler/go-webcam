@@ -34,10 +34,8 @@ RUN cd js-webcam && npm install && npm run build
 # build final image
 FROM scratch
 USER app
-WORKDIR /app
-COPY --from=go-builder /go-webcam ./
-COPY --from=go-builder /etc/group /etc/group
-COPY --from=go-builder /etc/passwd /etc/passwd
-COPY --from=js-builder /app/js-webcam/build ./frontend-build
-
-CMD ["/app/go-webcam", "-c", "/app/config.yaml"]
+COPY --from=go-builder /go-webcam           /go-webcam
+COPY --from=go-builder /etc/group           /etc/group
+COPY --from=go-builder /etc/passwd          /etc/passwd
+COPY --from=js-builder /app/js-webcam/build /frontend-build
+CMD ["/go-webcam", "-c", "/config.yaml"]

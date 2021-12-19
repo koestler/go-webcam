@@ -120,8 +120,8 @@ go generate && go build && ./go-webcam
 ```
 docker build -f docker/Dockerfile.dev -t go-webcam .
 docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
-  -v "$(pwd)"/config.yaml:/app/config.yaml:ro \
-  -v "$(pwd)"/auth.passwd:/app/auth.passwd:ro \
+  -v "$(pwd)"/config.yaml:/config.yaml:ro \
+  -v "$(pwd)"/auth.passwd:/auth.passwd:ro \
   go-webcam
 ```
 
