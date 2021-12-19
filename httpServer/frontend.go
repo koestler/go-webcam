@@ -1,7 +1,6 @@
 package httpServer
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"log"
@@ -65,7 +64,8 @@ func setupFrontend(engine *gin.Engine, config Config) {
 
 func serveStatic(engine *gin.Engine, config Config, route, filePath string) {
 	engine.GET(route, func(c *gin.Context) {
-		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", int(config.FrontendExpires().Seconds())))
+		setCacheControlPublic(c, config.FrontendExpires())
+		// c.File calls http.serveContent which sets / checks Last-Modified / If-Modified-Since
 		c.File(filePath)
 	})
 	log.Printf("httpServer: %s -> serve static %s", route, filePath)

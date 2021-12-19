@@ -4,9 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type ErrorResponse struct {
@@ -36,4 +38,8 @@ func jsonGetResponse(c *gin.Context, obj interface{}) {
 
 	c.Header("ETag", "W/"+etag)
 	c.Data(http.StatusOK, "application/json; charset=utf-8", jsonBytes)
+}
+
+func setCacheControlPublic(c *gin.Context, maxAge time.Duration) {
+	c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", int(maxAge.Seconds())))
 }

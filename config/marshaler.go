@@ -126,6 +126,7 @@ func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 		FrontendProxy:   frontendProxy,
 		FrontendPath:    c.frontendPath,
 		FrontendExpires: c.frontendExpires.String(),
+		ConfigExpires:   c.configExpires.String(),
 		HashTimeout:     c.hashTimeout.String(),
 	}
 }

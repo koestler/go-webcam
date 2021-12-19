@@ -16,7 +16,8 @@ HttpServer: # optional, default Disabled, start the http server
   #FrontendProxy: "http://127.0.0.1:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
   #FrontendPath: frontend-build
   FrontendPath: /home/lk/git/js-webcam/build
-  FrontendExpires: 2s
+  FrontendExpires: 10s
+  ConfigExpires: 10s
 
 Cameras:
   0-cam-east:

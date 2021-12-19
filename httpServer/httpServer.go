@@ -35,6 +35,7 @@ type Config interface {
 	FrontendPath() string
 	GetViewNames() []string
 	FrontendExpires() time.Duration
+	ConfigExpires() time.Duration
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {
@@ -45,11 +46,12 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	}
 	engine.Use(gin.Recovery())
 	engine.Use(authJwtMiddleware(env))
+	engine.Use(debugHeaderMiddleware())
 
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
 	}
-	addApiV0Routes(engine, env)
+	addApiV0Routes(engine, config, env)
 	setupFrontend(engine, config)
 
 	server := &http.Server{
@@ -79,9 +81,9 @@ func (s *HttpServer) Shutdown() {
 	}
 }
 
-func addApiV0Routes(r *gin.Engine, env *Environment) {
+func addApiV0Routes(r *gin.Engine, config Config, env *Environment) {
 	v0 := r.Group("/api/v0/")
-	setupConfig(v0, env)
+	setupConfig(v0, config, env)
 	setupLogin(v0, env)
 	setupImagesByHash(v0, env)
 	setupImages(v0, env)

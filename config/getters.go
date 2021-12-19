@@ -212,6 +212,10 @@ func (c HttpServerConfig) FrontendExpires() time.Duration {
 	return c.frontendExpires
 }
 
+func (c HttpServerConfig) ConfigExpires() time.Duration {
+	return c.configExpires
+}
+
 func (c HttpServerConfig) HashTimeout() time.Duration {
 	return c.hashTimeout
 }

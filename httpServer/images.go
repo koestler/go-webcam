@@ -1,7 +1,6 @@
 package httpServer
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
@@ -74,8 +73,7 @@ func handleCameraImage(
 
 	if view.IsPublic() {
 		//  output cache header
-		maxAge := int(cameraPicture.Expires().Sub(time.Now()).Seconds())
-		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
+		setCacheControlPublic(c, cameraPicture.Expires().Sub(time.Now()))
 		c.Data(http.StatusOK, "image/jpeg", cameraPicture.JpgImg())
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))

@@ -21,6 +21,7 @@ func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.Cl
 	}
 
 	return httpServer.Run(
+		// todo: refactor config and env into one object?
 		httpServerConfig{
 			cfg.HttpServer(),
 			cfg.GetViewNames(),

@@ -201,6 +201,17 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		ret.frontendExpires = frontendExpires
 	}
 
+	if len(c.ConfigExpires) < 1 {
+		// use default 5min
+		ret.configExpires = 5 * time.Minute
+	} else if configExpires, e := time.ParseDuration(c.ConfigExpires); e != nil {
+		err = append(err, fmt.Errorf("HttpServerConfig->ConfigExpires='%s' parse error: %s", c.ConfigExpires, e))
+	} else if configExpires < 0 {
+		err = append(err, fmt.Errorf("HttpServerConfig->ConfigExpires='%s' must be positive", c.ConfigExpires))
+	} else {
+		ret.configExpires = configExpires
+	}
+
 	if len(c.HashTimeout) < 1 {
 		// use default 10s
 		ret.hashTimeout = 10 * time.Second
