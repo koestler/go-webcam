@@ -7,7 +7,6 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest
 WORKDIR /app
 COPY . /app
 
-RUN go get
 RUN go generate
 
 RUN  VERSION=`git symbolic-ref -q --short HEAD || git describe --tags --exact-match` \
