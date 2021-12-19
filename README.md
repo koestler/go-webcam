@@ -13,7 +13,6 @@ The tool consists of the following components:
 * **mqttClient**: connects to a MQTT Server and *send* messages
 
 ## Basic Usage
-
 ```
 Usage:
   go-webcam [-c <path to yaml config file>]
@@ -26,6 +25,14 @@ Application Options:
 
 Help Options:
   -h, --help        Show this help message
+```
+
+### Run using docker
+```
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
+  -v "$(pwd)"/config.yaml:/config.yaml:ro \
+  -v "$(pwd)"/auth.passwd:/auth.passwd:ro \
+  koestler/go-webcam
 ```
 
 ## Config
