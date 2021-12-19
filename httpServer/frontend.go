@@ -1,6 +1,7 @@
 package httpServer
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"log"
@@ -38,9 +39,7 @@ func setupFrontend(engine *gin.Engine, config Config) {
 					}
 
 					route := path[len(frontendPath):]
-					engine.StaticFile(route, path)
-					log.Printf("httpServer: %s -> serve %s", route, path)
-
+					serveStatic(engine, config, route, path)
 					return nil
 				})
 
@@ -48,8 +47,7 @@ func setupFrontend(engine *gin.Engine, config Config) {
 				path := frontendPath + "/index.html"
 				for _, route := range append(config.GetViewNames(), "", "login") {
 					route = "/" + route
-					engine.StaticFile(route, path)
-					log.Printf("httpServer: %s -> serve %s", route, path)
+					serveStatic(engine, config, route, path)
 				}
 
 				if err != nil {
@@ -63,4 +61,12 @@ func setupFrontend(engine *gin.Engine, config Config) {
 			jsonErrorResponse(c, http.StatusNotFound, errors.New("route not found"))
 		})
 	}
+}
+
+func serveStatic(engine *gin.Engine, config Config, route, filePath string) {
+	engine.GET(route, func(c *gin.Context) {
+		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", int(config.FrontendExpires().Seconds())))
+		c.File(filePath)
+	})
+	log.Printf("httpServer: %s -> serve static %s", route, filePath)
 }

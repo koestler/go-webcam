@@ -119,12 +119,13 @@ func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 	}
 
 	return httpServerConfigRead{
-		Bind:          c.bind,
-		Port:          &c.port,
-		LogRequests:   &c.logRequests,
-		EnableDocs:    &c.enableDocs,
-		FrontendProxy: frontendProxy,
-		FrontendPath:  c.frontendPath,
-		HashTimeout:   c.hashTimeout.String(),
+		Bind:            c.bind,
+		Port:            &c.port,
+		LogRequests:     &c.logRequests,
+		EnableDocs:      &c.enableDocs,
+		FrontendProxy:   frontendProxy,
+		FrontendPath:    c.frontendPath,
+		FrontendExpires: c.frontendExpires.String(),
+		HashTimeout:     c.hashTimeout.String(),
 	}
 }

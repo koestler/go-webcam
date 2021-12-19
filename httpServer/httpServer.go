@@ -34,6 +34,7 @@ type Config interface {
 	FrontendProxy() *url.URL
 	FrontendPath() string
 	GetViewNames() []string
+	FrontendExpires() time.Duration
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {

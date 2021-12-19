@@ -208,6 +208,10 @@ func (c HttpServerConfig) FrontendPath() string {
 	return c.frontendPath
 }
 
+func (c HttpServerConfig) FrontendExpires() time.Duration {
+	return c.frontendExpires
+}
+
 func (c HttpServerConfig) HashTimeout() time.Duration {
 	return c.hashTimeout
 }
