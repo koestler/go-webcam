@@ -186,6 +186,8 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 
 	if len(c.FrontendPath) > 0 {
 		ret.frontendPath = c.FrontendPath
+	} else {
+		ret.frontendPath = "frontend-build"
 	}
 
 	if len(c.FrontendExpires) < 1 {

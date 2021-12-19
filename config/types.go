@@ -69,7 +69,7 @@ type HttpServerConfig struct {
 	logRequests     bool          // optional: default False
 	enableDocs      bool          // optional: default False
 	frontendProxy   *url.URL      // optional: default deactivated; otherwise an address of the frontend dev-server
-	frontendPath    string        // optional: default deactivated; otherwise set to a path where the frontend build is located
+	frontendPath    string        // optional: default "frontend-build"; otherwise set to a path where the frontend build is located
 	frontendExpires time.Duration // optional: default 5min; what cache-control header to sent for static frontend files
 	hashTimeout     time.Duration // optional: default 10s; for how long, after a redirect to a imageByHash is made, the entry is stored
 }
