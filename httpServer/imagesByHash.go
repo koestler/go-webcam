@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"log"
-	"math"
 	"math/rand"
 	"net/http"
 	"regexp"
+	"time"
 )
 
 // setupImagesByHash godoc
@@ -38,8 +38,8 @@ func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
 			jsonErrorResponse(c, http.StatusNotFound, fmt.Errorf("unknown hash: '%s", hash))
 			return
 		}
-		maxAge := math.Ceil(env.HashStorage.Config().HashTimeout().Seconds())
-		c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge))
+
+		setCacheControlPublic(c, time.Until(cp.Expires().Add(env.HashStorage.Config().HashTimeout())))
 		c.Data(http.StatusOK, "image/jpeg", cp.JpgImg())
 	})
 	if config.LogConfig() {
