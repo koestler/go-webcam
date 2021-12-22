@@ -74,9 +74,8 @@ func handleCameraImage(
 	}
 
 	if view.IsPublic() {
-		//  output cache header
 		setCacheControlPublic(c, cameraPicture.Expires().Sub(time.Now()))
-		c.Data(http.StatusOK, "image/jpeg", cameraPicture.JpgImg())
+		jpgGetResponse(c, cameraPicture.JpgImg(), cameraPicture.Uuid())
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
 	}
