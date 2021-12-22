@@ -2,6 +2,7 @@ package cameraClient
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,6 +28,11 @@ func createUbntState() ubntState {
 			// this tool is designed to serve cameras running on the local network
 			// -> us a relatively short timeout
 			Timeout: 10 * time.Second,
+
+			// ubnt cameras don't use valid certificates
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
 		},
 		authenticated: false,
 	}
@@ -42,7 +48,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 	}
 
 	// create address
-	addr := "http://" + path.Join(c.Config().Address(), "api/1.1/login")
+	addr := "https://" + path.Join(c.Config().Address(), "api/1.1/login")
 	loginUrl, err := url.Parse(addr)
 	if err != nil {
 		return
@@ -89,7 +95,7 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	}
 
 	// create address
-	imageUrl, err := url.Parse("http://" + path.Join(c.Config().Address(), "snap.jpeg"))
+	imageUrl, err := url.Parse("https://" + path.Join(c.Config().Address(), "snap.jpeg"))
 	if err != nil {
 		return
 	}

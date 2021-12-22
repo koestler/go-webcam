@@ -13,9 +13,9 @@ HttpServer: # optional, default Disabled, start the http server
   Port: 8043                                               # optional, default 8043
   LogRequests: True                                        # optional, default False, log all requests to stdout
   EnableDocs : True                                        # optional: default False
-  #FrontendProxy: "http://127.0.0.1:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
+  FrontendProxy: "http://127.0.0.1:3000/"                  # optional: default deactivated; otherwise an address of the frontend dev-server
   #FrontendPath: frontend-build
-  FrontendPath: /home/lk/git/js-webcam/build
+  #FrontendPath: /home/lk/git/js-webcam/build
   FrontendExpires: 10s
   ConfigExpires: 10s
 

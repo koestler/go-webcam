@@ -217,6 +217,9 @@ In UniFi Protect mode, the camera is adopted by the UniFi Protect controller. Th
 and the `Password` can be found in the UniFi Protect Web-Frontend under Settings, General, Device Password, Reveal.
 It is the same for all cameras adopted by the controller.
 
+The requests to the cameras are mad encrypted over https however validation of the camera's
+server certificate is always skipped.
+
 ## Rest-API
 When `enableDocs: True` is set in the configuration, a Swagger documentation of the REST-Api
 is exposed.
