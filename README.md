@@ -97,6 +97,14 @@ Help Options:
   -h, --help        Show this help message
 ```
 
+Return Codes:
+```txt
+ExitSuccess          = 0
+ExitDueToCmdOptions  = 1
+ExitDueToConfig      = 2
+ExitDueToModuleStart = 3
+```
+
 ## Frontend
 The frontend is a client-side application based on [React](https://reactjs.org/).
 It is developed in a separate [repository](https://github.com/koestler/js-webcam)
