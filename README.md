@@ -1,19 +1,89 @@
 # go-webcams
+The goal of this project is to show still images of IP security cameras on the web.
 
-This daemon conntets to multiple network cameras and serves all their images as one central server. It can authenticate
-at the cameras to fetch images and serve the images in aggregated views to different users.
+This daemon is a http server, that fetches images from cameras, caches and scales those images
+and serves them in a simple [REST-Api](#api).
 
-The tool can also connect to an MQTT server to publish the health state of each webcam and the url where the image can
-be fetched.
+There is a [frontend](#frontend) that shows
+all the available images and can also autoplay them (reload when new image is available).
+Specific resolutions of a webcam can be made available publicly or only behind a login
+(eg. high resolution on when logged in, low resolution thumbnail for everyone).
 
-The tool consists of the following components:
+The daemon reads a [configuration](#configuration) written in YAML to configure:
+* Project title etc.
+* What cameras are available and how to acces them.
+* How often a specific camera or a resized image is computed.
+* If the image / resolution is public or only available for certain users.
+* Some technical stuff.
 
-* **httpServer**: *serves* the images as well as a simple frontend to the clients
-* **cameraClient**: connects to a camera and *receives* images
-* **mqttClient**: connects to a MQTT Server and *send* messages
+The tool is written with relatively low cpu-resources of embedded systems
+(eg. a [Raspberry Pi](https://www.raspberrypi.com/) or a [PC Engines APU Board](https://pcengines.ch/))
+in mind. It therefore supports an in-memory caching mechanism to only fetch images once per timeframe,
+to never redo rescaling and therefore is able to serve hundreds of clients on such an embedded system.
+
+It uses [HTTP Cache-Control headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control) 
+and [HTTP conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)
+to minimize bandwidth-requirements. This is especially useful when the webcam and the computer running
+this software is connected over a slow (eg. LTE) connection to a webserver running as a
+[reverse-proxy](https://en.wikipedia.org/wiki/Reverse_proxy).
+The webserver can than deliver the same image to many clients while it is only transmitted
+once over the slow connection. This even works for images only available behind a login.
+In this case, images are sent only once to the reverse proxy
+and only small redirect / authentication requests are sent for each user.
 
 ## Basic Usage
+
+### Running in docker-compose
+I use [docker-compose](https://docs.docker.com/compose/) to deploy this tool.
+This has the advantage, that autostart on boot, running as non-root-user, monitoring
+and log-rotation are all taken care of by docker.
+There is a precompiled docker image (approx. 10 MB) on [dockerhub](https://hub.docker.com/r/koestler/go-webcam),
+which I normally use for deployment.
+An example docker-compose is here:
+
+```yaml
+# documentation/docker-compose.yml
+
+version: "3"
+services:
+  go-webcam:
+    restart: always
+    image: koestler/go-webcam
+    volumes:
+      - ${PWD}/config.yaml:/config.yaml:ro
+      # - ${PWD}/auth.passwd:/auth.passwd:ro
+    ports:
+      - "80:8043"
 ```
+
+Setup like this:
+```bash
+# create configuration files
+mkdir -p /srv/dc/webscam
+cd /srv/dc/webscam
+curl https://raw.githubusercontent.com/koestler/go-webcam/main/documentation/docker-compose.yml -o docker-compose.yml
+curl https://raw.githubusercontent.com/koestler/go-webcam/main/documentation/config.yaml -o config.yaml
+# edit config.yaml
+
+# create htpasswd file
+sudo apt-get install apache2-utils
+htpasswd -c auth.passwd user
+
+# start it
+docker-compose up -d
+```
+
+### Run using docker
+```bash
+docker run --rm --name go-webcam \
+  -p 80:8043 \
+  -v "$(pwd)"/config.yaml:/config.yaml:ro \
+  -v "$(pwd)"/auth.passwd:/auth.passwd:ro \
+  koestler/go-webcam
+```
+
+### Basic Usage of the binary
+```txt
 Usage:
   go-webcam [-c <path to yaml config file>]
 
@@ -27,86 +97,125 @@ Help Options:
   -h, --help        Show this help message
 ```
 
-### Run using docker
-```
-docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
-  -v "$(pwd)"/config.yaml:/config.yaml:ro \
-  -v "$(pwd)"/auth.passwd:/auth.passwd:ro \
-  koestler/go-webcam
-```
+## Frontend
+The frontend is a client-side application based on [React](https://reactjs.org/).
+It is developed in a separate [repository](https://github.com/koestler/js-webcam)
+but normally bundled into the build of this project.
 
 ## Config
-
-The Configuration is stored in one yaml file. There are mandatory fields and there are optional fields which have a
-default value.
+The Configuration is stored in one yaml file. This file is only read once when the server is started.
+Restart the backend whenever you change something.
+There are mandatory fields and there are optional fields which have a default value.
+Whenever a mandatory field is missing or an invalid value is given, the backend refuses to start.
 
 ### Complete, explained example
 
 ```yaml
-Version: 0                                                 # mandatory, version is always 0 (reserved for later use)
+# documentation/config.yaml
+
+Version: 0
 LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
-LogWorkerStart: True                                       # optional, default False, write log for starting / stoping of workers
-LogDebug: False                                            # optional, default False, enable debug output
-HttpServer:                                                # optional, default Disabled, start the http server
+LogWorkerStart: True
+ProjectTitle: Configurable Title of Project
+
+Auth:
+  HtaccessFile: ./auth.passwd
+
+HttpServer:
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
-  Port: 80                                                 # optional, default 8042
-  LogRequests: True                                        # optional, default False, log all requests to stdout
+  Port: 8043                                               # optional, default 8043
+  LogRequests: True
 
-MqttClients:                                               # mandatory, a list of MQTT servers to connect to
-  0-piegn-mosquitto:                                       # mandatory, an arbitrary name used in log outputs and for reference in the converters section
-    Broker: "tcp://mqtt.exampel.com:1883"                  # mandatory, the address / port of the server
-    User: Bob                                              # optional, if given used for login
-    Password: Jeir2Jie4zee                                 # optional, if given used for login
-    ClientId: "config-tester"                              # optional, default go-webcam, client-id sent to the server
-    Qos: 2                                                 # optional, default 0, QOS-level used for subscriptions
-    AvailabilityTopic: test/%Prefix%tele/%clientId%/LWT    # optional, if given, a message with Online/Offline will be published on connect/disconnect
-                                                           # supported placeholders:
-                                                           # - %Prefix$   : as specified in this config section
-                                                           # - %clientId% : as specified in this config section
-    TopicPrefix: piegn/                                    # optional, default empty
-    LogMessages: False                                     # optional, default False, logs all received messages
-
-  1-local-mosquitto:                                       # optional, a second MQTT erver
-    Broker: "tcp://172.17.0.5:1883"                        # optional, the second MQTT servers broker...
-
-CameraClients:
+Cameras:
   0-cam-east:
-    Host: 192.168.8.32
-    Implementation: ubnt
+    Address: 192.168.8.63
     User: ubnt
-    Password: 1234
+    Password: my-password-1234
+    RefreshInterval: 10s
 
   1-cam-north:
-    Host: 192.168.8.33
-    Implementation: ubnt
+    Address: 192.168.8.64
     User: ubnt
-    Password: abcde
+    Password: my-password-1234
+    RefreshInterval: 10s
 
-Views:                                                     # mandatory, a list of Views that shall be available
-  public:
-    Route: /
+
+Views:
+  low:
+    Title: Low Resolution
     Cameras:
-      - cam0
+      0-cam-east:
+        title: Camera East
+      1-cam-north:
+        Title: Camera North
+    ResolutionMaxWidth: 480
+    RefreshInterval: 2s
+  highres:
+    Title: High Resolution
+    Cameras:
+      0-cam-east:
+        title: Camera East
+      1-cam-north:
+        Title: Camera North
     ResolutionMaxWidth: 1024
-    ResolutionMaxHeight: 768
-  private:
-    Route: /all/
-    Cameras:
-      - cam0
-      - cam1
-    ResolutionMaxWidth: 1920
-    ResolutionMaxHeight: 1080
-    Htaccess:
-      - "user:password"
-```  
-
-## API
-
-A swagger documentation of the API is build and available under: http://localhost:8043/swagger
-
-## Generating HtaccessFile
-Use `htpasswd` to generate password files like this:
+    RefreshInterval: 2s
+    AllowedUsers:
+      - tester0
 ```
+
+### Minimalistic example
+The following example shows the minimal configuration that only specifies the mandatory configuration
+fields. Start with this one and override the defaults.
+
+```yaml
+# documentation/minimal-config.yaml
+
+Version: 0
+ProjectTitle: Configurable Title of Project
+
+HttpServer:
+  Port: 8043                                               # optional, default 8043
+
+Cameras:
+  0-cam-east:
+    Address: 192.168.8.63
+    User: ubnt
+    Password: my-password-1234
+    RefreshInterval: 10s
+
+Views:
+  raw:
+    Title: Full Resolution
+    Cameras:
+      0-cam-east:
+        title: Camera East
+
+```
+
+## Cameras
+
+### Ubiquiti UVC
+Ubiquiti camaras like the UVC-G3 work. They provide as RAW image via their http server.
+
+The option "Enable Anonymous Snapshot" can be deactivated. A login with the configured
+`User` and `Password` is performed.
+
+They can be configured in two different modes. In "Standalone" and "UniFi Protect".
+In Standalone mode, the `User` / `Password` are manually defined.
+In UniFi Protect mode, the camera is adopted by the UniFi Protect controller. The `User` is "ubnt"
+and the `Password` can be found in the UniFi Protect Web-Frontend under Settings, General, Device Password, Reveal.
+It is the same for all cameras adopted by the controller.
+
+## Rest-API
+When `enableDocs: True` is set in the configuration, a Swagger documentation of the REST-Api
+is exposed.
+
+## Authentication
+The user/password database is stored in a single file in the format of the apache `htpasswd` tool.
+The file can is reloaded automatically.
+
+Use `htpasswd` to generate password files like this:
+```bash
 sudo apt install apache2-utils
 htpasswd -c auth.passwd username
 ```
@@ -114,17 +223,17 @@ htpasswd -c auth.passwd username
 ## Local Development
 
 ### Install dependencies
-```
+```bash
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 ### Compile and run on host
-```
+```bash
 go generate && go build && ./go-webcam
 ```
 
 ### Compile and run inside docker
-```
+```bash
 docker build -f docker/Dockerfile -t go-webcam .
 docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
   -v "$(pwd)"/config.yaml:/config.yaml:ro \
@@ -132,32 +241,44 @@ docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
   go-webcam
 ```
 
+### Update README.md
+```bash
+npx embedme README.md
+```
+
 ## Production build
 ### Install dependencies
 Buildx must be installed: https://docs.docker.com/buildx/working-with-buildx/
 On Linux, binfmt_misc needs to be installed and a builder needs to be created:
-```
+```bash
 docker run --privileged --rm tonistiigi/binfmt --install all
 docker buildx create --name mbuilder
 docker buildx use mbuilder
 ```
 
-## Local Production Build
-```
+### Local Production Build
+Build:
+```bash
 docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
-Test it:
-```
+Test:
+```bash
 docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro koestler/go-webcam
 ```
 
-## Dockerhub Production amd64/arm64 Build
-```
-docker buildx build --push --platform linux/arm64,linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
+### Dockerhub Production amd64/arm64 Build
+This is for testing only. Production builds are generated by Github Actions.
+```bash
+docker buildx build --push --platform linux/arm64,linux/amd64 -f docker/Dockerfile -t koestler/go-webcam:tdev .
 ```
 
-# License
+## License
+[MIT License](LICENSE)
 
-MIT License
+## Contributing
+This is a private project currently maintained by one person only. Therfore only the cameras my friends
+and I own are supported. However I'm happy to receive bug reports via github.
+I'm also happy to merge pull requests (eg. support for other cameras) and change this section
+to give credits to others.

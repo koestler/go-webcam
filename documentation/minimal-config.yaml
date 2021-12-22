@@ -1,0 +1,19 @@
+Version: 0
+ProjectTitle: Configurable Title of Project
+
+HttpServer:
+  Port: 8043                                               # optional, default 8043
+
+Cameras:
+  0-cam-east:
+    Address: 192.168.8.63
+    User: ubnt
+    Password: my-password-1234
+    RefreshInterval: 10s
+
+Views:
+  raw:
+    Title: Full Resolution
+    Cameras:
+      0-cam-east:
+        title: Camera East
