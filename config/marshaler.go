@@ -25,10 +25,10 @@ func (c Config) MarshalYAML() (interface{}, error) {
 			}
 			return cameras
 		}(),
-		Views: func() viewConfigReadMap {
-			views := make(viewConfigReadMap, len(c.views))
+		Views: func() viewConfigReadList {
+			views := make(viewConfigReadList, len(c.views))
 			for _, c := range c.views {
-				views[c.name] = c.convertToRead()
+				views = append(views, c.convertToRead())
 			}
 			return views
 		}(),
@@ -85,6 +85,7 @@ func (c ViewCameraConfig) convertToRead() viewCameraConfigRead {
 
 func (c ViewConfig) convertToRead() viewConfigRead {
 	return viewConfigRead{
+		Name:  c.name,
 		Title: c.title,
 		Cameras: func() viewCameraConfigReadMap {
 			views := make(viewCameraConfigReadMap, len(c.cameras))

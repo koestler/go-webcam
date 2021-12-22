@@ -149,7 +149,7 @@ Cameras:
 
 
 Views:
-  low:
+  - Name: low
     Title: Low Resolution
     Cameras:
       0-cam-east:
@@ -158,7 +158,7 @@ Views:
         Title: Camera North
     ResolutionMaxWidth: 480
     RefreshInterval: 2s
-  highres:
+  - Name: highres
     Title: High Resolution
     Cameras:
       0-cam-east:
@@ -192,7 +192,7 @@ Cameras:
     RefreshInterval: 10s
 
 Views:
-  raw:
+  - Name: raw
     Title: Full Resolution
     Cameras:
       0-cam-east:

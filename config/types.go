@@ -51,7 +51,7 @@ type ViewCameraConfig struct {
 }
 
 type ViewConfig struct {
-	name                string              // defined automatically by map key
+	name                string              // mandatory: A technical name used in the URLs
 	title               string              // mandatory: a nice title for the frontend
 	cameras             []*ViewCameraConfig // mandatory: a list of cameraClient names
 	resolutionMaxWidth  int                 // optional: defaults to 3840
@@ -81,7 +81,7 @@ type configRead struct {
 	Auth           *authConfigRead         `yaml:"Auth"`
 	MqttClients    mqttClientConfigReadMap `yaml:"MqttClients"`
 	Cameras        cameraConfigReadMap     `yaml:"Cameras"`
-	Views          viewConfigReadMap       `yaml:"Views"`
+	Views          viewConfigReadList      `yaml:"Views"`
 	HttpServer     *httpServerConfigRead   `yaml:"HttpServer"`
 	LogConfig      *bool                   `yaml:"LogConfig"`
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
@@ -124,6 +124,7 @@ type viewCameraConfigRead struct {
 type viewCameraConfigReadMap map[string]viewCameraConfigRead
 
 type viewConfigRead struct {
+	Name                string                  `yaml:"Name"`
 	Title               string                  `yaml:"Title"`
 	Cameras             viewCameraConfigReadMap `yaml:"Cameras"`
 	ResolutionMaxWidth  *int                    `yaml:"ResolutionMaxWidth"`
@@ -134,7 +135,7 @@ type viewConfigRead struct {
 	Hidden              *bool                   `yaml:"Hidden"`
 }
 
-type viewConfigReadMap map[string]viewConfigRead
+type viewConfigReadList []viewConfigRead
 
 type httpServerConfigRead struct {
 	Bind            string `yaml:"Bind"`

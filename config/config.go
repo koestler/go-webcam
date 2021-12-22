@@ -352,39 +352,26 @@ func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, e
 	return
 }
 
-func (c viewConfigReadMap) getOrderedKeys() (ret []string) {
-	ret = make([]string, len(c))
-	i := 0
-	for k := range c {
-		ret[i] = k
-		i++
-	}
-	sort.Strings(ret)
-	return
-}
-
-func (c viewConfigReadMap) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
+func (c viewConfigReadList) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
 	if len(c) < 1 {
 		return ret, []error{fmt.Errorf("Views section must no be empty.")}
 	}
 
 	ret = make([]*ViewConfig, len(c))
 	j := 0
-	for _, name := range c.getOrderedKeys() {
-		r, e := c[name].TransformAndValidate(name, cameras)
+	for _, cr := range c {
+		r, e := cr.TransformAndValidate(cameras)
 		ret[j] = &r
 		err = append(err, e...)
 		j++
 	}
+
 	return
 }
 
-func (c viewConfigRead) TransformAndValidate(
-	name string,
-	cameras []*CameraConfig,
-) (ret ViewConfig, err []error) {
+func (c viewConfigRead) TransformAndValidate(cameras []*CameraConfig) (ret ViewConfig, err []error) {
 	ret = ViewConfig{
-		name:         name,
+		name:         c.Name,
 		title:        c.Title,
 		allowedUsers: make(map[string]struct{}),
 		hidden:       false,
@@ -395,14 +382,14 @@ func (c viewConfigRead) TransformAndValidate(
 	}
 
 	if len(c.Title) < 1 {
-		err = append(err, fmt.Errorf("Views->%s->Title must not be empty", name))
+		err = append(err, fmt.Errorf("Views->%s->Title must not be empty", c.Name))
 	}
 
 	{
 		var camerasErr []error
 		ret.cameras, camerasErr = c.Cameras.TransformAndValidate(cameras)
-		for ce := range camerasErr {
-			err = append(err, fmt.Errorf("Views->%s: %s", name, ce))
+		for _, ce := range camerasErr {
+			err = append(err, fmt.Errorf("Views->%s: %s", c.Name, ce))
 		}
 	}
 
@@ -411,7 +398,7 @@ func (c viewConfigRead) TransformAndValidate(
 	} else if *c.ResolutionMaxWidth > 0 {
 		ret.resolutionMaxWidth = *c.ResolutionMaxWidth
 	} else {
-		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxWidth=%d but must be a positive integer", name, *c.ResolutionMaxWidth))
+		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxWidth=%d but must be a positive integer", c.Name, *c.ResolutionMaxWidth))
 	}
 
 	if c.ResolutionMaxHeight == nil {
@@ -419,7 +406,7 @@ func (c viewConfigRead) TransformAndValidate(
 	} else if *c.ResolutionMaxHeight > 0 {
 		ret.resolutionMaxHeight = *c.ResolutionMaxHeight
 	} else {
-		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxHeight=%d but must be a positive integer", name, *c.ResolutionMaxHeight))
+		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxHeight=%d but must be a positive integer", c.Name, *c.ResolutionMaxHeight))
 	}
 
 	if len(c.RefreshInterval) < 1 {
@@ -427,11 +414,11 @@ func (c viewConfigRead) TransformAndValidate(
 		ret.refreshInterval = time.Minute
 	} else if refreshInterval, e := time.ParseDuration(c.RefreshInterval); e != nil {
 		err = append(err, fmt.Errorf("viewConfig->%s->RefreshInterval='%s' parse error: %s",
-			name, c.RefreshInterval, e,
+			c.Name, c.RefreshInterval, e,
 		))
 	} else if refreshInterval < 0 {
 		err = append(err, fmt.Errorf("viewConfig->%s->RefreshInterval='%s' must be positive",
-			name, c.RefreshInterval,
+			c.Name, c.RefreshInterval,
 		))
 	} else {
 		ret.refreshInterval = refreshInterval

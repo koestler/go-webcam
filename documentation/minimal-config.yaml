@@ -12,7 +12,7 @@ Cameras:
     RefreshInterval: 10s
 
 Views:
-  raw:
+  - Name: raw
     Title: Full Resolution
     Cameras:
       0-cam-east:
