@@ -255,6 +255,15 @@ docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 \
   go-webcam
 ```
 
+### Frontend development
+Whe developing on the frontend, the backend can be configured to be a reverse-proxy
+instead of serving a static frontend build.
+
+```yaml
+HttpServer:
+  FrontendProxy: "http://127.0.0.1:3000/"
+```
+
 ### Update README.md
 ```bash
 npx embedme README.md
