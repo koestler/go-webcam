@@ -171,8 +171,9 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		ret.logRequests = true
 	}
 
-	if c.EnableDocs != nil && *c.EnableDocs {
-		ret.enableDocs = true
+	ret.enableDocs = true
+	if c.EnableDocs != nil && !*c.EnableDocs {
+		ret.enableDocs = false
 	}
 
 	if len(c.FrontendProxy) > 0 {
