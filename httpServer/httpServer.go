@@ -2,6 +2,7 @@ package httpServer
 
 import (
 	"context"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"github.com/koestler/go-webcam/config"
@@ -47,6 +48,7 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 		engine.Use(gin.Logger())
 	}
 	engine.Use(gin.Recovery())
+	engine.Use(gzip.Gzip(gzip.BestCompression))
 	engine.Use(authJwtMiddleware(env))
 	if config.LogDebug() {
 		engine.Use(debugHeaderMiddleware())
