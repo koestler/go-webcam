@@ -52,19 +52,18 @@ func jsonGetResponse(c *gin.Context, obj interface{}) {
 	c.Data(http.StatusOK, "application/json; charset=utf-8", jsonBytes)
 }
 
-func jpgGetResponse(c *gin.Context, jpg []byte, etag string) {
-	if sendNotModified(c, etag) {
-		return
-	}
-
-	c.Header("ETag", "W/"+etag)
-	c.Data(http.StatusOK, "image/jpeg", jpg)
-}
-
 func setCacheControlPublic(c *gin.Context, maxAge time.Duration) {
 	if maxAge < 0 {
 		maxAge = 0
 	}
 	maxAgeSeconds := int(maxAge.Seconds()) // floor given duration to next lower second
 	c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAgeSeconds))
+}
+
+func setCacheControlPublicProxy(c *gin.Context, sMaxAge time.Duration) {
+	if sMaxAge < 0 {
+		sMaxAge = 0
+	}
+	sMaxAgeSeconds := int(sMaxAge.Seconds()) // floor given duration to next lower second
+	c.Header("Cache-Control", fmt.Sprintf("public, s-max-age=%d", sMaxAgeSeconds))
 }

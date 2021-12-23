@@ -59,6 +59,7 @@ func setupFrontend(engine *gin.Engine, config Config) {
 			log.Print("httpServer: no frontend configured")
 		}
 		engine.NoRoute(func(c *gin.Context) {
+			setCacheControlPublic(c, config.FrontendExpires())
 			jsonErrorResponse(c, http.StatusNotFound, errors.New("route not found"))
 		})
 	}

@@ -74,11 +74,9 @@ func handleCameraImage(
 	}
 
 	if view.IsPublic() {
-		setCacheControlPublic(c, cameraPicture.Expires().Sub(time.Now()))
-		jpgGetResponse(c, cameraPicture.JpgImg(), cameraPicture.Uuid())
-	} else {
-		c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
+		setCacheControlPublicProxy(c, cameraPicture.Expires().Sub(time.Now()))
 	}
+	c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
 }
 
 type Dimension struct {
