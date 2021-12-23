@@ -40,9 +40,7 @@ func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
 		}
 
 		setCacheControlPublic(c, time.Until(cp.Expires().Add(env.HashStorage.Config().HashTimeout())))
-
-		expires, _ := cp.Expires().MarshalJSON()
-		c.Header("X-Next-Image-At", string(expires))
+		c.Header("X-Next-Image-At", cp.Expires().Format(time.RFC3339Nano))
 		c.Data(http.StatusOK, "image/jpeg", cp.JpgImg())
 	})
 	if config.LogConfig() {
