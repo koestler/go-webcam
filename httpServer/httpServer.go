@@ -50,9 +50,6 @@ func Run(config Config, env *Environment) (httpServer *HttpServer) {
 	engine.Use(gin.Recovery())
 	engine.Use(gzip.Gzip(gzip.BestCompression))
 	engine.Use(authJwtMiddleware(env))
-	if config.LogDebug() {
-		engine.Use(debugHeaderMiddleware())
-	}
 
 	if config.EnableDocs() {
 		setupSwaggerDocs(engine, config)
