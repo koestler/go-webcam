@@ -362,6 +362,14 @@ func (c viewConfigReadList) TransformAndValidate(cameras []*CameraConfig) (ret [
 	j := 0
 	for _, cr := range c {
 		r, e := cr.TransformAndValidate(cameras)
+
+		// check for duplicate name
+		for i := 0; i < j; i++ {
+			if r.Name() == ret[i].Name() {
+				err = append(err, fmt.Errorf("Views->Name='%s': name must be unique", r.Name()))
+			}
+		}
+
 		ret[j] = &r
 		err = append(err, e...)
 		j++
