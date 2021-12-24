@@ -3,15 +3,13 @@ name: Docker Image CI
 on:
   push:
     branches: [ main ]
+    tags:
+      - v0.*
   pull_request:
     branches: [ main ]
-
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -29,5 +27,5 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: koestler/go-webcam:latest
+          tags: koestler/go-webcam:${GITHUB_REF_NAME} koestler/go-webcam:latest
           file: docker/Dockerfile
