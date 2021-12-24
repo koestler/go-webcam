@@ -63,16 +63,17 @@ type ViewConfig struct {
 }
 
 type HttpServerConfig struct {
-	enabled         bool          // defined automatically if HttpServer section exists
-	bind            string        // optional: defaults to ::1 (ipv6 loopback)
-	port            int           // optional: defaults to 8043
-	logRequests     bool          // optional: default False
-	enableDocs      bool          // optional: default True
-	frontendProxy   *url.URL      // optional: default deactivated; otherwise an address of the frontend dev-server
-	frontendPath    string        // optional: default "frontend-build"; otherwise set to a path where the frontend build is located
-	frontendExpires time.Duration // optional: default 5min; what cache-control header to sent for static frontend files
-	configExpires   time.Duration // optional: default 1min; what cache-control header to sent for static frontend files
-	hashTimeout     time.Duration // optional: default 10s; for how long, after a redirect to a imageByHash is made, the entry is stored
+	enabled          bool          // defined automatically if HttpServer section exists
+	bind             string        // optional: defaults to ::1 (ipv6 loopback)
+	port             int           // optional: defaults to 8043
+	logRequests      bool          // optional: default False
+	enableDocs       bool          // optional: default True
+	frontendProxy    *url.URL      // optional: default deactivated; otherwise an address of the frontend dev-server
+	frontendPath     string        // optional: default "frontend-build"; otherwise set to a path where the frontend build is located
+	frontendExpires  time.Duration // optional: default 5min; what cache-control header to sent for static frontend files
+	configExpires    time.Duration // optional: default 1min; what cache-control header to sent for static frontend files
+	hashTimeout      time.Duration // optional: default 10s; for how long, after a redirect to a imageByHash is made, the entry is stored
+	imageEarlyExpire time.Duration // optional: default 2s; s-maxage of images is computed ad expiry - imageEarlyExpire;
 }
 
 // Read structs are given to yaml for decoding and are slightly less exact in types
@@ -138,13 +139,14 @@ type viewConfigRead struct {
 type viewConfigReadList []viewConfigRead
 
 type httpServerConfigRead struct {
-	Bind            string `yaml:"Bind"`
-	Port            *int   `yaml:"Port"`
-	LogRequests     *bool  `yaml:"LogRequests"`
-	EnableDocs      *bool  `yaml:"EnableDocs"`
-	FrontendProxy   string `yaml:"FrontendProxy"`
-	FrontendPath    string `yaml:"FrontendPath"`
-	FrontendExpires string `yaml:"FrontendExpires"`
-	ConfigExpires   string `yaml:"ConfigExpires"`
-	HashTimeout     string `yaml:"HashTimeout"`
+	Bind             string `yaml:"Bind"`
+	Port             *int   `yaml:"Port"`
+	LogRequests      *bool  `yaml:"LogRequests"`
+	EnableDocs       *bool  `yaml:"EnableDocs"`
+	FrontendProxy    string `yaml:"FrontendProxy"`
+	FrontendPath     string `yaml:"FrontendPath"`
+	FrontendExpires  string `yaml:"FrontendExpires"`
+	ConfigExpires    string `yaml:"ConfigExpires"`
+	HashTimeout      string `yaml:"HashTimeout"`
+	ImageEarlyExpire string `yaml:"ImageEarlyExpire"`
 }

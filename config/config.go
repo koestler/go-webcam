@@ -224,6 +224,17 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		ret.hashTimeout = hashTimeout
 	}
 
+	if len(c.ImageEarlyExpire) < 1 {
+		// use default 10s
+		ret.imageEarlyExpire = time.Second
+	} else if imageEarlyExpire, e := time.ParseDuration(c.ImageEarlyExpire); e != nil {
+		err = append(err, fmt.Errorf("HttpServerConfig->ImageEarlyExpire='%s' parse error: %s", c.ImageEarlyExpire, e))
+	} else if imageEarlyExpire < 0 {
+		err = append(err, fmt.Errorf("HttpServerConfig->ImageEarlyExpire='%s' must be positive", c.ImageEarlyExpire))
+	} else {
+		ret.imageEarlyExpire = imageEarlyExpire
+	}
+
 	return
 }
 

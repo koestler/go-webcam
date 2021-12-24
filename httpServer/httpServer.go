@@ -39,6 +39,7 @@ type Config interface {
 	GetViewNames() []string
 	FrontendExpires() time.Duration
 	ConfigExpires() time.Duration
+	ImageEarlyExpire() time.Duration
 }
 
 func Run(config Config, env *Environment) (httpServer *HttpServer) {
