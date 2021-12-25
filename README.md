@@ -1,4 +1,7 @@
 # go-webcams
+
+[![Docker Image CI](https://github.com/koestler/go-webcam/actions/workflows/docker-image.yml/badge.svg)](https://github.com/koestler/go-webcam/actions/workflows/docker-image.yml)
+
 The goal of this project is to show still images of IP security cameras on the web.
 
 This daemon is a http server, that fetches images from cameras, caches and scales those images
