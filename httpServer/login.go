@@ -34,9 +34,9 @@ type loginResponse struct {
 // @Failure 500 {object} ErrorResponse
 // @Failure 503 {object} ErrorResponse
 // @Router /login [post]
-func setupLogin(r *gin.RouterGroup, config Config, env *Environment) {
+func setupLogin(r *gin.RouterGroup, env *Environment) {
 	if !env.Auth.Enabled() {
-		disableLogin(r, config)
+		disableLogin(r, env.Config)
 		return
 	}
 
@@ -44,7 +44,7 @@ func setupLogin(r *gin.RouterGroup, config Config, env *Environment) {
 	authChecker, err := htpasswd.New(env.Auth.HtaccessFile(), htpasswd.DefaultSystems, nil)
 	if err != nil {
 		log.Printf("httpServer: cannot load htaccess file: %s", err)
-		disableLogin(r, config)
+		disableLogin(r, env.Config)
 		return
 	}
 
@@ -55,7 +55,7 @@ func setupLogin(r *gin.RouterGroup, config Config, env *Environment) {
 			return
 		}
 
-		reloadAuthChecker(authChecker, config)
+		reloadAuthChecker(authChecker, env.Config)
 		if !authChecker.Match(req.User, req.Password) {
 			jsonErrorResponse(c, http.StatusUnauthorized, errors.New("Invalid credentials"))
 			return
@@ -77,7 +77,7 @@ func setupLogin(r *gin.RouterGroup, config Config, env *Environment) {
 
 		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, User: req.User, AllowedViews: allowedViews})
 	})
-	if config.LogConfig() {
+	if env.Config.LogConfig() {
 		log.Printf("httpServer: %slogin -> serve login", r.BasePath())
 	}
 }

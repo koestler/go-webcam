@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/koestler/go-webcam/cameraClient"
 	"log"
-	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
@@ -25,7 +24,7 @@ import (
 // @Failure 404 {object} ErrorResponse
 // @Router /imagesByHash/{hash}.jpg [get]
 // @Security ApiKeyAuth
-func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
+func setupImagesByHash(r *gin.RouterGroup, env *Environment) {
 	r.GET("imagesByHash/:filename", func(c *gin.Context) {
 		filename := c.Param("filename")
 		if !hashFileNameMatcher.MatchString(filename) {
@@ -43,7 +42,7 @@ func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
 		c.Header("X-Next-Image-At", cp.Expires().Format(time.RFC3339Nano))
 		c.Data(http.StatusOK, "image/jpeg", cp.JpgImg())
 	})
-	if config.LogConfig() {
+	if env.Config.LogConfig() {
 		log.Printf("httpServer: %simagesByHash/<hash>.jpg -> serve imagesByHash", r.BasePath())
 	}
 }
@@ -51,27 +50,15 @@ func setupImagesByHash(r *gin.RouterGroup, config Config, env *Environment) {
 var hashFileNameMatcher = regexp.MustCompilePOSIX(`^[0-9a-f]{40}\.jpg$`)
 
 func getImageByHashUrl(cp cameraClient.CameraPicture, env *Environment) string {
-	hash := getHash(cp)
+	hash := getHash(cp, env.Config.HashSecret())
 	env.HashStorage.Set(hash, cp)
 	return fmt.Sprintf("/api/v0/imagesByHash/%s.jpg", hash)
 }
 
-func getHash(cp cameraClient.CameraPicture) string {
+func getHash(cp cameraClient.CameraPicture, hashSecret string) string {
 	dimKey := cameraClient.DimensionCacheKey(cameraClient.DimensionOfImage(cp.DecodedImg()))
-	str := fmt.Sprintf("%s-%s-%s", randomPrefix, cp.Uuid(), dimKey)
+	str := fmt.Sprintf("%s-%s-%s", hashSecret, cp.Uuid(), dimKey)
 	h := sha1.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-var randomPrefix = randomString(64)
-
-func randomString(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-	s := make([]rune, n)
-	for i := range s {
-		s[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(s)
 }

@@ -226,6 +226,10 @@ func (c HttpServerConfig) ImageEarlyExpire() time.Duration {
 	return c.imageEarlyExpire
 }
 
+func (c HttpServerConfig) HashSecret() string {
+	return c.hashSecret
+}
+
 func (c Config) GetViewNames() (ret []string) {
 	ret = []string{}
 	for _, v := range c.Views() {

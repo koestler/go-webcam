@@ -36,7 +36,7 @@ type cameraViewResponse struct {
 // @Success 200 {object} configResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /config [get]
-func setupConfig(r *gin.RouterGroup, cfg Config, env *Environment) {
+func setupConfig(r *gin.RouterGroup, env *Environment) {
 	r.GET("config", func(c *gin.Context) {
 		response := configResponse{
 			ProjectTitle: env.ProjectTitle,
@@ -64,10 +64,10 @@ func setupConfig(r *gin.RouterGroup, cfg Config, env *Environment) {
 			})
 		}
 
-		setCacheControlPublic(c, cfg.ConfigExpires())
+		setCacheControlPublic(c, env.Config.ConfigExpires())
 		jsonGetResponse(c, response)
 	})
-	if cfg.LogConfig() {
+	if env.Config.LogConfig() {
 		log.Printf("httpServer: %sconfig -> serve config", r.BasePath())
 	}
 }

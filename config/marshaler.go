@@ -130,5 +130,6 @@ func (c HttpServerConfig) convertToRead() httpServerConfigRead {
 		FrontendExpires: c.frontendExpires.String(),
 		ConfigExpires:   c.configExpires.String(),
 		HashTimeout:     c.hashTimeout.String(),
+		HashSecret:      &c.hashSecret,
 	}
 }

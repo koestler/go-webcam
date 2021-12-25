@@ -29,7 +29,7 @@ import (
 // @Failure 404 {object} ErrorResponse
 // @Router /images/{viewName}/{cameraName}.jpg [get]
 // @Security ApiKeyAuth
-func setupImages(r *gin.RouterGroup, config Config, env *Environment) {
+func setupImages(r *gin.RouterGroup, env *Environment) {
 	// add dynamic routes
 	for _, v := range env.Views {
 		view := v
@@ -43,9 +43,9 @@ func setupImages(r *gin.RouterGroup, config Config, env *Environment) {
 
 			relativePath := "images/" + view.Name() + "/" + camera + ".jpg"
 			r.GET(relativePath, func(c *gin.Context) {
-				handleCameraImage(client, view, c, config, env)
+				handleCameraImage(client, view, c, env)
 			})
-			if config.LogConfig() {
+			if env.Config.LogConfig() {
 				log.Printf("httpServer: %s%s -> serve image", r.BasePath(), relativePath)
 			}
 		}
@@ -56,7 +56,6 @@ func handleCameraImage(
 	cameraClient *cameraClient.Client,
 	view *config.ViewConfig,
 	c *gin.Context,
-	config Config,
 	env *Environment,
 ) {
 	// check authorization
@@ -81,7 +80,7 @@ func handleCameraImage(
 		// expire proxy cache before image expires.
 		// The accounts for the fact that some proxies count the maxAge when they fully received the body
 		// but this header is computed when the head is sent.
-		setCacheControlPublicProxy(c, cameraPicture.Expires().Sub(time.Now())-config.ImageEarlyExpire())
+		setCacheControlPublicProxy(c, cameraPicture.Expires().Sub(time.Now())-env.Config.ImageEarlyExpire())
 	}
 	c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
 }

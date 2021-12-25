@@ -152,6 +152,7 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 	ret.enabled = false
 	ret.bind = "[::1]"
 	ret.port = 8043
+	ret.hashSecret = randomString(64)
 
 	if c == nil {
 		return
@@ -233,6 +234,14 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 		err = append(err, fmt.Errorf("HttpServerConfig->ImageEarlyExpire='%s' must be positive", c.ImageEarlyExpire))
 	} else {
 		ret.imageEarlyExpire = imageEarlyExpire
+	}
+
+	if c.HashSecret != nil {
+		if len(*c.HashSecret) < 32 {
+			err = append(err, fmt.Errorf("HashSecret must be empty ot >= 32 chars"))
+		} else {
+			ret.hashSecret = *c.HashSecret
+		}
 	}
 
 	return
