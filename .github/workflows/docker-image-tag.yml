@@ -1,12 +1,9 @@
-name: Docker Image CI
+name: Docker Image CI for Tags
 
 on:
   push:
-    branches: [ main ]
     tags:
       - v0.*
-  pull_request:
-    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,5 +24,5 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: koestler/go-webcam:${GITHUB_REF_NAME} koestler/go-webcam:latest
+          tags: koestler/go-webcam:latest koestler/go-webcam:$GITHUB_REF_NAME
           file: docker/Dockerfile
