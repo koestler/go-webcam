@@ -96,6 +96,7 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 		}(),
 		ResolutionMaxWidth:  &c.resolutionMaxWidth,
 		ResolutionMaxHeight: &c.resolutionMaxHeight,
+		JpgQuality:          &c.jpgQuality,
 		RefreshInterval:     c.refreshInterval.String(),
 		Autoplay:            &c.autoplay,
 		AllowedUsers:        mapKeys(c.allowedUsers),

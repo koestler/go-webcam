@@ -157,6 +157,10 @@ func (c ViewConfig) ResolutionMaxHeight() int {
 	return c.resolutionMaxHeight
 }
 
+func (c ViewConfig) JpgQuality() int {
+	return c.jpgQuality
+}
+
 func (c ViewConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }

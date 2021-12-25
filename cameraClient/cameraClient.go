@@ -64,10 +64,10 @@ func (c *Client) GetDelayedImage(refreshInterval time.Duration) *cameraPicture {
 	return <-response
 }
 
-func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension) *cameraPicture {
+func (c *Client) GetResizedImage(refreshInterval time.Duration, dim Dimension, jpgQuality int) *cameraPicture {
 	response := make(chan *cameraPicture)
 	c.resize.readRequestChannel <- resizedImageReadRequest{
-		resizedImageRequest{refreshInterval, dim},
+		resizedImageRequest{refreshInterval, dim, jpgQuality},
 		response}
 	return <-response
 }

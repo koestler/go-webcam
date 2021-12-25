@@ -66,7 +66,10 @@ func handleCameraImage(
 	}
 
 	// fetch image
-	cameraPicture := cameraClient.GetResizedImage(view.RefreshInterval(), getDimensions(view, c))
+	cameraPicture := cameraClient.GetResizedImage(
+		view.RefreshInterval(), getDimensions(view, c),
+		view.JpgQuality(),
+	)
 
 	// handle camera fetching errors
 	if cameraPicture.Err() != nil {

@@ -56,6 +56,7 @@ type ViewConfig struct {
 	cameras             []*ViewCameraConfig // mandatory: a list of cameraClient names
 	resolutionMaxWidth  int                 // optional: defaults to 3840
 	resolutionMaxHeight int                 // optional: defaults  2160
+	jpgQuality          int                 // optional: default 80
 	refreshInterval     time.Duration       // optional: default 1m
 	autoplay            bool                // optional: default false
 	allowedUsers        map[string]struct{} // optional: if empty: view is public; otherwise only allowed to listed users
@@ -130,6 +131,7 @@ type viewConfigRead struct {
 	Cameras             viewCameraConfigReadMap `yaml:"Cameras"`
 	ResolutionMaxWidth  *int                    `yaml:"ResolutionMaxWidth"`
 	ResolutionMaxHeight *int                    `yaml:"ResolutionMaxHeight"`
+	JpgQuality          *int                    `yaml:"JpgQuality"`
 	RefreshInterval     string                  `yaml:"RefreshInterval"`
 	Autoplay            *bool                   `yaml:"Autoplay"`
 	AllowedUsers        []string                `yaml:"AllowedUsers"`

@@ -429,6 +429,14 @@ func (c viewConfigRead) TransformAndValidate(cameras []*CameraConfig) (ret ViewC
 		err = append(err, fmt.Errorf("Views->%s->ResolutionMaxHeight=%d but must be a positive integer", c.Name, *c.ResolutionMaxHeight))
 	}
 
+	if c.JpgQuality == nil {
+		ret.jpgQuality = 80
+	} else if *c.JpgQuality > 0 && *c.JpgQuality <= 100 {
+		ret.jpgQuality = *c.JpgQuality
+	} else {
+		err = append(err, fmt.Errorf("Views->%s->JpgQuality=%d but must be >0 and <= 100", c.Name, *c.JpgQuality))
+	}
+
 	if len(c.RefreshInterval) < 1 {
 		// use default 0
 		ret.refreshInterval = time.Minute
