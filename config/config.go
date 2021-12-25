@@ -439,7 +439,7 @@ func (c viewConfigRead) TransformAndValidate(cameras []*CameraConfig) (ret ViewC
 	}
 
 	if c.JpgQuality == nil {
-		ret.jpgQuality = 80
+		ret.jpgQuality = 85
 	} else if *c.JpgQuality > 0 && *c.JpgQuality <= 100 {
 		ret.jpgQuality = *c.JpgQuality
 	} else {
