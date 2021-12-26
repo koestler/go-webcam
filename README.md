@@ -285,7 +285,6 @@ Build:
 docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
 docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
 docker buildx build --load --platform linux/arm/v7 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --load --platform linux/arm/v8 -f docker/Dockerfile -t koestler/go-webcam .
 ```
 
 Test:
