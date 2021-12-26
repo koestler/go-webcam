@@ -101,7 +101,12 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 func (c *authConfigRead) TransformAndValidate() (ret AuthConfig, err []error) {
 	ret.enabled = false
 	ret.jwtValidityPeriod = time.Hour
-	ret.jwtSecret = []byte(randomString(64))
+
+	if randString, e := randomString(64); err == nil {
+		ret.jwtSecret = []byte(randString)
+	} else {
+		err = append(err, fmt.Errorf("Auth->JwtSecret: error while generating random secret: %s", e))
+	}
 
 	if c == nil {
 		return
@@ -111,7 +116,7 @@ func (c *authConfigRead) TransformAndValidate() (ret AuthConfig, err []error) {
 
 	if c.JwtSecret != nil {
 		if len(*c.JwtSecret) < 32 {
-			err = append(err, fmt.Errorf("JwtSecret must be empty ot >= 32 chars"))
+			err = append(err, fmt.Errorf("Auth->JwtSecret must be empty ot >= 32 chars"))
 		} else {
 			ret.jwtSecret = []byte(*c.JwtSecret)
 		}
@@ -152,7 +157,12 @@ func (c *httpServerConfigRead) TransformAndValidate() (ret HttpServerConfig, err
 	ret.enabled = false
 	ret.bind = "[::1]"
 	ret.port = 8043
-	ret.hashSecret = randomString(64)
+
+	if randString, e := randomString(64); err == nil {
+		ret.hashSecret = randString
+	} else {
+		err = append(err, fmt.Errorf("HttpServerConfig->HashSecret: error while generating random secret: %s", e))
+	}
 
 	if c == nil {
 		return
