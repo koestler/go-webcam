@@ -9,3 +9,4 @@
 * change autoPlay progress bar; show interval in human-readable form
 * multi-lang support
 * loading spinner for image
+* show proper error when camera is offline
