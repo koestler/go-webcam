@@ -7,8 +7,9 @@ import (
 )
 
 type configResponse struct {
-	ProjectTitle string         `json:"projectTitle" example:"go-webcam"`
-	Views        []viewResponse `json:"views"`
+	ProjectTitle   string         `json:"projectTitle" example:"go-webcam"`
+	BackendVersion string         `json:"backendVersion" example:"v1.2.3"`
+	Views          []viewResponse `json:"views"`
 }
 
 type viewResponse struct {
@@ -39,8 +40,9 @@ type cameraViewResponse struct {
 func setupConfig(r *gin.RouterGroup, env *Environment) {
 	r.GET("config", func(c *gin.Context) {
 		response := configResponse{
-			ProjectTitle: env.ProjectTitle,
-			Views:        make([]viewResponse, 0),
+			ProjectTitle:   env.ProjectTitle,
+			BackendVersion: env.Config.BuildVersion(),
+			Views:          make([]viewResponse, 0),
 		}
 
 		for _, v := range env.Views {

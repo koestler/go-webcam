@@ -57,3 +57,7 @@ func (c httpServerConfig) LogConfig() bool {
 func (c httpServerConfig) LogDebug() bool {
 	return c.logDebug
 }
+
+func (c httpServerConfig) BuildVersion() string {
+	return buildVersion
+}

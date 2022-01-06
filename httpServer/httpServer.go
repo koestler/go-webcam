@@ -29,6 +29,7 @@ type Environment struct {
 }
 
 type Config interface {
+	BuildVersion() string
 	Bind() string
 	Port() int
 	LogRequests() bool
