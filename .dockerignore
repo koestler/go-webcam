@@ -1,0 +1,4 @@
+docker/Dockerfile
+config.yaml
+go-webcam
+*.passwd

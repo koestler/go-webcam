@@ -9,10 +9,10 @@ COPY . /app
 
 RUN go generate
 
-RUN  VERSION=`git symbolic-ref -q --short HEAD || git describe --tags --exact-match` \
-     BUILD_TIME=`date -Is` \
-     CGO_ENABLED=0 \
-     GOOS=linux \
+RUN  VERSION=`git describe --always --tags`; \
+     BUILD_TIME=`date -Is`; \
+     CGO_ENABLED=0; \
+     GOOS=linux; \
      go build -ldflags="-s -w -X main.buildVersion=$VERSION -X main.buildTime=$BUILD_TIME" \
      -o /go-webcam
 
@@ -24,13 +24,13 @@ RUN groupadd -g 1000 app && \
 RUN chown app:app /go-webcam
 
 # use already compiled frontend
-FROM koestler/js-webcam AS js-builder
+FROM koestler/js-webcam:latest AS js-builder
 
 # build final image
 FROM scratch
 USER app
-COPY --from=go-builder /go-webcam      /go-webcam
-COPY --from=go-builder /etc/group      /etc/group
-COPY --from=go-builder /etc/passwd     /etc/passwd
-COPY --from=js-builder /frontend-build /frontend-build
+COPY --from=go-builder /go-webcam            /go-webcam
+COPY --from=go-builder /etc/group            /etc/group
+COPY --from=go-builder /etc/passwd           /etc/passwd
+COPY --from=js-builder /usr/share/nginx/html /frontend-build
 CMD ["/go-webcam", "-c", "/config.yaml"]
