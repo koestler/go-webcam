@@ -9,12 +9,12 @@ COPY . /app
 
 RUN go generate
 
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+
 RUN  VERSION=`git describe --always --tags`; \
      BUILD_TIME=`date -Is`; \
-     CGO_ENABLED=0; \
-     GOOS=linux; \
-     go build -ldflags="-s -w -X main.buildVersion=$VERSION -X main.buildTime=$BUILD_TIME" \
-     -o /go-webcam
+     go build -ldflags="-s -w -X main.buildVersion=$VERSION -X main.buildTime=$BUILD_TIME" -o /go-webcam
 
 RUN upx /go-webcam
 
