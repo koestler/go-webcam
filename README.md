@@ -62,8 +62,8 @@ services:
 Setup like this:
 ```bash
 # create configuration files
-mkdir -p /srv/dc/webscam
-cd /srv/dc/webscam
+mkdir -p /srv/dc/webcam
+cd /srv/dc/webcam
 curl https://raw.githubusercontent.com/koestler/go-webcam/main/documentation/docker-compose.yml -o docker-compose.yml
 curl https://raw.githubusercontent.com/koestler/go-webcam/main/documentation/config.yaml -o config.yaml
 # edit config.yaml

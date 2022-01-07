@@ -2,7 +2,7 @@ version: "3"
 services:
   go-webcam:
     restart: always
-    image: koestler/go-webcam
+    image: koestler/go-webcam:v0
     volumes:
       - ${PWD}/config.yaml:/config.yaml:ro
       # - ${PWD}/auth.passwd:/auth.passwd:ro
