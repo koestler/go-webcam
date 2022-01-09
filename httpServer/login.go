@@ -23,7 +23,7 @@ type loginResponse struct {
 
 // setupLogin godoc
 // @Summary Login endpoint
-// @Description Creates a new JWT token used for authentication if a valud user / password is given.
+// @Description Creates a new JWT token used for authentication if a valid user / password is given.
 // @ID login
 // @Accept json
 // @Produce json
