@@ -77,7 +77,7 @@ func main() {
 	// call defer statements before os.Exit
 	exitCode := func() (exitCode int) {
 		// whenever an error is pushed to this chan, main is terminated
-		initiateShutdown := make(chan error, 4)
+		initiateShutdown := make(chan error)
 
 		if cfg.LogWorkerStart() {
 			log.Printf("main: start go-webcam version=%s", buildVersion)
