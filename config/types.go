@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	version        int                 `yaml:"Version"`        // must be 0
+	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
 	auth           AuthConfig          `yaml:"Auth"`           // optional: default Disabled
 	mqttClients    []*MqttClientConfig `yaml:"MqttClient"`     // mandatory: at least 1 must be defined
 	cameras        []*CameraConfig     `yaml:"Cameras"`        // mandatory: at least 1 must be defined
@@ -15,7 +16,6 @@ type Config struct {
 	logConfig      bool                `yaml:"LogConfig"`      // optional: default False
 	logWorkerStart bool                `yaml:"LogWorkerStart"` // optional: default False
 	logDebug       bool                `yaml:"LogDebug"`       // optional: default False
-	projectTitle   string              `yaml:"ProjectTitle"`   // optional: default go-webcam
 }
 
 type AuthConfig struct {
@@ -81,6 +81,7 @@ type HttpServerConfig struct {
 // Read structs are given to yaml for decoding and are slightly less exact in types
 type configRead struct {
 	Version        *int                    `yaml:"Version"`
+	ProjectTitle   string                  `yaml:"ProjectTitle"`
 	Auth           *authConfigRead         `yaml:"Auth"`
 	MqttClients    mqttClientConfigReadMap `yaml:"MqttClients"`
 	Cameras        cameraConfigReadMap     `yaml:"Cameras"`
@@ -89,7 +90,6 @@ type configRead struct {
 	LogConfig      *bool                   `yaml:"LogConfig"`
 	LogWorkerStart *bool                   `yaml:"LogWorkerStart"`
 	LogDebug       *bool                   `yaml:"LogDebug"`
-	ProjectTitle   string                  `yaml:"ProjectTitle"`
 }
 
 type authConfigRead struct {

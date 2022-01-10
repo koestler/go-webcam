@@ -77,6 +77,12 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 		}
 	}
 
+	if len(c.ProjectTitle) > 0 {
+		ret.projectTitle = c.ProjectTitle
+	} else {
+		ret.projectTitle = "go-webcam"
+	}
+
 	if c.LogConfig != nil && *c.LogConfig {
 		ret.logConfig = true
 	}
@@ -87,12 +93,6 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 
 	if c.LogDebug != nil && *c.LogDebug {
 		ret.logDebug = true
-	}
-
-	if len(c.ProjectTitle) > 0 {
-		ret.projectTitle = c.ProjectTitle
-	} else {
-		ret.projectTitle = "go-webcam"
 	}
 
 	return

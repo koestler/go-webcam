@@ -1,7 +1,7 @@
 Version: 0
+ProjectTitle: Configurable Title of Project
 LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
 LogWorkerStart: True
-ProjectTitle: Configurable Title of Project
 
 Auth:
   HtaccessFile: ./auth.passwd

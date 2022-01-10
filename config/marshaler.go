@@ -3,7 +3,8 @@ package config
 func (c Config) MarshalYAML() (interface{}, error) {
 
 	return configRead{
-		Version: &c.version,
+		Version:      &c.version,
+		ProjectTitle: c.projectTitle,
 		Auth: func() *authConfigRead {
 			if !c.auth.enabled {
 				return nil
@@ -44,7 +45,6 @@ func (c Config) MarshalYAML() (interface{}, error) {
 		LogConfig:      &c.logConfig,
 		LogWorkerStart: &c.logWorkerStart,
 		LogDebug:       &c.logDebug,
-		ProjectTitle:   c.projectTitle,
 	}, nil
 }
 

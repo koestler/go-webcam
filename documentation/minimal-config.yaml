@@ -1,5 +1,4 @@
 Version: 0
-ProjectTitle: Configurable Title of Project
 
 HttpServer:
   Port: 8043                                               # optional, default 8043
