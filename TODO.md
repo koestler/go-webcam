@@ -1,7 +1,8 @@
 ## backend
-* implement preemptive camera fetch
 * auth log
 * log camera errors always
+* document JWTSecret generation
+* debug-log received resolution from camera
 
 ## frontend
 * fetch dynamic image resolutions
