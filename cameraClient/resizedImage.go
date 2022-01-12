@@ -97,7 +97,10 @@ func (c *Client) handleResizeComputeResponse(response resizedImageComputeRespons
 }
 
 func (c *Client) resizeOperation(request resizedImageRequest) {
+	start0 := time.Now()
 	delayedImg := c.GetDelayedImage(request.refreshInterval)
+
+	start1 := time.Now()
 
 	var oupJpgImg []byte
 	var oupDecodedImg image.Image
@@ -115,6 +118,15 @@ func (c *Client) resizeOperation(request resizedImageRequest) {
 		expires:    delayedImg.Expires(),
 		uuid:       delayedImg.Uuid(),
 		err:        err,
+	}
+
+	if c.Config().LogDebug() {
+		log.Printf(
+			"cameraClient[%s]: resized image,     took=%.3fs, total=%.3fs",
+			c.Name(),
+			time.Since(start1).Seconds(),
+			time.Since(start0).Seconds(),
+		)
 	}
 
 	c.resize.computeResponseChannel <- resizedImageComputeResponse{

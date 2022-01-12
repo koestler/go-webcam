@@ -14,6 +14,9 @@ type rawState struct {
 
 	// img image
 	img cameraPicture
+
+	preemptiveTickerRunning bool
+	preemptiveTicker        *time.Ticker
 }
 
 type rawImageReadRequest struct {
@@ -21,17 +24,85 @@ type rawImageReadRequest struct {
 }
 
 func createRawState() rawState {
+	// create a stopped ticker
+	ticker := time.NewTicker(time.Hour)
+	ticker.Stop()
+
 	return rawState{
-		readRequestChannel: make(chan rawImageReadRequest, 16),
+		readRequestChannel:      make(chan rawImageReadRequest, 16),
+		preemptiveTickerRunning: false,
+		preemptiveTicker:        ticker,
 	}
 }
 
 func (c *Client) rawImageRoutine() {
+	cfg := c.Config()
+
+	c.startPreemptiveTicker()
+
+	// track when the last non-preemptive fetch was made
+	lastFetch := time.Now()
+
 	for {
-		readRequest := <-c.raw.readRequestChannel
-		// per camera, maximum one fetch operation is in progress
-		c.handleRawImageReadRequest(readRequest)
+		select {
+		case readRequest := <-c.raw.readRequestChannel:
+			// per camera, maximum one fetch operation is in progress
+			c.handleRawImageReadRequest(readRequest)
+			lastFetch = time.Now()
+
+			// check if preemptive fetch needs to be started
+			c.startPreemptiveTicker()
+		case <-c.raw.preemptiveTicker.C:
+			if cfg.LogDebug() {
+				log.Printf("cameraClient[%s]: preemptive fetch", c.Name())
+			}
+			// trigger a new camera fetch whenever ticker goes off
+			c.fetchImage()
+
+			// check if preemptive fetch needs to be stopped
+			if lastFetch.Add(cfg.PreemptiveFetch()).Before(time.Now()) {
+				c.stopPreemptiveTicker()
+			}
+		}
 	}
+}
+
+func (c *Client) isPreemptiveFetchEnabled() bool {
+	cfg := c.Config()
+	return cfg.RefreshInterval() > (50*time.Millisecond) && cfg.PreemptiveFetch() > cfg.RefreshInterval()
+}
+
+func (c *Client) startPreemptiveTicker() {
+	if !c.isPreemptiveFetchEnabled() {
+		// not enabled, do not start
+		return
+	}
+
+	if c.raw.preemptiveTickerRunning {
+		// already running, do not restart
+		return
+	}
+
+	if c.Config().LogDebug() {
+		log.Printf("cameraClient[%s]: start preemptive fetch", c.Name())
+	}
+
+	c.raw.preemptiveTickerRunning = true
+	c.raw.preemptiveTicker.Reset(c.Config().RefreshInterval())
+}
+
+func (c *Client) stopPreemptiveTicker() {
+	if !c.raw.preemptiveTickerRunning {
+		// not running, do not stop
+		return
+	}
+
+	if c.Config().LogDebug() {
+		log.Printf("cameraClient[%s]: stop preemptive fetch", c.Name())
+	}
+
+	c.raw.preemptiveTickerRunning = false
+	c.raw.preemptiveTicker.Stop()
 }
 
 func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
@@ -40,26 +111,42 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 		if c.Config().LogDebug() {
 			log.Printf("cameraClient[%s]: raw image cache MISS", c.Name())
 		}
-
-		rawImg, err := c.ubntGetRawImage()
-		var decodedRawImg image.Image
-
-		if err == nil {
-			decodedRawImg, err = jpeg.Decode(bytes.NewReader(rawImg))
-		}
-
-		now := time.Now()
-		c.raw.img = cameraPicture{
-			jpgImg:     rawImg,
-			decodedImg: decodedRawImg,
-			fetched:    now,
-			expires:    now.Add(c.Config().RefreshInterval()),
-			uuid:       uuid.New().String(),
-			err:        err,
-		}
+		c.fetchImage()
 	} else if c.Config().LogDebug() {
 		log.Printf("cameraClient[%s]: raw image cache HIT, expiresIn=%s", c.Name(), time.Until(c.raw.img.expires))
 	}
 
 	request.response <- &c.raw.img
+}
+
+func (c *Client) fetchImage() {
+	start0 := time.Now()
+
+	rawImg, err := c.ubntGetRawImage()
+	var decodedRawImg image.Image
+
+	start1 := time.Now()
+
+	if err == nil {
+		decodedRawImg, err = jpeg.Decode(bytes.NewReader(rawImg))
+	}
+
+	now := time.Now()
+	c.raw.img = cameraPicture{
+		jpgImg:     rawImg,
+		decodedImg: decodedRawImg,
+		fetched:    now,
+		expires:    now.Add(c.Config().RefreshInterval()),
+		uuid:       uuid.New().String(),
+		err:        err,
+	}
+
+	if c.Config().LogDebug() {
+		log.Printf(
+			"cameraClient[%s]: raw image fetched, took=%.3fs, total=%.3fs",
+			c.Name(),
+			time.Since(start1).Seconds(),
+			time.Since(start0).Seconds(),
+		)
+	}
 }

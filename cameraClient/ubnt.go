@@ -47,6 +47,8 @@ func (c *Client) ubntLogin(force bool) (err error) {
 		return
 	}
 
+	start := time.Now()
+
 	// create address
 	addr := "https://" + path.Join(c.Config().Address(), "api/1.1/login")
 	loginUrl, err := url.Parse(addr)
@@ -81,7 +83,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 	// we are authenticated
 	c.ubnt.authenticated = true
 	if c.Config().LogDebug() {
-		log.Printf("cameraClient[%s]: ubntLogin successful", c.Name())
+		log.Printf("cameraClient[%s]: ubntLogin successful, took=%s", c.Name(), time.Since(start))
 	}
 
 	return nil
@@ -93,6 +95,8 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	if err != nil {
 		return
 	}
+
+	start := time.Now()
 
 	// create address
 	imageUrl, err := url.Parse("https://" + path.Join(c.Config().Address(), "snap.jpeg"))
@@ -131,6 +135,10 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	img, err = io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.Config().LogDebug() {
+		log.Printf("cameraClient[%s]: ubntImage fetched, took=%.3f", c.Name(), time.Since(start).Seconds())
 	}
 	return img, nil
 }

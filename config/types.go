@@ -43,7 +43,7 @@ type CameraConfig struct {
 	user            string        // optional: default empty
 	password        string        // optional: default empty
 	refreshInterval time.Duration // optional: default 200ms
-	preemptiveFetch time.Duration // optional: default 1m
+	preemptiveFetch time.Duration // optional: default 2 x refreshInterval
 }
 
 type ViewCameraConfig struct {
