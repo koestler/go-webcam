@@ -117,6 +117,10 @@ func (c CameraConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }
 
+func (c CameraConfig) PreemptiveFetch() time.Duration {
+	return c.preemptiveFetch
+}
+
 func (c CameraConfig) ExpireEarly() time.Duration {
 	return 0
 }

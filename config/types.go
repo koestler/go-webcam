@@ -43,6 +43,7 @@ type CameraConfig struct {
 	user            string        // optional: default empty
 	password        string        // optional: default empty
 	refreshInterval time.Duration // optional: default 200ms
+	preemptiveFetch time.Duration // optional: default 1m
 }
 
 type ViewCameraConfig struct {
@@ -116,6 +117,7 @@ type cameraConfigRead struct {
 	User            string `yaml:"User"`
 	Password        string `yaml:"Password"`
 	RefreshInterval string `yaml:"RefreshInterval"`
+	PreemptiveFetch string `yaml:"PreemptiveFetch"`
 }
 
 type cameraConfigReadMap map[string]cameraConfigRead

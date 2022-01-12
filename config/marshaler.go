@@ -76,6 +76,7 @@ func (c CameraConfig) convertToRead() cameraConfigRead {
 		User:            c.user,
 		Password:        c.password,
 		RefreshInterval: c.refreshInterval.String(),
+		PreemptiveFetch: c.preemptiveFetch.String(),
 	}
 }
 

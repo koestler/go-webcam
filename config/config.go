@@ -380,6 +380,22 @@ func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, e
 		ret.refreshInterval = refreshInterval
 	}
 
+	if len(c.PreemptiveFetch) < 1 {
+		// use default 200ms
+		ret.preemptiveFetch =  time.Minute
+	} else if preemptiveFetch, e := time.ParseDuration(c.PreemptiveFetch); e != nil {
+		err = append(err, fmt.Errorf("CameraConfig->%s->PreemptiveFetch='%s' parse error: %s",
+			name, c.PreemptiveFetch, e,
+		))
+	} else if preemptiveFetch < 0 {
+		err = append(err, fmt.Errorf("CameraConfig->%s->PreemptiveFetch='%s' must be positive or zero",
+			name, c.PreemptiveFetch,
+		))
+	} else {
+		ret.preemptiveFetch = preemptiveFetch
+	}
+
+
 	return
 }
 

@@ -10,6 +10,7 @@ type Config interface {
 	User() string
 	Password() string
 	RefreshInterval() time.Duration
+	PreemptiveFetch() time.Duration
 	ExpireEarly() time.Duration
 	LogDebug() bool
 }
