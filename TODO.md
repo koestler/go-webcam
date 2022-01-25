@@ -1,5 +1,4 @@
 ## backend
-* log camera errors always
 * document JWTSecret generation
 * debug-log received resolution from camera
 

@@ -72,6 +72,7 @@ func (c *Client) ubntLogin(force bool) (err error) {
 
 	res, err := c.ubnt.httpClient.Post(loginUrl.String(), "application/json", bytes.NewBuffer(bodyJson))
 	if err != nil {
+		log.Printf("cameraClient[%s]: ubntLogin failed: %s", c.Name(), err)
 		return
 	}
 
@@ -107,6 +108,7 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	// first attempt
 	res, err := c.ubnt.httpClient.Get(imageUrl.String())
 	if err != nil {
+		log.Printf("cameraClient[%s]: fetch failed: %s", c.Name(), err)
 		return
 	}
 
@@ -120,6 +122,7 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 
 		res, err = c.ubnt.httpClient.Get(imageUrl.String())
 		if err != nil {
+			log.Printf("cameraClient[%s]: fetch failed: %s", c.Name(), err)
 			return
 		}
 
@@ -127,6 +130,9 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 
 	// handle errors
 	if res.StatusCode != http.StatusOK {
+		if c.Config().LogDebug() {
+			log.Printf("cameraClient[%s]: fetch failed with code %d, error: %s", c.Name(), res.StatusCode, res.Body)
+		}
 		return nil, fmt.Errorf("got code %v from camera when fetching a snapshot", res.StatusCode)
 	}
 
