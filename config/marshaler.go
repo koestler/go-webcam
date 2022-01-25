@@ -54,6 +54,7 @@ func (c AuthConfig) convertToRead() authConfigRead {
 		JwtSecret:         &jwtSecret,
 		JwtValidityPeriod: c.jwtValidityPeriod.String(),
 		HtaccessFile:      &c.htaccessFile,
+		LogAuth:           &c.logAuth,
 	}
 }
 

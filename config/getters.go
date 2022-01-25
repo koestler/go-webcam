@@ -61,6 +61,10 @@ func (c AuthConfig) HtaccessFile() string {
 	return c.htaccessFile
 }
 
+func (c AuthConfig) LogAuth() bool {
+	return c.logAuth
+}
+
 func (c MqttClientConfig) Name() string {
 	return c.name
 }

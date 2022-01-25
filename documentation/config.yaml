@@ -10,6 +10,7 @@ HttpServer:
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
   Port: 8043                                               # optional, default 8043
   LogRequests: True
+  LogAuth: True                                            # optional, default False, log when login is successful / fails
 
 Cameras:
   0-cam-east:

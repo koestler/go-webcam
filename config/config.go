@@ -150,6 +150,10 @@ func (c *authConfigRead) TransformAndValidate() (ret AuthConfig, err []error) {
 		ret.htaccessFile = *c.HtaccessFile
 	}
 
+	if c.LogAuth != nil && *c.LogAuth {
+		ret.logAuth = true
+	}
+
 	return
 }
 

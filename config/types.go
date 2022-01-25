@@ -23,6 +23,7 @@ type AuthConfig struct {
 	jwtSecret         []byte        `yaml:"JwtSecret"`         // optional: default new random string on startup
 	jwtValidityPeriod time.Duration `yaml:"JwtValidityPeriod"` // optional: default 1h
 	htaccessFile      string        `yaml:"HtaccessFile"`      // optional: default no valid users
+	logAuth           bool          `yaml:"LogAuth"`           // optional: default False
 }
 
 type MqttClientConfig struct {
@@ -97,6 +98,7 @@ type authConfigRead struct {
 	JwtSecret         *string `yaml:"JwtSecret"`
 	JwtValidityPeriod string  `yaml:"JwtValidityPeriod"`
 	HtaccessFile      *string `yaml:"HtaccessFile"`
+	LogAuth           *bool   `yaml:"LogAuth"`
 }
 
 type mqttClientConfigRead struct {

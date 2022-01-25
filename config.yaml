@@ -7,6 +7,7 @@ LogDebug: False                                            # optional, default F
 Auth:
   HtaccessFile: ./auth.passwd
   JwtValidityPeriod: 2h
+  LogAuth: true
 
 HttpServer: # optional, default Disabled, start the http server
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)

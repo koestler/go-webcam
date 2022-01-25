@@ -57,6 +57,9 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 
 		reloadAuthChecker(authChecker, env.Config)
 		if !authChecker.Match(req.User, req.Password) {
+			if env.Auth.LogAuth() {
+				log.Printf("httpServer: login failed for user '%s'", req.User)
+			}
 			jsonErrorResponse(c, http.StatusUnauthorized, errors.New("Invalid credentials"))
 			return
 		}
@@ -73,6 +76,10 @@ func setupLogin(r *gin.RouterGroup, env *Environment) {
 			if v.IsAllowed(req.User) {
 				allowedViews = append(allowedViews, v.Name())
 			}
+		}
+
+		if env.Auth.LogAuth() {
+			log.Printf("httpServer: successful login of user '%s'", req.User)
 		}
 
 		c.JSON(http.StatusOK, loginResponse{Token: tokenStr, User: req.User, AllowedViews: allowedViews})
