@@ -1,6 +1,5 @@
 ## backend
 * document JWTSecret generation
-* debug-log received resolution from camera
 
 ## frontend
 * fetch dynamic image resolutions
