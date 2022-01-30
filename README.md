@@ -203,6 +203,21 @@ Views:
 
 ```
 
+### JwtSecret
+The JwtSecret is optional. When it is missing, a random secret is generated on every startup of the
+backend. This causes all users to be logged out whenever the backend is restarted.
+To avoid this, it can be fixed via the configuration.
+Most easily, you start the backend the first time with `LogDebug: True`
+and copy the randomly generated secret into the configuration file.
+
+### HashSecret
+In order to allow reverse proxies to cache images even when authentication is used, all authenticated
+images requests are redirected to an unauthenticated, unguessable URL of the image.
+This URL includes a hash of the uuid uf the image plus the `HashSecret`. To avoid making
+all cached images obsolete after a restart of the backend, this secret should be hardcoded.
+Most easily, you start the backend the first time with `LogDebug: True`
+and copy the randomly generated secret into the configuration file.
+
 ## Cameras
 
 ### Ubiquiti UVC

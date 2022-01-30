@@ -1,6 +1,3 @@
-## backend
-* document JWTSecret generation
-
 ## frontend
 * fetch dynamic image resolutions
 * add Description text
