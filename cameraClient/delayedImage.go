@@ -8,6 +8,10 @@ import (
 type delayedState struct {
 	readRequestChannel chan delayedImageReadRequest
 	cache              cameraPictureMap
+
+	// shutdown handling
+	shutdown chan struct{}
+	closed   chan struct{}
 }
 
 type delayedImageReadRequest struct {
@@ -19,13 +23,20 @@ func createDelayedState() delayedState {
 	return delayedState{
 		readRequestChannel: make(chan delayedImageReadRequest, 16),
 		cache:              make(cameraPictureMap),
+		shutdown:           make(chan struct{}),
+		closed:             make(chan struct{}),
 	}
 }
 
 func (c *Client) delayedImageRoutine() {
+	defer close(c.delayed.closed)
 	for {
-		readRequest := <-c.delayed.readRequestChannel
-		c.handleDelayedImageReadRequest(readRequest)
+		select {
+		case readRequest := <-c.delayed.readRequestChannel:
+			c.handleDelayedImageReadRequest(readRequest)
+		case <-c.delayed.shutdown:
+			return
+		}
 	}
 }
 

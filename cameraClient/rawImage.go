@@ -17,6 +17,10 @@ type rawState struct {
 
 	preemptiveTickerRunning bool
 	preemptiveTicker        *time.Ticker
+
+	// shutdown handling
+	shutdown chan struct{}
+	closed   chan struct{}
 }
 
 type rawImageReadRequest struct {
@@ -32,10 +36,14 @@ func createRawState() rawState {
 		readRequestChannel:      make(chan rawImageReadRequest, 16),
 		preemptiveTickerRunning: false,
 		preemptiveTicker:        ticker,
+		shutdown:                make(chan struct{}),
+		closed:                  make(chan struct{}),
 	}
 }
 
 func (c *Client) rawImageRoutine() {
+	defer close(c.raw.closed)
+
 	cfg := c.Config()
 
 	c.startPreemptiveTicker()
@@ -63,6 +71,8 @@ func (c *Client) rawImageRoutine() {
 			if lastFetch.Add(cfg.PreemptiveFetch()).Before(time.Now()) {
 				c.stopPreemptiveTicker()
 			}
+		case <-c.raw.shutdown:
+			return
 		}
 	}
 }

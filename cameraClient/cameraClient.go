@@ -42,7 +42,14 @@ func RunClient(config Config) (*Client, error) {
 }
 
 func (c *Client) Shutdown() {
-	// todo: implement proper shutdown
+	// send shutdown signals
+	close(c.raw.shutdown)
+	close(c.delayed.shutdown)
+	close(c.resize.shutdown)
+	// wait for all 3 go routines to send the closed signal
+	<-c.raw.closed
+	<-c.delayed.closed
+	<-c.resize.closed
 }
 
 func (c *Client) Name() string {

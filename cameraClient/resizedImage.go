@@ -17,6 +17,10 @@ type resizeState struct {
 	cache                  cameraPictureMap
 	computeResponseChannel chan resizedImageComputeResponse
 	waitingResponses       map[string][]chan *cameraPicture
+
+	// shutdown handling
+	shutdown chan struct{}
+	closed   chan struct{}
 }
 
 type resizedImageRequest struct {
@@ -41,16 +45,21 @@ func createResizeState() resizeState {
 		cache:                  make(cameraPictureMap),
 		computeResponseChannel: make(chan resizedImageComputeResponse, 16),
 		waitingResponses:       make(map[string][]chan *cameraPicture),
+		shutdown:               make(chan struct{}),
+		closed:                 make(chan struct{}),
 	}
 }
 
 func (c *Client) resizedImageRoutine() {
+	defer close(c.resize.closed)
 	for {
 		select {
 		case readRequest := <-c.resize.readRequestChannel:
 			c.handleResizedImageReadRequest(readRequest)
 		case computeResponse := <-c.resize.computeResponseChannel:
 			c.handleResizeComputeResponse(computeResponse)
+		case <-c.resize.shutdown:
+			return
 		}
 	}
 }
