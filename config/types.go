@@ -125,22 +125,23 @@ type cameraConfigRead struct {
 type cameraConfigReadMap map[string]cameraConfigRead
 
 type viewCameraConfigRead struct {
+	Name  string `yaml:"Name"`
 	Title string `yaml:"Title"`
 }
 
-type viewCameraConfigReadMap map[string]viewCameraConfigRead
+type viewCameraConfigReadList []viewCameraConfigRead
 
 type viewConfigRead struct {
-	Name                string                  `yaml:"Name"`
-	Title               string                  `yaml:"Title"`
-	Cameras             viewCameraConfigReadMap `yaml:"Cameras"`
-	ResolutionMaxWidth  *int                    `yaml:"ResolutionMaxWidth"`
-	ResolutionMaxHeight *int                    `yaml:"ResolutionMaxHeight"`
-	JpgQuality          *int                    `yaml:"JpgQuality"`
-	RefreshInterval     string                  `yaml:"RefreshInterval"`
-	Autoplay            *bool                   `yaml:"Autoplay"`
-	AllowedUsers        []string                `yaml:"AllowedUsers"`
-	Hidden              *bool                   `yaml:"Hidden"`
+	Name                string                   `yaml:"Name"`
+	Title               string                   `yaml:"Title"`
+	Cameras             viewCameraConfigReadList `yaml:"Cameras"`
+	ResolutionMaxWidth  *int                     `yaml:"ResolutionMaxWidth"`
+	ResolutionMaxHeight *int                     `yaml:"ResolutionMaxHeight"`
+	JpgQuality          *int                     `yaml:"JpgQuality"`
+	RefreshInterval     string                   `yaml:"RefreshInterval"`
+	Autoplay            *bool                    `yaml:"Autoplay"`
+	AllowedUsers        []string                 `yaml:"AllowedUsers"`
+	Hidden              *bool                    `yaml:"Hidden"`
 }
 
 type viewConfigReadList []viewConfigRead

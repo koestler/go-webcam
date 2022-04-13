@@ -30,18 +30,18 @@ Views:
   - Name: low
     Title: Low Resolution
     Cameras:
-      0-cam-east:
+      - Name: 0-cam-east
         title: Camera East
-      1-cam-north:
+      - Name: 1-cam-north
         Title: Camera North
     ResolutionMaxWidth: 480
     RefreshInterval: 2s
   - Name: highres
     Title: High Resolution
     Cameras:
-      0-cam-east:
-        title: Camera East
-      1-cam-north:
+      - Name: 0-cam-east
+        Title: Camera East
+      - Name: 1-cam-north
         Title: Camera North
     ResolutionMaxWidth: 1024
     RefreshInterval: 2s

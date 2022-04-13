@@ -1,7 +1,6 @@
 package config
 
 func (c Config) MarshalYAML() (interface{}, error) {
-
 	return configRead{
 		Version:      &c.version,
 		ProjectTitle: c.projectTitle,
@@ -83,6 +82,7 @@ func (c CameraConfig) convertToRead() cameraConfigRead {
 
 func (c ViewCameraConfig) convertToRead() viewCameraConfigRead {
 	return viewCameraConfigRead{
+		Name:  c.name,
 		Title: c.title,
 	}
 }
@@ -91,10 +91,10 @@ func (c ViewConfig) convertToRead() viewConfigRead {
 	return viewConfigRead{
 		Name:  c.name,
 		Title: c.title,
-		Cameras: func() viewCameraConfigReadMap {
-			views := make(viewCameraConfigReadMap, len(c.cameras))
-			for _, c := range c.cameras {
-				views[c.name] = c.convertToRead()
+		Cameras: func() viewCameraConfigReadList {
+			views := make(viewCameraConfigReadList, len(c.cameras))
+			for i, c := range c.cameras {
+				views[i] = c.convertToRead()
 			}
 			return views
 		}(),

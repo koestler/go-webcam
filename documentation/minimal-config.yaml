@@ -14,5 +14,5 @@ Views:
   - Name: raw
     Title: Full Resolution
     Cameras:
-      0-cam-east:
-        title: Camera East
+      - Name: 0-cam-east
+        Title: Camera East

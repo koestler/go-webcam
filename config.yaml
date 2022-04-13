@@ -56,22 +56,22 @@ Views: # mandatory, a list of Views that shall be available
   - Name: public
     Title: For All
     Cameras:
-      0-cam-east:
-        title: Camera East
+      - Name: 0-cam-east
+        Title: Camera East
     ResolutionMaxWidth: 1024
     ResolutionMaxHeight: 768
     RefreshInterval: 1s
   - Name: publicHighRes
     Title: For All High Res
     Cameras:
-      0-cam-east:
-        title: Camera East
+      - Name: 0-cam-east
+        Title: Camera East
     ResolutionMaxWidth: 1500
     RefreshInterval: 1s
   - Name: private
     Title: For Staff
     Cameras:
-      0-cam-east:
+      - Name: 0-cam-east
         Title: Cmera East Zero
     RefreshInterval: 2s
     Autoplay: True
@@ -81,9 +81,9 @@ Views: # mandatory, a list of Views that shall be available
   - Name: private2
     Title: For Staff High-Speed
     Cameras:
-      3-cam-north:
+      - Name: 3-cam-north
         Title: Camera North One
-      4-cam-north:
+      - Name: 4-cam-north
         Title: Camera North Three
     RefreshInterval: 100ms
     Autoplay: False
@@ -92,9 +92,9 @@ Views: # mandatory, a list of Views that shall be available
   - Name: private3
     Title: I'm hidden
     Cameras:
-      3-cam-north:
+      - Name: 3-cam-north
         Title: Camera North One
-      4-cam-north:
+      - Name: 4-cam-north
         Title: Camera North Three
     RefreshInterval: 100ms
     Autoplay: False
