@@ -511,12 +511,10 @@ func (c viewCameraConfigReadList) TransformAndValidate(cameras []*CameraConfig) 
 	}
 
 	ret = make([]*ViewCameraConfig, len(c))
-	j := 0
-	for _, camera := range c {
+	for i, camera := range c {
 		r, e := camera.TransformAndValidate(cameras)
-		ret[j] = &r
+		ret[i] = &r
 		err = append(err, e...)
-		j++
 	}
 	return
 
