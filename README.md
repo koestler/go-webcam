@@ -51,7 +51,7 @@ version: "3"
 services:
   go-webcam:
     restart: always
-    image: koestler/go-webcam
+    image: koestler/go-webcam:v0
     volumes:
       - ${PWD}/config.yaml:/config.yaml:ro
       # - ${PWD}/auth.passwd:/auth.passwd:ro
@@ -125,9 +125,9 @@ Whenever a mandatory field is missing or an invalid value is given, the backend 
 # documentation/config.yaml
 
 Version: 0
+ProjectTitle: Configurable Title of Project
 LogConfig: True                                            # optional, default False, outputs the configuration including defaults on startup
 LogWorkerStart: True
-ProjectTitle: Configurable Title of Project
 
 Auth:
   HtaccessFile: ./auth.passwd
@@ -136,6 +136,7 @@ HttpServer:
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
   Port: 8043                                               # optional, default 8043
   LogRequests: True
+  LogAuth: True                                            # optional, default False, log when login is successful / fails
 
 Cameras:
   0-cam-east:
@@ -155,18 +156,18 @@ Views:
   - Name: low
     Title: Low Resolution
     Cameras:
-      0-cam-east:
+      - Name: 0-cam-east
         title: Camera East
-      1-cam-north:
+      - Name: 1-cam-north
         Title: Camera North
     ResolutionMaxWidth: 480
     RefreshInterval: 2s
   - Name: highres
     Title: High Resolution
     Cameras:
-      0-cam-east:
-        title: Camera East
-      1-cam-north:
+      - Name: 0-cam-east
+        Title: Camera East
+      - Name: 1-cam-north
         Title: Camera North
     ResolutionMaxWidth: 1024
     RefreshInterval: 2s
@@ -182,7 +183,6 @@ fields. Start with this one and override the defaults.
 # documentation/minimal-config.yaml
 
 Version: 0
-ProjectTitle: Configurable Title of Project
 
 HttpServer:
   Port: 8043                                               # optional, default 8043
@@ -198,8 +198,8 @@ Views:
   - Name: raw
     Title: Full Resolution
     Cameras:
-      0-cam-east:
-        title: Camera East
+      - Name: 0-cam-east
+        Title: Camera East
 
 ```
 
