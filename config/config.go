@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -18,7 +17,7 @@ const NameRegexp = "^[a-zA-Z0-9\\-]{1,32}$"
 var nameMatcher = regexp.MustCompile(NameRegexp)
 
 func ReadConfigFile(exe, source string) (config Config, err []error) {
-	yamlStr, e := ioutil.ReadFile(source)
+	yamlStr, e := os.ReadFile(source)
 	if e != nil {
 		return config, []error{fmt.Errorf("cannot read configuration: %v; use see `%s --help`", err, exe)}
 	}
