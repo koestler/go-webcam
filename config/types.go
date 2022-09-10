@@ -33,9 +33,9 @@ type MqttClientConfig struct {
 	password          string // optional: default empty
 	clientId          string // optional: default go-webcam-UUID
 	qos               byte   // optional: default 1, must be 0, 1, 2
-	availabilityTopic string // optional: default %Prefix%tele/%clientId%/LWT
+	availabilityTopic string // optional: default %Prefix%tele/%ClientId%/status
 	topicPrefix       string // optional: default empty
-	logMessages       bool   // optional: default False
+	logDebug          bool   // optional: default False
 }
 
 type CameraConfig struct {
@@ -109,7 +109,7 @@ type mqttClientConfigRead struct {
 	Qos               *byte   `yaml:"Qos"`
 	AvailabilityTopic *string `yaml:"AvailabilityTopic"`
 	TopicPrefix       string  `yaml:"TopicPrefix"`
-	LogMessages       *bool   `yaml:"LogMessages"`
+	LogDebug          *bool   `yaml:"LogDebug"`
 }
 
 type mqttClientConfigReadMap map[string]mqttClientConfigRead

@@ -302,7 +302,7 @@ func (c mqttClientConfigRead) TransformAndValidate(name string) (ret MqttClientC
 		err = append(err, fmt.Errorf("MqttClientConfig->%s->Broker must not be empty", name))
 	}
 	if len(ret.clientId) < 1 {
-		ret.clientId = "go-webcam"
+		ret.clientId = "go-webcam-" + uuid.New().String()
 	}
 	if c.Qos == nil {
 		ret.qos = 1
@@ -314,13 +314,13 @@ func (c mqttClientConfigRead) TransformAndValidate(name string) (ret MqttClientC
 
 	if c.AvailabilityTopic == nil {
 		// use default
-		ret.availabilityTopic = "%Prefix%tele/%clientId%/LWT"
+		ret.availabilityTopic = "%Prefix%tele/%ClientId%/status"
 	} else {
 		ret.availabilityTopic = *c.AvailabilityTopic
 	}
 
-	if c.LogMessages != nil && *c.LogMessages {
-		ret.logMessages = true
+	if c.LogDebug != nil && *c.LogDebug {
+		ret.logDebug = true
 	}
 
 	return

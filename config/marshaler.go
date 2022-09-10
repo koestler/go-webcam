@@ -66,7 +66,7 @@ func (c MqttClientConfig) convertToRead() mqttClientConfigRead {
 		Qos:               &c.qos,
 		AvailabilityTopic: &c.availabilityTopic,
 		TopicPrefix:       c.topicPrefix,
-		LogMessages:       &c.logMessages,
+		LogDebug:          &c.logDebug,
 	}
 }
 

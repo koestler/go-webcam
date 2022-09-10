@@ -97,10 +97,8 @@ func main() {
 		defer httpServerInstance.Shutdown()
 
 		// start mqtt clients
-		mqttClientInstances := runMqttClient(cfg, initiateShutdown)
-		for _, client := range mqttClientInstances {
-			defer client.Shutdown()
-		}
+		clientPoolInstance := runMqttClient(cfg)
+		defer clientPoolInstance.Shutdown()
 
 		if cfg.LogWorkerStart() {
 			log.Print("main: start completed; run until SIGTERM or SIGINT is received")

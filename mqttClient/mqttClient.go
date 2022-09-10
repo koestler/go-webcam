@@ -4,14 +4,9 @@ import (
 	"fmt"
 	"github.com/eclipse/paho.mqtt.golang"
 	"log"
+	"os"
 	"strings"
-	"time"
 )
-
-type MqttClient struct {
-	config Config
-	client mqtt.Client
-}
 
 type Config interface {
 	Name() string
@@ -20,94 +15,81 @@ type Config interface {
 	Password() string
 	ClientId() string
 	Qos() byte
-	AvailabilityTopic() string
 	TopicPrefix() string
-	LogMessages() bool
+	AvailabilityTopic() string
+	LogDebug() bool
 }
 
-const (
-	OfflinePayload string = "Offline"
-	OnlinePayload  string = "Online"
-)
+type Client interface {
+	Config() Config
+	Shutdown()
+}
 
-func Run(config Config) (*MqttClient, error) {
+type ClientStruct struct {
+	cfg        Config
+	mqttClient mqtt.Client
+	shutdown   chan struct{}
+}
+
+func RunClient(cfg Config) (client Client, err error) {
 	// configure client and start connection
 	opts := mqtt.NewClientOptions().
-		AddBroker(config.Broker()).
-		SetClientID(config.ClientId())
-	if len(config.User()) > 0 {
-		opts.SetUsername(config.User())
+		AddBroker(cfg.Broker()).
+		SetClientID(cfg.ClientId()).
+		SetOrderMatters(false).
+		SetCleanSession(true) // use clean, non-persistent session since we only publish
+	if len(cfg.User()) > 0 {
+		opts.SetUsername(cfg.User())
 	}
-	if len(config.Password()) > 0 {
-		opts.SetPassword(config.Password())
-	}
-
-	opts.SetOrderMatters(false)
-	opts.SetCleanSession(false)
-	opts.MaxReconnectInterval = 10 * time.Second
-
-	// setup availability topic using will
-	availableTopic := getAvailableTopic(config)
-	if len(availableTopic) > 0 {
-		log.Printf("mqttClient[%s]: set will to topic='%s', payload='%s'",
-			config.Name(), availableTopic, OfflinePayload,
-		)
-		opts.SetWill(availableTopic, OfflinePayload, config.Qos(), true)
-
-		// public availability after each connect
-		opts.SetOnConnectHandler(func(client mqtt.Client) {
-			sendAvailableMsg(config, client)
-		})
+	if len(cfg.Password()) > 0 {
+		opts.SetPassword(cfg.Password())
 	}
 
-	// start connection
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		return nil, fmt.Errorf("mqttClient[%s]: connect failed: %s", config.Name(), token.Error())
-	}
-	log.Printf("mqttClient[%s]: connected to broker='%s'", config.Name(), config.Broker())
+	// public availability offline as will
+	opts.SetWill(GetAvailabilityTopic(cfg), "offline", cfg.Qos(), true)
 
-	return &MqttClient{
-		config: config,
-		client: client,
-	}, nil
+	mqtt.ERROR = log.New(os.Stdout, "", 0)
+	if cfg.LogDebug() {
+		mqtt.DEBUG = log.New(os.Stdout, "", 0)
+	}
+
+	mqttClient := mqtt.NewClient(opts)
+	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
+		return nil, fmt.Errorf("connect failed: %s", token.Error())
+	}
+
+	clientStruct := ClientStruct{
+		cfg:        cfg,
+		mqttClient: mqttClient,
+		shutdown:   make(chan struct{}),
+	}
+
+	// send Online
+	mqttClient.Publish(GetAvailabilityTopic(cfg), cfg.Qos(), true, "online")
+
+	return &clientStruct, nil
 }
 
-func (mq *MqttClient) Shutdown() {
-	sendUnavailableMsg(mq.config, mq.client)
-	mq.client.Disconnect(1000)
+func (c ClientStruct) Config() Config {
+	return c.cfg
 }
 
-func replaceTemplate(template string, config Config) (r string) {
-	r = strings.Replace(template, "%Prefix%", config.TopicPrefix(), 1)
-	r = strings.Replace(r, "%clientId%", config.ClientId(), 1)
+func (c ClientStruct) Shutdown() {
+	close(c.shutdown)
+
+	// publish availability offline
+	c.mqttClient.Publish(GetAvailabilityTopic(c.cfg), c.cfg.Qos(), true, "offline")
+
+	c.mqttClient.Disconnect(1000)
+	log.Printf("mqttClient[%s]: shutdown completed", c.cfg.Name())
+}
+
+func GetAvailabilityTopic(cfg Config) string {
+	return replaceTemplate(cfg.AvailabilityTopic(), cfg)
+}
+
+func replaceTemplate(template string, cfg Config) (r string) {
+	r = strings.Replace(template, "%Prefix%", cfg.TopicPrefix(), 1)
+	r = strings.Replace(r, "%ClientId%", cfg.ClientId(), 1)
 	return
-}
-
-func (mq *MqttClient) Name() string {
-	return mq.config.Name()
-}
-
-func getAvailableTopic(config Config) string {
-	return replaceTemplate(config.AvailabilityTopic(), config)
-}
-
-func sendUnavailableMsg(config Config, client mqtt.Client) {
-	availableTopic := getAvailableTopic(config)
-	if len(availableTopic) < 1 {
-		return
-	}
-
-	log.Printf("mqttClient[%s]: set availability to topic='%s', payload='%s'",
-		config.Name(), availableTopic, OfflinePayload,
-	)
-	client.Publish(availableTopic, config.Qos(), true, OfflinePayload)
-}
-
-func sendAvailableMsg(config Config, client mqtt.Client) {
-	availableTopic := getAvailableTopic(config)
-	log.Printf("mqttClient[%s]: set availability to topic='%s', payload='%s'",
-		config.Name(), availableTopic, OnlinePayload,
-	)
-	client.Publish(availableTopic, config.Qos(), true, OnlinePayload)
 }

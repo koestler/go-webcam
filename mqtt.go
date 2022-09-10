@@ -1,39 +1,35 @@
 package main
 
 import (
-	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/koestler/go-webcam/config"
 	"github.com/koestler/go-webcam/mqttClient"
 	"log"
-	"os"
 )
 
-func runMqttClient(
-	cfg *config.Config,
-	initiateShutdown chan<- error,
-) map[string]*mqttClient.MqttClient {
-	mqtt.ERROR = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
-	if cfg.LogDebug() {
-		mqtt.DEBUG = log.New(os.Stdout, "MqttDebugLog: ", log.LstdFlags)
-	}
+func runMqttClient(cfg *config.Config) (clientPoolInstance *mqttClient.ClientPool) {
+	clientPoolInstance = mqttClient.RunPool()
 
-	mqttClientInstances := make(map[string]*mqttClient.MqttClient)
-
-	for _, mqttClientConfig := range cfg.MqttClients() {
+	for _, cfgClient := range cfg.MqttClients() {
 		if cfg.LogWorkerStart() {
 			log.Printf(
-				"mqttClient[%s]: start: Broker='%s', ClientId='%s'",
-				mqttClientConfig.Name(), mqttClientConfig.Broker(), mqttClientConfig.ClientId(),
+				"mqttClient[%s]: broker='%s'",
+				cfgClient.Name(),
+				cfgClient.Broker(),
 			)
 		}
 
-		if client, err := mqttClient.Run(mqttClientConfig); err != nil {
-			log.Printf("mqttClient[%s]: start failed: %s", mqttClientConfig.Name(), err)
+		if client, err := mqttClient.RunClient(cfgClient); err != nil {
+			log.Printf("mqttClient[%s]: start failed: %s", cfgClient.Name(), err)
 		} else {
-			mqttClientInstances[mqttClientConfig.Name()] = client
-			log.Printf("mqttClient[%s]: started", mqttClientConfig.Name())
+			clientPoolInstance.AddClient(client)
+			if cfg.LogWorkerStart() {
+				log.Printf(
+					"mqttClient[%s]: started",
+					client.Config().Name(),
+				)
+			}
 		}
 	}
 
-	return mqttClientInstances
+	return
 }

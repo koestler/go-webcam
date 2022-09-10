@@ -97,8 +97,8 @@ func (c MqttClientConfig) TopicPrefix() string {
 	return c.topicPrefix
 }
 
-func (c MqttClientConfig) LogMessages() bool {
-	return c.logMessages
+func (c MqttClientConfig) LogDebug() bool {
+	return c.logDebug
 }
 
 func (c CameraConfig) Name() string {
