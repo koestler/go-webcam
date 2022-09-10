@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v2"
 	"log"
 	"net/url"
@@ -79,7 +80,7 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	if len(c.ProjectTitle) > 0 {
 		ret.projectTitle = c.ProjectTitle
 	} else {
-		ret.projectTitle = "go-webcam"
+		ret.projectTitle = "go-webcam-" + uuid.New().String()
 	}
 
 	if c.LogConfig != nil && *c.LogConfig {
@@ -304,7 +305,7 @@ func (c mqttClientConfigRead) TransformAndValidate(name string) (ret MqttClientC
 		ret.clientId = "go-webcam"
 	}
 	if c.Qos == nil {
-		ret.qos = 0
+		ret.qos = 1
 	} else if *c.Qos == 0 || *c.Qos == 1 || *c.Qos == 2 {
 		ret.qos = *c.Qos
 	} else {
