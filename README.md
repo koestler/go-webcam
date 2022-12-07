@@ -235,10 +235,6 @@ It is the same for all cameras adopted by the controller.
 The requests to the cameras are mad encrypted over https however validation of the camera's
 server certificate is always skipped.
 
-## Rest-API
-When `enableDocs: True` is set in the configuration, a Swagger documentation of the REST-Api
-is exposed.
-
 ## Authentication
 The user/password database is stored in a single file in the format of the apache `htpasswd` tool.
 The file can is reloaded automatically.

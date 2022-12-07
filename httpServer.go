@@ -8,8 +8,6 @@ import (
 	"log"
 )
 
-//go:generate swag init -g httpServer/swagger.go
-
 func runHttpServer(cfg *config.Config, cameraClientPoolInstance *cameraClient.ClientPool) *httpServer.HttpServer {
 	httpServerCfg := cfg.HttpServer()
 	if !httpServerCfg.Enabled() {

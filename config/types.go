@@ -70,7 +70,6 @@ type HttpServerConfig struct {
 	bind             string        // optional: defaults to ::1 (ipv6 loopback)
 	port             int           // optional: defaults to 8043
 	logRequests      bool          // optional: default False
-	enableDocs       bool          // optional: default True
 	frontendProxy    *url.URL      // optional: default deactivated; otherwise an address of the frontend dev-server
 	frontendPath     string        // optional: default "frontend-build"; otherwise set to a path where the frontend build is located
 	frontendExpires  time.Duration // optional: default 5min; what cache-control header to sent for static frontend files
@@ -150,7 +149,6 @@ type httpServerConfigRead struct {
 	Bind             string  `yaml:"Bind"`
 	Port             *int    `yaml:"Port"`
 	LogRequests      *bool   `yaml:"LogRequests"`
-	EnableDocs       *bool   `yaml:"EnableDocs"`
 	FrontendProxy    string  `yaml:"FrontendProxy"`
 	FrontendPath     string  `yaml:"FrontendPath"`
 	FrontendExpires  string  `yaml:"FrontendExpires"`
