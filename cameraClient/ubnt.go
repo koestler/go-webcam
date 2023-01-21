@@ -15,8 +15,9 @@ import (
 )
 
 type ubntState struct {
-	httpClient    *http.Client
-	authenticated bool
+	httpClient        *http.Client
+	authenticated     bool
+	firstAttemptError string
 }
 
 func createUbntState() ubntState {
@@ -34,7 +35,8 @@ func createUbntState() ubntState {
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 		},
-		authenticated: false,
+		authenticated:     false,
+		firstAttemptError: "",
 	}
 }
 
@@ -108,9 +110,16 @@ func (c *Client) ubntGetRawImage() (img []byte, err error) {
 	// first attempt
 	res, err := c.ubnt.httpClient.Get(imageUrl.String())
 	if err != nil {
-		log.Printf("cameraClient[%s]: fetch failed: %s", c.Name(), err)
+		errMsg := fmt.Sprintf("cameraClient[%s]: fetch failed: %s", c.Name(), err)
+		// only print the same connect error once and not on every retry
+		// this is prevents the logs from filling up when a host is unavailable
+		if c.ubnt.firstAttemptError != errMsg {
+			log.Println(errMsg)
+		}
+		c.ubnt.firstAttemptError = errMsg
 		return
 	}
+	c.ubnt.firstAttemptError = ""
 
 	// second attempt; try to relogin if unauthorized is returned
 	if res.StatusCode == http.StatusUnauthorized {
