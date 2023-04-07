@@ -1,5 +1,5 @@
 # build backend
-FROM golang:1.19 as go-builder
+FROM golang:1.20 as go-builder
 
 RUN apt-get update && apt-get install -y git
 
@@ -19,7 +19,7 @@ RUN groupadd -g 1000 app && \
 RUN chown app:app /go-webcam
 
 # use already compiled frontend
-FROM koestler/js-webcam:v0.3.1 AS js-builder
+FROM ghcr.io/koestler/js-webcam:v0.4.0 AS js-builder
 
 # build final image
 FROM scratch
