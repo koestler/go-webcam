@@ -51,7 +51,7 @@ version: "3"
 services:
   go-webcam:
     restart: always
-    image: koestler/go-webcam:v0
+    image: ghcr.io/koestler/go-webcam:v0
     volumes:
       - ${PWD}/config.yaml:/config.yaml:ro
       # - ${PWD}/auth.passwd:/auth.passwd:ro
@@ -293,14 +293,14 @@ docker buildx use mbuilder
 ### Local Production Build
 Build:
 ```bash
-docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t koestler/go-webcam .
-docker buildx build --load --platform linux/arm/v7 -f docker/Dockerfile -t koestler/go-webcam .
+docker buildx build --load --platform linux/amd64 -f docker/Dockerfile -t ghcr.io/koestler/go-webcam .
+docker buildx build --load --platform linux/arm64 -f docker/Dockerfile -t ghcr.io/koestler/go-webcam .
+docker buildx build --load --platform linux/arm/v7 -f docker/Dockerfile -t ghcr.io/koestler/go-webcam .
 ```
 
 Test:
 ```bash
-docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro koestler/go-webcam
+docker run --rm --name go-webcam -p 127.0.0.1:8043:8043 -v "$(pwd)"/config.yaml:/app/config.yaml:ro ghcr.io/koestler/go-webcam
 ```
 
 ### Dockerhub Production amd64/arm64 Build
