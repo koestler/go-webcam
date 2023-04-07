@@ -47,6 +47,7 @@ func (c *Client) rawImageRoutine() {
 	cfg := c.Config()
 
 	c.startPreemptiveTicker()
+	defer c.raw.preemptiveTicker.Stop()
 
 	// track when the last non-preemptive fetch was made
 	lastFetch := time.Now()

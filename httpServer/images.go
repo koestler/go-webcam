@@ -80,7 +80,7 @@ func handleCameraImage(
 		// expire proxy cache before image expires.
 		// The accounts for the fact that some proxies count the maxAge when they fully received the body
 		// but this header is computed when the head is sent.
-		setCacheControlPublicProxy(c, cameraPicture.Expires().Sub(time.Now())-env.Config.ImageEarlyExpire())
+		setCacheControlPublicProxy(c, time.Until(cameraPicture.Expires())-env.Config.ImageEarlyExpire())
 	}
 	c.Redirect(http.StatusTemporaryRedirect, getImageByHashUrl(cameraPicture, env))
 }

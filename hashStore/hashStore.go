@@ -78,7 +78,8 @@ func (h *HashStore) Config() Config {
 func (h *HashStore) worker() {
 	defer close(h.closed)
 
-	ticker := time.Tick(time.Second)
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
 	for {
 		select {
 		case setRequest := <-h.setChannel:
@@ -97,7 +98,7 @@ func (h *HashStore) worker() {
 			} else {
 				getRequest.response <- nil
 			}
-		case <-ticker:
+		case <-ticker.C:
 			now := time.Now()
 			for k, v := range h.storage {
 				if v.touched.Add(h.config.HashTimeout()).Before(now) {
