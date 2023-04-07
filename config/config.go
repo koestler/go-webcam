@@ -69,11 +69,11 @@ func (c configRead) TransformAndValidate() (ret Config, err []error) {
 	err = append(err, e...)
 
 	if c.Version == nil {
-		err = append(err, fmt.Errorf("Version must be defined. Use Version=0."))
+		err = append(err, fmt.Errorf("version must be defined. Use Version=0"))
 	} else {
 		ret.version = *c.Version
 		if ret.version != 0 {
-			err = append(err, fmt.Errorf("Version=%d is not supported.", ret.version))
+			err = append(err, fmt.Errorf("version=%d is not supported", ret.version))
 		}
 	}
 
@@ -399,7 +399,7 @@ func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, e
 
 func (c viewConfigReadList) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewConfig, err []error) {
 	if len(c) < 1 {
-		return ret, []error{fmt.Errorf("Views section must no be empty.")}
+		return ret, []error{fmt.Errorf("views section must no be empty")}
 	}
 
 	ret = make([]*ViewConfig, len(c))
@@ -442,7 +442,7 @@ func (c viewConfigRead) TransformAndValidate(cameras []*CameraConfig) (ret ViewC
 		var camerasErr []error
 		ret.cameras, camerasErr = c.Cameras.TransformAndValidate(cameras)
 		for _, ce := range camerasErr {
-			err = append(err, fmt.Errorf("Views->%s: %s", c.Name, ce))
+			err = append(err, fmt.Errorf("section Views->%s: %s", c.Name, ce))
 		}
 	}
 
@@ -502,7 +502,7 @@ func (c viewConfigRead) TransformAndValidate(cameras []*CameraConfig) (ret ViewC
 
 func (c viewCameraConfigReadList) TransformAndValidate(cameras []*CameraConfig) (ret []*ViewCameraConfig, err []error) {
 	if len(c) < 1 {
-		return ret, []error{fmt.Errorf("Cameras section must no be empty.")}
+		return ret, []error{fmt.Errorf("cameras section must no be empty")}
 	}
 
 	ret = make([]*ViewCameraConfig, len(c))
@@ -519,7 +519,7 @@ func (c viewCameraConfigRead) TransformAndValidate(
 	cameras []*CameraConfig,
 ) (ret ViewCameraConfig, err []error) {
 	if !cameraExists(c.Name, cameras) {
-		err = append(err, fmt.Errorf("Camera='%s' is not defined", c.Name))
+		err = append(err, fmt.Errorf("camera='%s' is not defined", c.Name))
 	}
 
 	ret = ViewCameraConfig{
