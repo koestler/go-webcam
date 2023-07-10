@@ -19,7 +19,7 @@ RUN groupadd -g 1000 app && \
 RUN chown app:app /go-webcam
 
 # use already compiled frontend
-FROM ghcr.io/koestler/js-webcam:v0.4.0 AS js-builder
+FROM ghcr.io/koestler/js-webcam:v0.4.1 AS js-builder
 
 # build final image
 FROM scratch
