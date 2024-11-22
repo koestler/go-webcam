@@ -1,5 +1,5 @@
 # build backend
-FROM golang:1.20 as go-builder
+FROM golang:1.23 AS go-builder
 
 RUN apt-get update && apt-get install -y git
 
