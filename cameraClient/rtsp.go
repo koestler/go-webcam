@@ -126,8 +126,8 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		}
 
 		saveCount++
-		if saveCount == 5 {
-			log.Printf("saved 5 images, exiting")
+		if saveCount == 3 {
+			log.Printf("saved 3 images, exiting")
 			os.Exit(1)
 		}
 	})
