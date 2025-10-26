@@ -1,7 +1,7 @@
 # build backend
-FROM golang:1.23 AS go-builder
+FROM golang:1.25 AS go-builder
 
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git libavcodec-dev libswscale-dev gcc pkg-config
 
 WORKDIR /app
 COPY . /app

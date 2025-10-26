@@ -4,11 +4,6 @@ LogConfig: True                                            # optional, default F
 LogWorkerStart: True                                       # optional, default False, write log for starting / stopping of workers
 LogDebug: True                                             # optional, default False, enable debug output of the mqtt module
 
-Auth:
-  HtaccessFile: ./auth.passwd
-  JwtValidityPeriod: 2h
-  LogAuth: true
-
 HttpServer: # optional, default Disabled, start the http server
   Bind: 0.0.0.0                                            # optional, default ::1 (ipv6 loopback)
   Port: 8043                                               # optional, default 8043
@@ -21,35 +16,11 @@ HttpServer: # optional, default Disabled, start the http server
 
 Cameras:
   0-cam-east:
-    Address: 192.168.8.63
+    Address: rtsps://192.168.1.103:7441/DGGVv7OgHQG7pkpp?enableSrtp
     User: ubnt
-    Password: gDtDFhjUfcYQthKQX7zN
+    Password: ubnt
     RefreshInterval: 1s
-
-  1-cam-north:
-    Address: 192.168.8.64
-    User: ubnt
-    Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 1500ms
-
-  2-cam-east:
-    Address: 192.168.8.63
-    User: ubnt
-    Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 5s
-
-  3-cam-north:
-    Address: 192.168.8.64
-    User: ubnt
-    Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 1500ms
-
-  4-cam-north:
-    Address: 192.168.8.64
-    User: ubnt
-    Password: gDtDFhjUfcYQthKQX7zN
-    RefreshInterval: 1500ms
-
+    PreemtiveFetch: 1s
 
 Views: # mandatory, a list of Views that shall be available
   - Name: public
@@ -60,47 +31,3 @@ Views: # mandatory, a list of Views that shall be available
     ResolutionMaxWidth: 1024
     ResolutionMaxHeight: 768
     RefreshInterval: 1s
-  - Name: publicHighRes
-    Title: For All High Res
-    Cameras:
-      - Name: 0-cam-east
-        Title: Camera East
-    ResolutionMaxWidth: 1500
-    RefreshInterval: 1s
-  - Name: private
-    Title: For Staff
-    Cameras:
-      - Name: 0-cam-east
-        Title: Cmera East Zero
-    RefreshInterval: 2s
-    Autoplay: True
-    AllowedUsers:
-      - tester
-      - lk
-  - Name: private2
-    Title: For Staff High-Speed
-    Cameras:
-      - Name: 3-cam-north
-        Title: Camera North One
-      - Name: 4-cam-north
-        Title: Camera North Three
-    RefreshInterval: 100ms
-    Autoplay: False
-    AllowedUsers:
-      - tester
-  - Name: private3
-    Title: I'm hidden
-    Cameras:
-      - Name: 3-cam-north
-        Title: Camera North One
-      - Name: 4-cam-north
-        Title: Camera North Three
-    RefreshInterval: 100ms
-    Autoplay: False
-    AllowedUsers:
-      - tester
-    Hidden: True
-#MqttClients:                                               # mandatory, a list of MQTT servers to connect to
-#  1-local-mosquitto:                                       # optional, a second MQTT erver
-#    Broker: "tcp://172.17.0.2:1883"                         # optional, the second MQTT servers broker...
-

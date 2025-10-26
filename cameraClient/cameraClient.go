@@ -19,7 +19,7 @@ type Client struct {
 	// configuration
 	config Config
 
-	ubnt    ubntState
+	rtsp    rtspState
 	raw     rawState
 	delayed delayedState
 	resize  resizeState
@@ -28,7 +28,7 @@ type Client struct {
 func RunClient(config Config) (*Client, error) {
 	client := &Client{
 		config:  config,
-		ubnt:    createUbntState(),
+		rtsp:    createRtspState(),
 		raw:     createRawState(),
 		delayed: createDelayedState(),
 		resize:  createResizeState(),
