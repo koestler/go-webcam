@@ -1,5 +1,5 @@
 # build backend
-FROM golang:1.25-bookworm AS go-builder
+FROM golang:1.25-trixie AS go-builder
 
 RUN apt-get update && apt-get install -y git libavcodec-dev libswscale-dev gcc pkg-config
 
@@ -22,7 +22,10 @@ RUN chown app:app /go-webcam
 FROM ghcr.io/koestler/js-webcam:v0.4.1 AS js-builder
 
 # build final image
-FROM scratch
+FROM debian:trixie
+
+RUN apt-get update && apt-get install -y libavcodec61 libswscale8 && rm -rf /var/lib/apt/lists/*
+
 USER app
 COPY --from=go-builder /go-webcam            /go-webcam
 COPY --from=go-builder /etc/group            /etc/group

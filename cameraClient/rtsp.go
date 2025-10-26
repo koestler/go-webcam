@@ -2,9 +2,12 @@ package cameraClient
 
 import (
 	"crypto/tls"
-	"errors"
-	"fmt"
+	"image"
+	"image/jpeg"
 	"log"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/bluenviron/gortsplib/v5"
 	"github.com/bluenviron/gortsplib/v5/pkg/base"
@@ -35,68 +38,56 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		},
 	}
 
+	// connect to the server
 	err = gc.Start()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer gc.Close()
 
+	// find available medias
 	desc, _, err := gc.Describe(u)
 	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("desc: %v", desc)
-
-	for _, medi := range desc.Medias {
-		log.Printf("media: %v", medi)
-		for _, forma := range medi.Formats {
-			fmt.Printf("codec: %v\n", forma.Codec())
-		}
+		panic(err)
 	}
 
 	// find the H264 media and format
 	var forma *format.H264
 	medi := desc.FindFormat(&forma)
 	if medi == nil {
-		return nil, errors.New("media not found")
+		panic("media not found")
 	}
 
 	// setup RTP -> H264 decoder
 	rtpDec, err := forma.CreateDecoder()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	// setup H264 -> RGBA decoder
 	h264Dec := &h264Decoder{}
 	err = h264Dec.initialize()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer h264Dec.close()
 
 	// if SPS and PPS are present into the SDP, send them to the decoder
 	if forma.SPS != nil {
-		_, err := h264Dec.decode([][]byte{forma.SPS})
-		if err != nil {
-			return nil, err
-		}
+		h264Dec.decode([][]byte{forma.SPS})
 	}
 	if forma.PPS != nil {
-		_, err := h264Dec.decode([][]byte{forma.PPS})
-		if err != nil {
-			return nil, err
-		}
+		h264Dec.decode([][]byte{forma.PPS})
 	}
 
-	// set up a single media
+	// setup a single media
 	_, err = gc.Setup(desc.BaseURL, medi, 0, 0)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	firstRandomAccess := false
+	saveCount := 0
 
 	// called when a RTP packet arrives
 	gc.OnPacketRTP(medi, forma, func(pkt *rtp.Packet) {
@@ -104,7 +95,7 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		au, err := rtpDec.Decode(pkt)
 		if err != nil {
 			if err != rtph264.ErrNonStartingPacketAndNoPrevious && err != rtph264.ErrMorePacketsNeeded {
-				log.Printf("rtpDec error: %v", err)
+				log.Printf("ERR: %v", err)
 			}
 			return
 		}
@@ -119,8 +110,7 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		// convert H264 access units into RGBA frames
 		img, err := h264Dec.decode(au)
 		if err != nil {
-			log.Printf("h264Dec error: %v", err)
-			return
+			panic(err)
 		}
 
 		// check for frame presence
@@ -128,21 +118,43 @@ func (c *Client) getRawImage() (img []byte, err error) {
 			log.Printf("ERR: frame cannot be decoded")
 			return
 		}
-		// convert frame to JPEG and save to file
-		//err = saveToFile(img)
-		//if err != nil {
-		//	panic(err)
-		//}
-		fmt.Printf("********* VALID FRAME DECODED **********\n")
 
+		// convert frame to JPEG and save to file
+		err = saveToFile(img)
+		if err != nil {
+			panic(err)
+		}
+
+		saveCount++
+		if saveCount == 5 {
+			log.Printf("saved 5 images, exiting")
+			os.Exit(1)
+		}
 	})
 
 	// start playing
 	_, err = gc.Play(nil)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	// wait until a fatal error
-	return nil, gc.Wait()
+	panic(gc.Wait())
+}
+
+func saveToFile(img image.Image) error {
+	// create file
+	fname := strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10) + ".jpg"
+	f, err := os.Create(fname)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	log.Println("saving", fname)
+
+	// convert to jpeg
+	return jpeg.Encode(f, img, &jpeg.Options{
+		Quality: 60,
+	})
 }
