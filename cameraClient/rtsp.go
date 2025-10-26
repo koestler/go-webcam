@@ -78,16 +78,22 @@ func (c *Client) getRawImage() (img []byte, err error) {
 
 	// if SPS and PPS are present into the SDP, send them to the decoder
 	if forma.SPS != nil {
-		h264Dec.decode([][]byte{forma.SPS})
+		_, err := h264Dec.decode([][]byte{forma.SPS})
+		if err != nil {
+			return nil, err
+		}
 	}
 	if forma.PPS != nil {
-		h264Dec.decode([][]byte{forma.PPS})
+		_, err := h264Dec.decode([][]byte{forma.PPS})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// setup a single media
+	// set up a single media
 	_, err = gc.Setup(desc.BaseURL, medi, 0, 0)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	firstRandomAccess := false
@@ -98,7 +104,7 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		au, err := rtpDec.Decode(pkt)
 		if err != nil {
 			if err != rtph264.ErrNonStartingPacketAndNoPrevious && err != rtph264.ErrMorePacketsNeeded {
-				log.Printf("ERR: %v", err)
+				log.Printf("rtpDec error: %v", err)
 			}
 			return
 		}
@@ -113,7 +119,8 @@ func (c *Client) getRawImage() (img []byte, err error) {
 		// convert H264 access units into RGBA frames
 		img, err := h264Dec.decode(au)
 		if err != nil {
-			panic(err)
+			log.Printf("h264Dec error: %v", err)
+			return
 		}
 
 		// check for frame presence
@@ -121,12 +128,13 @@ func (c *Client) getRawImage() (img []byte, err error) {
 			log.Printf("ERR: frame cannot be decoded")
 			return
 		}
-
 		// convert frame to JPEG and save to file
 		//err = saveToFile(img)
 		//if err != nil {
 		//	panic(err)
 		//}
+		fmt.Printf("********* VALID FRAME DECODED **********\n")
+
 	})
 
 	// start playing
