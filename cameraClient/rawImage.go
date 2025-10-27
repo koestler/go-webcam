@@ -140,9 +140,6 @@ func (c *Client) fetchImage() {
 	}
 
 	var decodedRawImg image.Image
-
-	start1 := time.Now()
-
 	if err == nil {
 		decodedRawImg, err = jpeg.Decode(bytes.NewReader(rawImg))
 	}
@@ -159,9 +156,8 @@ func (c *Client) fetchImage() {
 
 	if c.Config().LogDebug() && decodedRawImg != nil {
 		log.Printf(
-			"cameraClient[%s]: raw image fetched, took=%.3fs, total=%.3fs, dim=%s",
+			"cameraClient[%s]: raw image fetched, took=%.3fs, dim=%s",
 			c.Name(),
-			time.Since(start1).Seconds(),
 			time.Since(start0).Seconds(),
 			DimensionCacheKey(DimensionOfImage(decodedRawImg)),
 		)
