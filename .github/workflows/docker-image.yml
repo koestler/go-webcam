@@ -48,6 +48,8 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: set up qemu
+        uses: docker/setup-qemu-action@v3
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5
@@ -75,6 +77,8 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: set up qemu
+        uses: docker/setup-qemu-action@v3
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5
