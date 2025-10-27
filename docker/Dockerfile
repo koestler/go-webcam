@@ -1,5 +1,5 @@
 # build backend
-FROM golang:1.23 AS go-builder
+FROM golang:1.25 AS go-builder
 
 RUN apt-get update && apt-get install -y git
 
@@ -22,7 +22,8 @@ RUN chown app:app /go-webcam
 FROM ghcr.io/koestler/js-webcam:v0.4.1 AS js-builder
 
 # build final image
-FROM scratch
+FROM alpine
+RUN apk add --no-cache ffmpeg
 USER app
 COPY --from=go-builder /go-webcam            /go-webcam
 COPY --from=go-builder /etc/group            /etc/group
