@@ -2,11 +2,12 @@ package cameraClient
 
 import (
 	"bytes"
-	"github.com/google/uuid"
 	"image"
 	"image/jpeg"
 	"log"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type rawState struct {
@@ -133,7 +134,11 @@ func (c *Client) handleRawImageReadRequest(request rawImageReadRequest) {
 func (c *Client) fetchImage() {
 	start0 := time.Now()
 
-	rawImg, err := c.ubntGetRawImage()
+	rawImg, err := c.rtspGetRawImage()
+	if err != nil {
+		log.Printf("cameraClient[%s]: failed to fetch raw image: %v", c.Name(), err)
+	}
+
 	var decodedRawImg image.Image
 
 	start1 := time.Now()
