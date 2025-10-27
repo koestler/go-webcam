@@ -73,8 +73,6 @@ func (c MqttClientConfig) convertToRead() mqttClientConfigRead {
 func (c CameraConfig) convertToRead() cameraConfigRead {
 	return cameraConfigRead{
 		Address:         c.address,
-		User:            c.user,
-		Password:        c.password,
 		RefreshInterval: c.refreshInterval.String(),
 		PreemptiveFetch: c.preemptiveFetch.String(),
 	}

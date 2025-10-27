@@ -7,8 +7,6 @@ import (
 type Config interface {
 	Name() string
 	Address() string
-	User() string
-	Password() string
 	RefreshInterval() time.Duration
 	PreemptiveFetch() time.Duration
 	ExpireEarly() time.Duration

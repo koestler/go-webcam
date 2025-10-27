@@ -41,8 +41,6 @@ type MqttClientConfig struct {
 type CameraConfig struct {
 	name            string        // defined automatically by map key
 	address         string        // mandatory
-	user            string        // optional: default empty
-	password        string        // optional: default empty
 	refreshInterval time.Duration // optional: default 200ms
 	preemptiveFetch time.Duration // optional: default 2 x refreshInterval
 }
@@ -115,8 +113,6 @@ type mqttClientConfigReadMap map[string]mqttClientConfigRead
 
 type cameraConfigRead struct {
 	Address         string `yaml:"Address"`
-	User            string `yaml:"User"`
-	Password        string `yaml:"Password"`
 	RefreshInterval string `yaml:"RefreshInterval"`
 	PreemptiveFetch string `yaml:"PreemptiveFetch"`
 }

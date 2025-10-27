@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"gopkg.in/yaml.v2"
 	"log"
 	"net/url"
 	"os"
@@ -11,6 +9,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"gopkg.in/yaml.v2"
 )
 
 const NameRegexp = "^[a-zA-Z0-9\\-]{1,32}$"
@@ -350,10 +351,8 @@ func (c cameraConfigReadMap) TransformAndValidate() (ret []*CameraConfig, err []
 
 func (c cameraConfigRead) TransformAndValidate(name string) (ret CameraConfig, err []error) {
 	ret = CameraConfig{
-		name:     name,
-		address:  c.Address,
-		user:     c.User,
-		password: c.Password,
+		name:    name,
+		address: c.Address,
 	}
 
 	if !nameMatcher.MatchString(ret.name) {

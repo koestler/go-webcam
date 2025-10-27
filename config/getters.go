@@ -109,14 +109,6 @@ func (c CameraConfig) Address() string {
 	return c.address
 }
 
-func (c CameraConfig) User() string {
-	return c.user
-}
-
-func (c CameraConfig) Password() string {
-	return c.password
-}
-
 func (c CameraConfig) RefreshInterval() time.Duration {
 	return c.refreshInterval
 }
