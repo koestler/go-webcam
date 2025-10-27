@@ -51,7 +51,7 @@ version: "3"
 services:
   go-webcam:
     restart: always
-    image: ghcr.io/koestler/go-webcam:v0
+    image: ghcr.io/koestler/go-webcam:v1
     volumes:
       - ${PWD}/config.yaml:/config.yaml:ro
       # - ${PWD}/auth.passwd:/auth.passwd:ro
@@ -140,15 +140,11 @@ HttpServer:
 
 Cameras:
   0-cam-east:
-    Address: 192.168.8.63
-    User: ubnt
-    Password: my-password-1234
+    Address: rtsps://192.168.1.100:7441/DGGXXX3487348?enableSrtp
     RefreshInterval: 10s
 
   1-cam-north:
-    Address: 192.168.8.64
-    User: ubnt
-    Password: my-password-1234
+    Address: rtsps://192.168.1.101:7441/DGGXXX3487348?enableSrtp
     RefreshInterval: 10s
 
 
@@ -220,19 +216,11 @@ and copy the randomly generated secret into the configuration file.
 
 ## Cameras
 
-### Ubiquiti UVC
-Ubiquiti camaras like the UVC-G3 work. They provide as RAW image via their http server.
+### Unifi
+Login to the Unifi Protect controller and in the camera settings "Enable Secure RTSPS Output" and copy the
+returned URL into the `Address` field of the camera configuration.
 
-The option "Enable Anonymous Snapshot" can be deactivated. A login with the configured
-`User` and `Password` is performed.
-
-They can be configured in two different modes. In "Standalone" and "UniFi Protect".
-In Standalone mode, the `User` / `Password` are manually defined.
-In UniFi Protect mode, the camera is adopted by the UniFi Protect controller. The `User` is "ubnt"
-and the `Password` can be found in the UniFi Protect Web-Frontend under Settings, General, Device Password, Reveal.
-It is the same for all cameras adopted by the controller.
-
-The requests to the cameras are mad encrypted over https however validation of the camera's
+The requests to the cameras are encrypted however validation of the camera's
 server certificate is always skipped.
 
 ## Authentication
